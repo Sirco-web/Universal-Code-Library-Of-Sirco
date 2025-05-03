@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Content Loader</title>
+    <title>Proxy</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
     
-    <!-- Start with a blank page -->
     <style>
         body {
             display: none; /* Hide all content until cookie is validated */
@@ -18,54 +17,29 @@
             align-items: center;
             height: 100vh;
         }
-        #loadingMessage, #errorMessage {
-            font-size: 18px;
-        }
-        #loadingMessage {
-            color: #007bff;
-        }
-        #errorMessage {
-            color: red;
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
         }
     </style>
 
-    <!-- Cookie Validation -->
     <script>
-        const cookies = document.cookie.split("; ");
-        const accessCookie = cookies.find(row => row.startsWith("access="));
+        function checkCookie() {
+            const cookies = document.cookie.split("; ");
+            const accessCookie = cookies.find(row => row.startsWith("access="));
 
-        if (accessCookie && accessCookie.split("=")[1] === "1") {
-            // Valid cookie found, show the page
-            document.addEventListener("DOMContentLoaded", () => {
-                document.body.style.display = "flex"; // Display content
-                loadFromGitHub("https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/custom_proxy.html");
-            });
-        } else {
-            // No valid cookie, redirect to main page
-            window.location.replace("/index.html");
-        }
-
-        async function loadFromGitHub(url) {
-            try {
-                if (!url) throw new Error("GitHub URL is missing.");
-
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to fetch content.");
-
-                const content = await response.text();
-                document.open();
-                document.write(content);
-                document.close();
-            } catch (error) {
-                document.body.innerHTML = `<h1>Error</h1><p id="errorMessage">${error.message}</p>`;
+            if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+                window.location.href = "/index.html"; // Redirect if no valid cookie
+            } else {
+                document.body.style.display = "block"; // Show page after validation
             }
         }
+
+        window.onload = checkCookie; // Run cookie check on load
     </script>
 </head>
 <body>
-    <h1>Loading...</h1>
-    <p id="loadingMessage">Please wait while we fetch content from GitHub...</p>
+    <iframe src="https://proxery.wasmer.app/active/"></iframe>
 </body>
 </html>
-
-
