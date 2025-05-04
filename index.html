@@ -3,16 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚠ Secure Connection Failed</title>
-
-    <!-- Google Analytics Tracking -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-RYY2PDT1RB');
-    </script>
+    <title>L.B.V. - Learn by Video</title>
 
     <style>
         @keyframes glitch {
@@ -23,84 +14,197 @@
             80% { transform: translateX(2px); }
             100% { transform: translateX(0); }
         }
-        
-        body {
+
+        html, body {
+            overflow-x: hidden; /* Prevent horizontal scrolling */
             font-family: Arial, sans-serif;
-            background-color: #0f0f0f; /* Dark background for error screen */
             margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
             text-align: center;
-            color: #ff4444;
         }
-        .container {
-            margin-top: 10%;
+        header {
+            background: #003366;
+            color: white;
             padding: 20px;
-            background: #222;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
-            border-radius: 8px;
-            border: 1px solid #ff4444;
         }
-        h1 {
-            font-size: 2.8em;
-            color: #ff5555;
-            animation: glitch 1s infinite;
+        header a {
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
         }
-        .glitch-text {
-            display: inline-block;
-            animation: glitch 1s infinite;
+        header a:hover {
+            text-decoration: underline;
         }
-        p {
-            color: #ff8888;
-            font-size: 1.2em;
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #004488;
+            padding: 15px;
         }
-        code {
-            display: block;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #111;
+        nav button {
+            background: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
             border-radius: 5px;
-            font-family: monospace;
-            color: #ff4444;
-            animation: glitch 2s infinite;
+        }
+        nav button:hover {
+            background: #ddd;
+        }
+        main {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        .topic {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .fact-banner {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffcc00;
+            animation: glitch 1.5s infinite;
+            margin-bottom: 20px;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #004488;
+            color: white;
+        }
+        .version-banner {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 1em;
+            color: black;
+            opacity: 0.7;
         }
     </style>
 
     <script>
-        function checkAccess() {
+        function checkCookie() {
             const cookies = document.cookie.split("; ");
             const accessCookie = cookies.find(row => row.startsWith("access="));
 
             if (accessCookie && accessCookie.split("=")[1] === "1") {
-                let redirect = confirm("⚠ You are authorized to see 2nd site. Proceed to the site? ⚠");
+                let redirect = confirm("⚠ You have access to the second site. Do you want to go there?");
                 if (redirect) {
                     window.location.href = "/welcome/index.html"; 
+                    return;
                 }
-            } else {
-                document.body.style.display = "block"; // Show content for unauthorized users
+            }
+            document.body.style.display = "block"; // Show page if staying
+        }
+
+        async function fetchVersion() {
+            try {
+                const response = await fetch("/version.txt?nocache=" + new Date().getTime());
+                const versionText = await response.text();
+                document.getElementById("siteVersion").textContent = versionText.trim();
+            } catch (error) {
+                document.getElementById("siteVersion").textContent = "Unavailable";
             }
         }
 
         window.onload = function() {
-            checkAccess();
+            checkCookie();
+            fetchVersion();
         };
     </script>
 </head>
-<body>
-    <div class="container">
-        <h1 class="glitch-text">⚠ Secure Connection Failed</h1>
-        <p>The website's SSL certificate could not be validated.</p>
-        <code>
-            ERR_CERT_COMMON_NAME_INVALID<br>
-            ERR_SSL_VERSION_OR_CIPHER_MISMATCH<br>
-            CERTIFICATE DATE INVALID<br>
-        </code>
-        <p style="color: #ff9999;">The site may be misconfigured or an attacker might be intercepting your connection.</p>
-        <p>Please contact your administrator or try again later.</p>
-    </div>
+<body style="display: none;"> <!-- Initially hidden until cookie is checked -->
 
-    <!-- Hidden Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
+<header>
+    <a href="index.html">L.B.V. - Learn by Video</a>
+    <p>Your source for verified educational content and daily insights.</p>
+</header>
+
+<!-- Daily Fact Banner with Glitch Effect -->
+<p class="fact-banner">📢 Fresh Facts Added Every Day – Stay Curious! 📢</p>
+
+<nav>
+    <button onclick="loadTopic('government')">U.S. Government</button>
+    <button onclick="loadTopic('math')">Math</button>
+    <button onclick="loadTopic('science')">Science</button>
+    <button onclick="loadTopic('history')">History</button>
+    <button onclick="loadTopic('technology')">Technology</button>
+    <button onclick="loadTopic('literature')">Literature</button>
+    <button onclick="loadTopic('random')">Random Topic of the Day</button>
+</nav>
+
+<main>
+    <div class="topic">
+        <h2 id="topic-title">Welcome to L.B.V.</h2>
+        <p id="topic-content">Click a topic to explore in-depth knowledge.</p>
+        <p id="daily-fact" class="fact"></p>
+    </div>
+</main>
+
+<footer>
+    <p>© 2025 L.B.V. - Learn by Video. All rights reserved.</p>
+</footer>
+
+<!-- Transparent Version Banner -->
+<div class="version-banner">
+    Site Version: <span id="siteVersion">Loading...</span>
+</div>
+
+<script>
+    async function loadTopic(topic) {
+        if (topic === "random") {
+            document.getElementById('topic-title').innerText = "Random Topic of the Day";
+            document.getElementById('topic-content').innerText = loadRandomTopic();
+            document.getElementById('daily-fact').innerText = "Discover something new today!";
+            return;
+        }
+        
+        const topicDetails = {
+            government: "The U.S. government consists of three branches: Legislative, Executive, and Judicial. Each plays a critical role in governance.",
+            math: "Math is the foundation of problem-solving. It includes arithmetic, algebra, geometry, calculus, and statistics.",
+            science: "Science is the systematic study of the natural world. It encompasses fields such as physics, chemistry, biology, and earth sciences.",
+            history: "History teaches us about past events that shaped civilizations, including wars, revolutions, and cultural movements.",
+            technology: "Technology drives modern innovation, from computing and robotics to AI and space exploration.",
+            literature: "Literature captures human experiences through storytelling, poetry, novels, and essays."
+        };
+
+        document.getElementById('topic-title').innerText = topic.charAt(0).toUpperCase() + topic.slice(1);
+        document.getElementById('topic-content').innerText = topicDetails[topic];
+
+        const today = new Date();
+        const day = today.getDate();  
+
+        try {
+            const response = await fetch('facts.json');
+            const facts = await response.json();
+            const factText = facts[day][topic];
+            document.getElementById('daily-fact').innerHTML = factText ? formatFact(factText) : "No fact available.";
+        } catch (error) {
+            document.getElementById('daily-fact').innerText = "Error loading daily fact.";
+        }
+    }
+
+    function formatFact(fact) {
+        return fact.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">Source</a>');
+    }
+
+    function loadRandomTopic() {
+        const topics = ["Physics", "Philosophy", "Engineering", "Art", "Astronomy", "Psychology"];
+        const randomIndex = Math.floor(Math.random() * topics.length);
+        return topics[randomIndex]; 
+    }
+</script>
+
 </body>
 </html>

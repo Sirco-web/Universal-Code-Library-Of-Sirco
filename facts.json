@@ -1,0 +1,242 @@
+{
+    "1": {
+        "government": "The U.S. Constitution was signed in 1787. https://www.archives.gov/founding-docs/constitution",
+        "math": "Pi is an irrational number starting with 3.14159. https://mathworld.wolfram.com/Pi.html",
+        "science": "Newton’s laws describe the motion of objects. https://www.nasa.gov/audience/foreducators/k-4/features/F_Newton_1.html",
+        "history": "The Julian calendar was introduced by Julius Caesar. https://www.britannica.com/science/Julian-calendar",
+        "technology": "The first electronic computer, ENIAC, was developed in 1943. https://www.computerhistory.org/revolution/digital-computer/1/15",
+        "literature": "Shakespeare's plays are categorized into tragedies, comedies, and histories. https://www.bl.uk/shakespeare/articles/whats-it-like-to-visit-a-shakespeare-play"
+    },
+    "2": {
+        "government": "Congress consists of the Senate and House of Representatives. https://en.wikipedia.org/wiki/United_States_Congress",
+        "math": "Euler’s number, e, is approximately 2.718. https://en.wikipedia.org/wiki/E_%28mathematical_constant%29",
+        "science": "Photosynthesis allows plants to create energy from sunlight. https://education.nationalgeographic.org/resource/photosynthesis/",
+        "history": "This day marks key historical revolutions worldwide. https://www.history.co.uk/articles/revolutions-uprisings-that-changed-world-history",
+        "technology": "The internet was officially launched for public use in 1983. https://www.usatoday.com/story/tech/2022/08/28/when-was-internet-created-who-invented-it/10268999002/",
+        "literature": "Classic literature includes works by Homer, Dante, and Dickens. https://becomeawritertoday.com/what-is-classic-literature/"
+    },
+    "3": {
+        "government": "The U.S. Supreme Court was established in 1789. https://en.wikipedia.org/wiki/History_of_the_Supreme_Court_of_the_United_States",
+        "math": "The Pythagorean theorem is a fundamental principle in geometry. https://www.britannica.com/science/Pythagorean-theorem",
+        "science": "The theory of evolution by natural selection was proposed by Charles Darwin. https://education.nationalgeographic.org/resource/theory-of-evolution/",
+        "history": "The Great Fire of London occurred in 1666. https://www.britannica.com/event/Great-Fire-of-London",
+        "technology": "The first smartphone was introduced in 1992. https://www.historyandheadlines.com/november-23-1992-first-smart-phone-ibm-simon-personal-communicator-introduced/",
+        "literature": "Jane Austen's novels critique the British landed gentry. https://britishheritage.org/jane-austen"
+    },
+    "4": {
+        "government": "The Bill of Rights was ratified in 1791. https://www.history.com/this-day-in-history/bill-of-rights-is-finally-ratified",
+        "math": "The Golden Ratio, approximately 1.618, appears in art and nature. https://www.mathnasium.com/blog/golden-ratio-in-nature",
+        "science": "The periodic table organizes elements by atomic number. https://www.britannica.com/science/periodic-table",
+        "history": "The Boston Tea Party occurred in 1773. https://www.britannica.com/event/Boston-Tea-Party",
+        "technology": "The World Wide Web was invented in 1989. https://home.cern/science/computing/birth-web/short-history-web",
+        "literature": "The works of Edgar Allan Poe pioneered the detective fiction genre. https://www.nps.gov/articles/poe-detectivefiction.htm"
+    },
+    "5": {
+        "government": "The United Nations was established in 1945. https://www.un.org/en/about-us/history-of-the-un",
+        "math": "Prime numbers are integers greater than 1 that are only divisible by themselves and 1. https://www.britannica.com/science/prime-number",
+        "science": "DNA carries genetic information in all known living organisms. https://www.genome.gov/genetics-glossary/DNA",
+        "history": "The Eiffel Tower was completed in 1889. https://www.toureiffel.paris/en/the-monument",
+        "technology": "The first email was sent by Ray Tomlinson in 1971. https://computerhistory.org/blog/the-first-email/",
+        "literature": "Mary Shelley's Frankenstein is considered one of the first science fiction novels. https://www.britannica.com/biography/Mary-Shelley"
+    },
+    "6": {
+        "government": "The Magna Carta was signed in 1215, influencing constitutional law. https://www.bl.uk/magna-carta",
+        "math": "The Fibonacci sequence appears in many natural patterns. https://www.nationalgeographic.com/science/article/mathematical-models-fibonacci-numbers-nature",
+        "science": "The speed of light is approximately 299,792 kilometers per second. https://www.nasa.gov/mission_pages/sunearth/news/light-speed.html",
+        "history": "The Apollo 11 mission landed the first humans on the Moon in 1969. https://www.nasa.gov/mission_pages/apollo/apollo-11.html",
+        "technology": "Bluetooth technology was first introduced in 1994. https://www.bluetooth.com/about-bluetooth/",
+        "literature": "The Iliad and The Odyssey by Homer are foundational works of Western literature. https://www.britannica.com/biography/Homer-ancient-Greek-poet"
+    },
+    "7": {
+        "government": "The United States Declaration of Independence was adopted on July 4, 1776. https://www.archives.gov/founding-docs/declaration-transcript",
+        "math": "The number zero was first used as a mathematical concept by ancient Indian mathematicians. https://www.britannica.com/topic/zero-mathematics",
+        "science": "Einstein’s theory of relativity revolutionized our understanding of space and time. https://www.nasa.gov/mission_pages/station/expeditions/expedition30/try_rel.html",
+        "history": "The Great Wall of China was built to protect against invasions and raids. https://www.history.com/topics/ancient-china/great-wall-of-china",
+        "technology": "The first commercial jet flight occurred in 1952. https://airandspace.si.edu/stories/editorial/birth-commercial-jet-travel",
+        "literature": "George Orwell's novel 1984 introduced the concept of Big Brother. https://www.britannica.com/topic/Nineteen-Eighty-four"
+    },
+    "8": {
+        "government": "The Electoral College determines the winner of U.S. presidential elections. https://www.archives.gov/electoral-college",
+        "math": "Archimedes developed principles that led to integral calculus. https://www.britannica.com/biography/Archimedes",
+        "science": "The human brain has about 86 billion neurons. https://www.nationalgeographic.com/science/article/brain-neurons-scientists-number",
+        "history": "The Renaissance was a cultural rebirth that started in Italy during the 14th century. https://www.history.com/topics/renaissance",
+        "technology": "NASA's Apollo program led to the first Moon landing in 1969. https://www.nasa.gov/mission_pages/apollo/apollo-11.html",
+        "literature": "The epic poem Beowulf is one of the oldest surviving works in English literature. https://www.britannica.com/topic/Beowulf"
+    },
+    "9": {
+        "government": "The U.S. Congress passed the Civil Rights Act in 1964 to end segregation. https://www.archives.gov/milestone-documents/civil-rights-act",
+        "math": "Pascal’s triangle is a useful tool in algebra and probability. https://www.britannica.com/science/Pascals-triangle",
+        "science": "Black holes are regions where gravity is so strong that nothing, not even light, can escape. https://www.nasa.gov/black-holes",
+        "history": "World War I began in 1914 after the assassination of Archduke Franz Ferdinand. https://www.history.com/topics/world-war-i",
+        "technology": "The first programmable computer, the Zuse Z3, was developed in 1941. https://www.britannica.com/technology/Z3-computer",
+        "literature": "Homer’s Odyssey narrates the journey of Odysseus after the Trojan War. https://www.britannica.com/topic/Odyssey-epic-by-Homer"
+    },
+    "10": {
+        "government": "The United Nations was created in 1945 to promote peace and security. https://www.un.org/en/about-us/history-of-the-un",
+        "math": "The number Pi is infinite and non-repeating. https://mathworld.wolfram.com/Pi.html",
+        "science": "The periodic table consists of 118 known elements. https://www.rsc.org/periodic-table",
+        "history": "The Roman Empire was one of the largest and longest-lasting empires in history. https://www.history.com/topics/ancient-rome/roman-empire",
+        "technology": "The invention of the telephone revolutionized communication. https://www.britannica.com/technology/telephone",
+        "literature": "The Brothers Grimm collected and published famous fairy tales in the 19th century. https://www.britannica.com/biography/Brothers-Grimm"
+    },
+    "11": {
+        "government": "The U.S. Department of Defense was established in 1947. https://www.defense.gov/About/",
+        "math": "Calculus was independently developed by Newton and Leibniz in the 17th century. https://www.britannica.com/science/calculus-mathematics",
+        "science": "Atoms are made up of protons, neutrons, and electrons. https://www.nationalgeographic.com/science/article/atom",
+        "history": "The Berlin Wall fell in 1989, marking the end of the Cold War. https://www.history.com/topics/cold-war/berlin-wall",
+        "technology": "GPS technology was first developed for military use before becoming widespread in civilian applications. https://www.gps.gov/systems/gps/",
+        "literature": "The works of J.R.R. Tolkien, including The Lord of the Rings, shaped modern fantasy literature. https://www.britannica.com/biography/J-R-R-Tolkien"
+    },
+    "12": {
+        "government": "The Supreme Court ruled in Brown v. Board of Education (1954) that racial segregation in schools was unconstitutional. https://www.history.com/topics/black-history/brown-v-board-of-education",
+        "math": "Probability theory helps predict outcomes in uncertain situations. https://www.britannica.com/topic/probability",
+        "science": "The Earth's core is made mostly of iron and nickel. https://earthobservatory.nasa.gov/features/Magnetosphere",
+        "history": "The Renaissance spread ideas of art, science, and philosophy across Europe. https://www.history.com/topics/renaissance",
+        "technology": "The first video game, Pong, was released in 1972. https://www.britannica.com/topic/Pong-video-game",
+        "literature": "Leo Tolstoy’s War and Peace is considered one of the greatest novels of all time. https://www.britannica.com/biography/Leo-Tolstoy"
+    },
+    "13": {
+        "government": "The Emancipation Proclamation was issued by Abraham Lincoln in 1863 to free enslaved people in Confederate states. https://www.archives.gov/exhibits/featured-documents/emancipation-proclamation",
+        "math": "The number system we use today originated from ancient Hindu-Arabic numerals. https://www.britannica.com/science/Hindu-Arabic-numerals",
+        "science": "The theory of plate tectonics explains how Earth's continents move over time. https://www.nationalgeographic.com/science/article/plate-tectonics",
+        "history": "The Wright brothers achieved the first successful airplane flight in 1903. https://www.history.com/topics/inventions/wright-brothers",
+        "technology": "Artificial intelligence has evolved since the 1950s, shaping modern computing. https://www.ibm.com/artificial-intelligence/history",
+        "literature": "William Faulkner’s novels explore themes of history, memory, and the American South. https://www.britannica.com/biography/William-Faulkner"
+    },
+    "14": {
+        "government": "The U.S. Constitution established three branches of government: Executive, Legislative, and Judicial. https://www.archives.gov/founding-docs/constitution",
+        "math": "Geometry helps define shapes, spaces, and spatial relationships. https://www.khanacademy.org/math/geometry",
+        "science": "The Hubble Space Telescope has provided breathtaking images of distant galaxies. https://www.nasa.gov/mission_pages/hubble/story/index.html",
+        "history": "Ancient Egypt developed one of the earliest written languages, hieroglyphics. https://www.history.com/topics/ancient-egypt/ancient-egyptian-writing",
+        "technology": "Smartphones revolutionized communication by combining multiple technologies in a handheld device. https://www.britannica.com/technology/smartphone",
+        "literature": "Victor Hugo’s Les Misérables explores themes of justice, redemption, and revolution. https://www.britannica.com/biography/Victor-Hugo"
+    },
+    "15": {
+        "government": "The U.S. Supreme Court has the power of judicial review, ensuring laws comply with the Constitution. https://www.supremecourt.gov/about/about.aspx",
+        "math": "The concept of infinity is central to advanced mathematics and calculus. https://www.britannica.com/science/infinity-mathematics",
+        "science": "Tsunamis are caused by underwater earthquakes or volcanic eruptions. https://www.nationalgeographic.com/environment/article/tsunamis",
+        "history": "The Industrial Revolution transformed economies and societies in the 18th and 19th centuries. https://www.history.com/topics/industrial-revolution",
+        "technology": "The first 3D printer was developed in 1983, revolutionizing manufacturing. https://www.3dnatives.com/en/history-3d-printing-300120195/",
+        "literature": "Emily Dickinson’s poetry is known for its unique use of dashes and slant rhyme. https://www.poetryfoundation.org/poets/emily-dickinson"
+    },
+    "16": {
+        "government": "The U.S. Senate has 100 members, with two senators representing each state. https://www.senate.gov/",
+        "math": "Fractals are complex geometric shapes that appear similar at different scales. https://www.britannica.com/science/fractal",
+        "science": "The Milky Way galaxy is estimated to contain around 100 billion stars. https://www.nasa.gov/content/discoveries-about-the-milky-way-galaxy",
+        "history": "The Titanic sank in 1912 after hitting an iceberg. https://www.history.com/topics/titanic",
+        "technology": "The first digital camera was invented in 1975 by Kodak engineer Steven Sasson. https://www.britannica.com/technology/digital-camera",
+        "literature": "Harper Lee’s novel To Kill a Mockingbird addresses themes of racial injustice and moral growth. https://www.britannica.com/biography/Harper-Lee"
+    },
+    "17": {
+        "government": "The Executive Branch of the U.S. government includes the President, Vice President, and Cabinet. https://www.whitehouse.gov/about-the-white-house/our-government/",
+        "math": "Probability measures the likelihood of an event occurring. https://www.britannica.com/science/probability",
+        "science": "The Doppler Effect describes how the frequency of waves changes based on the movement of a source. https://www.nationalgeographic.org/encyclopedia/doppler-effect/",
+        "history": "The Great Depression lasted from 1929 to the late 1930s and severely impacted global economies. https://www.history.com/topics/great-depression",
+        "technology": "Wi-Fi was first introduced for consumer use in 1997, changing wireless communications. https://www.britannica.com/technology/Wi-Fi",
+        "literature": "Jane Eyre by Charlotte Brontë is considered one of the greatest English novels. https://www.britannica.com/topic/Jane-Eyre-novel-by-Bronte"
+    },
+    "18": {
+        "government": "The House of Representatives has 435 members, with representation based on state populations. https://www.house.gov/",
+        "math": "The Fibonacci sequence appears in nature, including sunflower spirals and pinecones. https://www.nationalgeographic.com/science/article/mathematical-models-fibonacci-numbers-nature",
+        "science": "The greenhouse effect helps regulate Earth’s temperature, but excess gases can lead to climate change. https://climate.nasa.gov/causes/",
+        "history": "The American Civil War lasted from 1861 to 1865, fought between the North and South. https://www.history.com/topics/american-civil-war",
+        "technology": "The first personal computer was the Altair 8800, released in 1975. https://www.britannica.com/technology/Altair-8800",
+        "literature": "Moby-Dick by Herman Melville explores themes of obsession and revenge. https://www.britannica.com/topic/Moby-Dick"
+    },
+    "19": {
+        "government": "The Constitution grants Congress the power to declare war. https://www.archives.gov/founding-docs/constitution",
+        "math": "A parabola is a symmetrical curve shaped by a quadratic function. https://www.britannica.com/science/parabola",
+        "science": "The human body contains approximately 37 trillion cells. https://www.nationalgeographic.com/science/article/human-cells",
+        "history": "The Cold War lasted from 1947 to 1991 and shaped global politics. https://www.history.com/topics/cold-war",
+        "technology": "The first microprocessor, Intel 4004, was released in 1971. https://www.intel.com/content/www/us/en/history/museum-story-of-intel-4004.html",
+        "literature": "The Canterbury Tales by Geoffrey Chaucer is a collection of stories written in Middle English. https://www.britannica.com/topic/The-Canterbury-Tales"
+    },
+    "20": {
+        "government": "Checks and balances prevent any branch of the U.S. government from becoming too powerful. https://www.archives.gov/founding-docs/constitution",
+        "math": "The concept of imaginary numbers was developed to solve equations with negative square roots. https://www.britannica.com/science/imaginary-number",
+        "science": "Plate tectonics explain the movement of Earth’s continents. https://www.nationalgeographic.com/science/article/plate-tectonics",
+        "history": "The French Revolution began in 1789, leading to political change in France. https://www.history.com/topics/french-revolution",
+        "technology": "The first commercially available computer mouse was released in 1981. https://www.britannica.com/technology/computer-mouse",
+        "literature": "F. Scott Fitzgerald’s The Great Gatsby critiques the American Dream. https://www.britannica.com/topic/The-Great-Gatsby"
+    },
+    "21": {
+        "government": "Presidential veto power allows the President to reject bills passed by Congress. https://www.archives.gov/founding-docs/constitution",
+        "math": "Logarithms simplify multiplication into addition. https://www.britannica.com/science/logarithm",
+        "science": "The Ozone Layer protects Earth from harmful ultraviolet radiation. https://www.nasa.gov/ozone-layer",
+        "history": "The Battle of Gettysburg in 1863 was a turning point in the U.S. Civil War. https://www.history.com/topics/american-civil-war/battle-of-gettysburg",
+        "technology": "The first website was launched in 1991 by Tim Berners-Lee. https://home.cern/science/computing/birth-web",
+        "literature": "William Shakespeare wrote 39 plays, including Hamlet and Romeo and Juliet. https://www.britannica.com/biography/William-Shakespeare"
+    },
+    "22": {
+        "government": "The First Amendment guarantees freedom of speech, religion, and press. https://www.archives.gov/founding-docs/constitution",
+        "math": "Pi is an irrational number with infinite decimal places. https://mathworld.wolfram.com/Pi.html",
+        "science": "The water cycle describes the movement of water through evaporation, condensation, and precipitation. https://www.nationalgeographic.com/environment/article/water-cycle",
+        "history": "The Wright brothers’ first successful flight took place on December 17, 1903. https://www.history.com/topics/inventions/wright-brothers",
+        "technology": "Smartphones became mainstream with the release of the first iPhone in 2007. https://www.britannica.com/technology/smartphone",
+        "literature": "To Kill a Mockingbird by Harper Lee won the Pulitzer Prize in 1961. https://www.britannica.com/topic/To-Kill-a-Mockingbird"
+    },
+    "23": {
+        "government": "The U.S. Constitution was signed at the Constitutional Convention in Philadelphia. https://www.archives.gov/founding-docs/constitution",
+        "math": "The Pythagorean theorem states that in a right-angled triangle, the square of the hypotenuse is equal to the sum of the squares of the other two sides. https://www.britannica.com/science/Pythagorean-theorem",
+        "science": "Photosynthesis enables plants to convert sunlight into energy. https://www.nationalgeographic.com/science/article/photosynthesis",
+        "history": "The Great Fire of London occurred in 1666 and lasted for four days. https://www.history.com/topics/great-fire-of-london",
+        "technology": "The first electronic computer, ENIAC, was developed in 1943. https://www.computerhistory.org/revolution/digital-computer/1/15",
+        "literature": "Jane Austen’s novels explore themes of love, society, and morality in early 19th-century England. https://www.britannica.com/biography/Jane-Austen"
+    },
+    "24": {
+        "government": "The White House has been the official residence of the U.S. President since 1800. https://www.whitehouse.gov/about-the-white-house/",
+        "math": "A prime number is a natural number greater than 1 that has no positive divisors other than 1 and itself. https://www.britannica.com/science/prime-number",
+        "science": "The speed of light is approximately 299,792 kilometers per second. https://www.nasa.gov/mission_pages/sunearth/news/light-speed.html",
+        "history": "The Renaissance was a cultural movement that began in Italy in the 14th century. https://www.history.com/topics/renaissance",
+        "technology": "The first commercially available digital camera was introduced in 1988. https://www.britannica.com/technology/digital-camera",
+        "literature": "Homer’s epic poems, the Iliad and the Odyssey, are foundational works of Western literature. https://www.britannica.com/biography/Homer-ancient-Greek-poet"
+    },
+    "25": {
+        "government": "The Federal Bureau of Investigation (FBI) was established in 1908 to enforce federal laws. https://www.fbi.gov/history",
+        "math": "Euler’s formula establishes a fundamental connection between complex numbers and trigonometry. https://www.britannica.com/science/Eulers-formula",
+        "science": "DNA carries genetic instructions in all known living organisms. https://www.genome.gov/genetics-glossary/DNA",
+        "history": "The Apollo 11 mission in 1969 landed the first humans on the Moon. https://www.nasa.gov/mission_pages/apollo/apollo-11.html",
+        "technology": "Bluetooth technology was first introduced in 1994, enabling wireless communication between devices. https://www.bluetooth.com/about-bluetooth/",
+        "literature": "Mary Shelley’s Frankenstein is considered one of the first science fiction novels. https://www.britannica.com/biography/Mary-Shelley"
+    },
+    "26": {
+        "government": "The U.S. Capitol building is the meeting place for Congress. https://www.aoc.gov/explore-capitol-campus/buildings-grounds/capitol-building",
+        "math": "The Fibonacci sequence appears in many natural patterns, such as sunflower spirals. https://www.nationalgeographic.com/science/article/mathematical-models-fibonacci-numbers-nature",
+        "science": "The greenhouse effect regulates Earth’s temperature, but excessive gases contribute to climate change. https://climate.nasa.gov/causes/",
+        "history": "The American Civil War lasted from 1861 to 1865, fought between the Union and the Confederacy. https://www.history.com/topics/american-civil-war",
+        "technology": "The first personal computer, the Altair 8800, was released in 1975. https://www.britannica.com/technology/Altair-8800",
+        "literature": "Moby-Dick by Herman Melville explores themes of obsession and revenge. https://www.britannica.com/topic/Moby-Dick"
+    },
+    "27": {
+        "government": "The Three-Fifths Compromise was part of the U.S. Constitution, affecting congressional representation. https://www.archives.gov/founding-docs/constitution",
+        "math": "The number Pi (π) is an infinite, non-repeating decimal often approximated as 3.14159. https://mathworld.wolfram.com/Pi.html",
+        "science": "The solar system consists of eight planets orbiting the Sun. https://solarsystem.nasa.gov/planets/overview/",
+        "history": "The Viking Age lasted from approximately 793 to 1066 CE. https://www.history.com/topics/exploration/vikings-history",
+        "technology": "The first mobile phone call was made by Martin Cooper in 1973. https://www.britannica.com/technology/mobile-telephone",
+        "literature": "George Orwell’s Animal Farm is an allegory critiquing political corruption. https://www.britannica.com/topic/Animal-Farm"
+    },
+    "28": {
+        "government": "The U.S. Secretary of State oversees foreign affairs and international diplomacy. https://www.state.gov/",
+        "math": "A circle’s circumference is calculated using the formula C = 2πr. https://www.britannica.com/science/circumference",
+        "science": "The Earth’s atmosphere is composed mainly of nitrogen and oxygen. https://www.nasa.gov/mission_pages/noaa-n/climate/climate_weather.html",
+        "history": "The Louisiana Purchase in 1803 doubled the size of the United States. https://www.history.com/topics/westward-expansion/louisiana-purchase",
+        "technology": "The first microchips were developed in the late 1950s, leading to modern computers. https://www.computerhistory.org/siliconengine/timeline/",
+        "literature": "The works of Edgar Allan Poe helped define gothic horror and detective fiction. https://www.poetryfoundation.org/poets/edgar-allan-poe"
+    },
+    "29": {
+        "government": "The U.S. Constitution allows amendments, with 27 ratified since its creation. https://www.archives.gov/founding-docs/amendments",
+        "math": "The concept of negative numbers dates back to ancient China and India. https://www.britannica.com/science/negative-number",
+        "science": "The human circulatory system transports oxygen and nutrients throughout the body. https://www.nationalgeographic.com/science/article/blood-circulation",
+        "history": "The fall of the Western Roman Empire occurred in 476 CE. https://www.history.com/topics/ancient-rome/fall-of-rome",
+        "technology": "The first space station, Salyut 1, was launched by the Soviet Union in 1971. https://www.nasa.gov/mission_pages/station/main/index.html",
+        "literature": "Charlotte Brontë’s novel Jane Eyre explores themes of independence and morality. https://www.britannica.com/topic/Jane-Eyre-novel-by-Bronte"
+    },
+    "30": {
+        "government": "The Great Compromise of 1787 established the U.S. Senate and House of Representatives. https://www.archives.gov/founding-docs/constitution",
+        "math": "Trigonometry studies the relationships between angles and sides in triangles. https://www.britannica.com/science/trigonometry",
+        "science": "Antibiotics are used to treat bacterial infections but do not work against viruses. https://www.cdc.gov/antibiotic-use/index.html",
+        "history": "The Industrial Revolution led to major advancements in manufacturing and transportation. https://www.history.com/topics/industrial-revolution",
+        "technology": "The internet evolved from ARPANET, a U.S. Department of Defense project in the 1960s. https://www.history.com/topics/inventions/invention-of-the-internet",
+        "literature": "Herman Melville’s Moby-Dick is a novel about obsession and revenge. https://www.britannica.com/topic/Moby-Dick"
+    }
+}
