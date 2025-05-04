@@ -30,7 +30,7 @@
         }
     
         function fetchMainSiteVersion() {
-            const mainSiteURL = "https://www.lbv.giize.com/";
+            const mainSiteURL = "https://code-faction.gleeze.com/";
             fetch(`${mainSiteURL}version.txt?nocache=${new Date().getTime()}`)
                 .then(response => response.text())
                 .then(data => {
@@ -124,7 +124,7 @@
     <p>This page checks the version of different UBG mirror sites.</p>
 
     <div class="highlight">
-        <p>Main Site: <a href="https://www.lbv.giize.com/" target="_blank">https://www.lbv.giize.com/</a></p>
+        <p>Main Site: <a href="https://code-faction.gleeze.com/" target="_blank">https://code-faction.gleeze.com</a></p>
         <p>Main Site Version: <span id="mainSiteVersion">Checking...</span></p>
     </div>
 
