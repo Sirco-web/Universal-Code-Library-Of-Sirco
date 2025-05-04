@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Configuration Error</title>
+    <title>⚠ Secure Connection Failed</title>
 
     <!-- Google Analytics Tracking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
@@ -15,38 +15,55 @@
     </script>
 
     <style>
+        @keyframes glitch {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-2px); }
+            80% { transform: translateX(2px); }
+            100% { transform: translateX(0); }
+        }
+        
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #0f0f0f; /* Dark background for error screen */
             margin: 0;
             text-align: center;
+            color: #ff4444;
         }
         .container {
-            margin-top: 20%;
+            margin-top: 10%;
             padding: 20px;
-            background: white;
+            background: #222;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.3);
             border-radius: 8px;
+            border: 1px solid #ff4444;
         }
         h1 {
-            font-size: 2.5em;
-            color: #333;
+            font-size: 2.8em;
+            color: #ff5555;
+            animation: glitch 1s infinite;
+        }
+        .glitch-text {
+            display: inline-block;
+            animation: glitch 1s infinite;
         }
         p {
-            color: #555;
+            color: #ff8888;
             font-size: 1.2em;
         }
         code {
             display: block;
             margin-top: 10px;
             padding: 10px;
-            background-color: #eaeaea;
+            background-color: #111;
             border-radius: 5px;
             font-family: monospace;
-            color: #333;
+            color: #ff4444;
+            animation: glitch 2s infinite;
         }
     </style>
 
@@ -56,15 +73,12 @@
             const accessCookie = cookies.find(row => row.startsWith("access="));
 
             if (accessCookie && accessCookie.split("=")[1] === "1") {
-                let redirect = confirm("You have access! Would you like to go to the second site?");
+                let redirect = confirm("⚠ You are authorized to see 2nd site. Proceed to the site? ⚠");
                 if (redirect) {
-                    window.location.href = "/welcome/index.html"; // Redirect users with access if they confirm
-                } else {
-                    console.log("User chose to stay on the page.");
+                    window.location.href = "/welcome/index.html"; 
                 }
             } else {
-                console.log("No access cookie found. Staying on the page.");
-                document.body.style.display = "block"; // Show content for users without access
+                document.body.style.display = "block"; // Show content for unauthorized users
             }
         }
 
@@ -75,17 +89,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>Domain Configuration Error</h1>
-        <p>The domain for this website appears to be misconfigured.</p>
+        <h1 class="glitch-text">⚠ Secure Connection Failed</h1>
+        <p>The website's SSL certificate could not be validated.</p>
         <code>
-            CNAME Record Missing<br>
-            Registrar Not Found<br>
-            SSL/TLS Certificate Invalid
+            ERR_CERT_COMMON_NAME_INVALID<br>
+            ERR_SSL_VERSION_OR_CIPHER_MISMATCH<br>
+            CERTIFICATE DATE INVALID<br>
         </code>
-        <p>If you're the owner of this domain, please update your settings or contact support.</p>
+        <p style="color: #ff9999;">The site may be misconfigured or an attacker might be intercepting your connection.</p>
+        <p>Please contact your administrator or try again later.</p>
     </div>
 
-    <!-- Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;"></iframe>
+    <!-- Hidden Grabify Tracking -->
+    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
 </body>
 </html>
