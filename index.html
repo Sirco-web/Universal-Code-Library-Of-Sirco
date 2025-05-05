@@ -20,13 +20,14 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: #003366; /* Uniform deep blue background */
+            color: white;
             text-align: center;
         }
+        header, footer, nav {
+            background: #003366; /* Keep everything else blue */
+        }
         header {
-            background: #003366;
-            color: white;
             padding: 20px;
         }
         header a {
@@ -41,33 +42,45 @@
         nav {
             display: flex;
             justify-content: center;
-            background: #004488;
+            padding: 15px;
+            flex-wrap: wrap;
+        }
+        .dynamic-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
             padding: 15px;
         }
-        nav button {
+        .dynamic-buttons button {
             background: white;
             border: none;
             padding: 10px 15px;
-            margin: 5px;
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
             border-radius: 5px;
+            color: #003366;
         }
-        nav button:hover {
+        .dynamic-buttons button:hover {
             background: #ddd;
         }
         main {
             max-width: 900px;
             margin: auto;
             padding: 20px;
+            background: white; /* Center is now white */
+            color: black; /* Ensure text remains visible */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
         .topic {
-            background: white;
+            background: white; /* Ensure topic section is white too */
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            color: black; /* Make sure text is readable */
         }
         .fact-banner {
             font-size: 1.5em;
@@ -76,38 +89,17 @@
             animation: glitch 1.5s infinite;
             margin-bottom: 20px;
         }
-        footer {
-            text-align: center;
-            padding: 15px;
-            background: #004488;
-            color: white;
-        }
         .version-banner {
             position: fixed;
             bottom: 10px;
             width: 100%;
             text-align: center;
             font-size: 1em;
-            color: black;
-            opacity: 0.7;
+            opacity: 0.7; /* Keep transparent */
         }
     </style>
 
     <script>
-        function checkCookie() {
-            const cookies = document.cookie.split("; ");
-            const accessCookie = cookies.find(row => row.startsWith("access="));
-
-            if (accessCookie && accessCookie.split("=")[1] === "1") {
-                let redirect = confirm("⚠ You have access to the second site. Do you want to go there?");
-                if (redirect) {
-                    window.location.href = "/welcome/index.html"; 
-                    return;
-                }
-            }
-            document.body.style.display = "block"; // Show page if staying
-        }
-
         async function fetchVersion() {
             try {
                 const response = await fetch("/version.txt?nocache=" + new Date().getTime());
@@ -118,13 +110,62 @@
             }
         }
 
+        async function loadTopics() {
+            const today = new Date();
+            const day = today.getDate();  
+
+            try {
+                const response = await fetch(`facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
+                const facts = await response.json();
+                const topics = facts[day];
+
+                if (!topics) {
+                    document.getElementById('topic-content').innerText = "No topics available for today.";
+                    return;
+                }
+
+                const buttonContainer = document.getElementById("dynamic-buttons");
+                buttonContainer.innerHTML = ""; // Clear existing buttons
+
+                Object.keys(topics).forEach(topic => {
+                    const button = document.createElement("button");
+                    button.textContent = topic.charAt(0).toUpperCase() + topic.slice(1);
+                    button.onclick = () => loadTopic(topic);
+                    buttonContainer.appendChild(button);
+                });
+            } catch (error) {
+                console.error("Error loading topics:", error);
+                document.getElementById('topic-content').innerText = "Error loading topics.";
+            }
+        }
+
+        async function loadTopic(topic) {
+            const today = new Date();
+            const day = today.getDate();  
+
+            try {
+                const response = await fetch(`facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
+                const facts = await response.json();
+                const factText = facts[day]?.[topic];
+
+                document.getElementById('topic-title').innerText = topic.charAt(0).toUpperCase() + topic.slice(1);
+                document.getElementById('topic-content').innerHTML = factText ? formatFact(factText) : "No fact available.";
+            } catch (error) {
+                document.getElementById('topic-content').innerText = "Error loading fact.";
+            }
+        }
+
+        function formatFact(fact) {
+            return fact.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">Source</a>');
+        }
+
         window.onload = function() {
-            checkCookie();
             fetchVersion();
+            loadTopics();
         };
     </script>
 </head>
-<body style="display: none;"> <!-- Initially hidden until cookie is checked -->
+<body>
 
 <header>
     <a href="index.html">L.B.V. - Learn by Video</a>
@@ -134,21 +175,15 @@
 <!-- Daily Fact Banner with Glitch Effect -->
 <p class="fact-banner">📢 Fresh Facts Added Every Day – Stay Curious! 📢</p>
 
-<nav>
-    <button onclick="loadTopic('government')">U.S. Government</button>
-    <button onclick="loadTopic('math')">Math</button>
-    <button onclick="loadTopic('science')">Science</button>
-    <button onclick="loadTopic('history')">History</button>
-    <button onclick="loadTopic('technology')">Technology</button>
-    <button onclick="loadTopic('literature')">Literature</button>
-    <button onclick="loadTopic('random')">Random Topic of the Day</button>
-</nav>
+<!-- Dynamic Buttons for Topics -->
+<div id="dynamic-buttons" class="dynamic-buttons">
+    <!-- Buttons will be added dynamically based on facts.json -->
+</div>
 
 <main>
     <div class="topic">
         <h2 id="topic-title">Welcome to L.B.V.</h2>
         <p id="topic-content">Click a topic to explore in-depth knowledge.</p>
-        <p id="daily-fact" class="fact"></p>
     </div>
 </main>
 
@@ -160,51 +195,6 @@
 <div class="version-banner">
     Site Version: <span id="siteVersion">Loading...</span>
 </div>
-
-<script>
-    async function loadTopic(topic) {
-        if (topic === "random") {
-            document.getElementById('topic-title').innerText = "Random Topic of the Day";
-            document.getElementById('topic-content').innerText = loadRandomTopic();
-            document.getElementById('daily-fact').innerText = "Discover something new today!";
-            return;
-        }
-        
-        const topicDetails = {
-            government: "The U.S. government consists of three branches: Legislative, Executive, and Judicial. Each plays a critical role in governance.",
-            math: "Math is the foundation of problem-solving. It includes arithmetic, algebra, geometry, calculus, and statistics.",
-            science: "Science is the systematic study of the natural world. It encompasses fields such as physics, chemistry, biology, and earth sciences.",
-            history: "History teaches us about past events that shaped civilizations, including wars, revolutions, and cultural movements.",
-            technology: "Technology drives modern innovation, from computing and robotics to AI and space exploration.",
-            literature: "Literature captures human experiences through storytelling, poetry, novels, and essays."
-        };
-
-        document.getElementById('topic-title').innerText = topic.charAt(0).toUpperCase() + topic.slice(1);
-        document.getElementById('topic-content').innerText = topicDetails[topic];
-
-        const today = new Date();
-        const day = today.getDate();  
-
-        try {
-            const response = await fetch('facts.json');
-            const facts = await response.json();
-            const factText = facts[day][topic];
-            document.getElementById('daily-fact').innerHTML = factText ? formatFact(factText) : "No fact available.";
-        } catch (error) {
-            document.getElementById('daily-fact').innerText = "Error loading daily fact.";
-        }
-    }
-
-    function formatFact(fact) {
-        return fact.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">Source</a>');
-    }
-
-    function loadRandomTopic() {
-        const topics = ["Physics", "Philosophy", "Engineering", "Art", "Astronomy", "Psychology"];
-        const randomIndex = Math.floor(Math.random() * topics.length);
-        return topics[randomIndex]; 
-    }
-</script>
 
 </body>
 </html>
