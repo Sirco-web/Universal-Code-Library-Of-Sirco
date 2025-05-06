@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L.B.V. - Main Page</title>
+    <title>Tools - L.B.V.</title>
 
     <style>
         html, body {
@@ -28,14 +28,14 @@
         header a:hover {
             text-decoration: underline;
         }
-        .nav-links {
+        .tool-buttons {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 15px;
             padding: 20px;
         }
-        .nav-links a {
+        .tool-buttons a {
             background: white;
             color: #003366;
             padding: 15px 25px;
@@ -44,24 +44,7 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        .nav-links a:hover {
-            background: #ddd;
-        }
-        #tools-section {
-            display: none; /* Hidden by default */
-            margin-top: 20px;
-        }
-        #tools-button {
-            background: white;
-            color: #003366;
-            padding: 15px 25px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #tools-button:hover {
+        .tool-buttons a:hover {
             background: #ddd;
         }
         .version-banner {
@@ -70,23 +53,11 @@
             width: 100%;
             text-align: center;
             font-size: 1em;
-            opacity: 0.7; /* Keep transparent */
+            opacity: 0.7;
         }
     </style>
 
     <script>
-        let konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // Up, Up, Down, Down, Left, Right, Left, Right, B, A
-        let inputKeys = [];
-
-        document.addEventListener("keydown", function(event) {
-            inputKeys.push(event.keyCode);
-
-            if (inputKeys.toString().indexOf(konamiCode.toString()) > -1) {
-                document.getElementById("tools-section").style.display = "block"; // Show tools section
-                inputKeys = []; // Reset input keys
-            }
-        });
-
         async function fetchVersion() {
             try {
                 const response = await fetch("/version.txt?nocache=" + new Date().getTime());
@@ -103,22 +74,14 @@
 <body>
 
 <header>
-    <a href="index.html">L.B.V. - Learn by Video</a>
-    <p>Explore Facts, Videos, and Games!</p>
+    <a href="index.html">L.B.V. - Tools</a>
+    <p>Explore exclusive tools for advanced users.</p>
 </header>
 
-<!-- Navigation Links -->
-<div class="nav-links">
-    <a href="/lbv/facts/">Facts</a>
-    <a href="/lbv/videos/">Videos</a>
-    <a href="/lbv/games/">Games</a>
-</div>
-
-<!-- Hidden Tools Section with Button -->
-<div id="tools-section">
-    <h2>🔧 Tools 🔧</h2>
-    <p>Secret tools unlocked!</p>
-    <button id="tools-button" onclick="window.location.href='/lbv/tools_5342/'">Access Tools</button>
+<!-- Open Access Tools Section -->
+<div class="tool-buttons">
+    <a href="cookie/">Cookie Viewer</a>
+    <a href="more/">More links</a>
 </div>
 
 <footer>
