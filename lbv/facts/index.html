@@ -116,7 +116,7 @@
             const day = today.getDate();  
 
             try {
-                const response = await fetch(`/facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
+                const response = await fetch(`https://raw.githubusercontent.com/Learn-by-video/assets/refs/heads/main/files/facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
                 const facts = await response.json();
                 const topics = facts[day];
 
@@ -145,7 +145,7 @@
             const day = today.getDate();  
 
             try {
-                const response = await fetch(`/facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
+                const response = await fetch(`https://raw.githubusercontent.com/Learn-by-video/assets/refs/heads/main/files/facts.json?nocache=${new Date().getTime()}`); // Forces fresh fetch on refresh
                 const facts = await response.json();
                 const factText = facts[day]?.[topic];
 
