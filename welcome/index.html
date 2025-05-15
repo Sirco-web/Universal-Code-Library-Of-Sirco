@@ -46,6 +46,7 @@
             background-color: #f4f4f4;
             margin: 0;
             text-align: center;
+            padding-top: 60px; /* Prevent content from being hidden under the banner */
         }
         .container {
             text-align: center;
@@ -82,6 +83,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            margin: 20px 0; /* Add vertical spacing above and below each button group */
         }
         .button-group button {
             padding: 10px 20px;
@@ -95,18 +97,69 @@
         .button-group button:hover {
             background-color: #0056b3;
         }
-        .top-buttons {
-            margin-bottom: 20px;
-        }
-                .top-group {
+        .top-group {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
-                }
+        }
+        /* Banner fixed to top */
+        #banner-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 60px;
+            border: none;
+            display: block;
+            margin-bottom: 0;
+            z-index: 1000;
+            background: transparent;
+        }
     </style>
+    <script>
+        // Hardcoded toggle for banner display
+        const showBanner = true; // Set to false to hide the banner
+
+        // Adjust iframe height to match banner.html content
+        function resizeBannerFrame(height) {
+            const bannerFrame = document.getElementById('banner-frame');
+            if (bannerFrame) {
+                bannerFrame.style.height = height + 'px';
+            }
+            // Also adjust body padding-top to prevent content overlap
+            document.body.style.paddingTop = height + 'px';
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            if (!showBanner) {
+                const bannerFrame = document.getElementById('banner-frame');
+                if (bannerFrame) bannerFrame.style.display = 'none';
+            }
+        });
+
+        // Listen for postMessage from banner.html to set height dynamically
+        window.addEventListener('message', function(event) {
+            // Optionally, check event.origin for security
+            if (event.data && event.data.type === 'bannerHeight') {
+                resizeBannerFrame(event.data.height);
+            }
+        });
+    </script>
 </head>
 <body>
+
+    <!-- Banner iframe, visibility controlled by showBanner -->
+    <iframe 
+        id="banner-frame"
+        title="Banner"
+        scrolling="no"
+        style="height:60px;" <!-- fallback height -->
+    ></iframe>
+    <script>
+        // Set the banner iframe src with cache-busting using JS (like fetchVersion)
+        document.getElementById('banner-frame').src = `/banner.html?nocache=${new Date().getTime()}`;
+    </script>
 
     <div class="footer-container">
         <p>
@@ -122,18 +175,18 @@
         <p>Welcome to the brand new UBG lineup called UBG UNIVERSE.</p>
 
         <!-- Top Buttons -->
-        <div class="top-buttons">
+        <div class="button-group">
             <button onclick="removeAccessKey();">Remove Access Key</button>
             <button onclick="window.location.href='/updates.txt';">View Updates</button>
         </div>
 
         <!-- Main Buttons -->
         <div class="button-group">
-            <button onclick="window.location.href='/games';">Games</button>
-            <button onclick="window.location.href='/proxys';">Proxys</button>
-            <button onclick="window.location.href='/ais';">AI's</button>
-            <button onclick="window.location.href='/tools';">Tools</button>
-            <button onclick="window.location.href='/testing';">Testing Help</button>
+            <button onclick="window.location.href='/CODE/games';">Games</button>
+            <button onclick="window.location.href='/CODE/proxys';">Proxys</button>
+            <button onclick="window.location.href='/CODE/ais';">AI's</button>
+            <button onclick="window.location.href='/CODE/tools';">Tools</button>
+            <button onclick="window.location.href='/CODE/testing';">Testing Help</button>
         </div>
     </div>
 

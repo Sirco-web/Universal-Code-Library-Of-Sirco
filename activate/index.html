@@ -54,8 +54,8 @@
                 if (!response.ok) throw new Error("Failed to fetch credentials.");
                 const text = await response.text();
                 const keys = text.split("\n").map(line => line.trim()).filter(line => line);
-                if (keys.length < 2) throw new Error("Invalid credentials format.");
-                return { tempKey: keys[0], permKey: keys[1] };
+                // Allow for only tempKey (first line) to exist
+                return { tempKey: keys[0], permKey: keys[1] || null };
             } catch (error) {
                 console.error("Error fetching credentials:", error);
                 window.location.href = "/index.html";
@@ -64,6 +64,14 @@
         }
 
         async function activate() {
+            // Always fetch the latest script version by reloading itself with a cache-busting query param if not present
+            if (!window.location.search.includes('nocache=')) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('nocache', Date.now());
+                window.location.replace(url.toString());
+                return;
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const providedKey = urlParams.get("key");
 
@@ -79,7 +87,7 @@
             if (providedKey.trim() === keys.tempKey.trim()) {
                 document.getElementById("rulesSection").classList.remove("hidden");
                 document.getElementById("agreeButton").setAttribute("onclick", "setAccessCookie(10)");
-            } else if (providedKey.trim() === keys.permKey.trim()) {
+            } else if (keys.permKey && providedKey.trim() === keys.permKey.trim()) {
                 document.getElementById("rulesSection").classList.remove("hidden");
                 document.getElementById("agreeButton").setAttribute("onclick", "grantPermanentAccess()");
             } else {

@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banner</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
     <style>
-        body { text-align: center; padding: 10px; background-color: #f4f4f4; margin: 0; }
+        body { 
+            text-align: center; 
+            padding: 0; /* Remove extra padding */
+            margin: 0; 
+            background-color: #f4f4f4; 
+        }
+        .banner-content {
+            padding: 10px 0; /* Add vertical padding just for the banner content */
+        }
         h2 {
             font-size: 1.5em;
             color: #333;
@@ -18,9 +27,25 @@
 </head>
 <body>
 
-    <div>
-        <h2>News: Lots more games and fixed Proxys! More soon...</h2>
+    <div class="banner-content">
+        <h2>We finally went public and fixed some major features!</h2>
+        <p>
+            Welcome to the public launch of UBG Universe.<br>
+            Enjoy improved stability, new features, and a better user experience.<br>
+            Stay tuned for more updates and enhancements coming soon!
+        </p>
     </div>
+    <script>
+        // Send the height of the banner to the parent window
+        function sendHeight() {
+            window.parent.postMessage({
+                type: 'bannerHeight',
+                height: document.body.scrollHeight
+            }, '*');
+        }
+        window.onload = sendHeight;
+        window.onresize = sendHeight;
+    </script>
 
 </body>
 </html>
