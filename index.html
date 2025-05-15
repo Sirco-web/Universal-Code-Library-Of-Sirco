@@ -5,74 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Universe - Educational Portal</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-
-    <style>
-        html, body {
-            overflow-x: hidden;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #003366;
-            color: white;
-            text-align: center;
-        }
-        header, footer {
-            background: #003366;
-            padding: 20px;
-        }
-        header h1 {
-            font-size: 28px;
-            margin: 0;
-        }
-        .main-content {
-            padding: 40px 20px;
-        }
-        /* Hide the activate button and place it in the bottom right */
-        .activate-btn {
-            position: fixed;
-            right: 18px;
-            bottom: 18px;
-            background: #007bff;
-            color: #fff;
-            padding: 6px 10px;
-            font-size: 10px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 1000;
-            opacity: 0;
-            text-decoration: none;
-            display: inline-block;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .activate-btn:hover, .activate-btn:focus, .activate-btn:active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .activate-btn-area {
-            position: fixed;
-            right: 18px;
-            bottom: 18px;
-            width: 40px;
-            height: 24px;
-            z-index: 999;
-        }
-        .activate-btn-area:hover .activate-btn,
-        .activate-btn-area:focus-within .activate-btn {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .activate-btn-area {
-            /* Make the hover area invisible */
-            background: transparent;
-        }
-        .activate-btn {
-            /* Hide link destination on hover */
-            -webkit-user-drag: none;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -82,43 +15,25 @@
 
 <div class="main-content">
     <h2>Educational Resources Portal</h2>
-    <p style="font-size: 1.15em;">
-        Discover a world of knowledge!<br>
-        Browse our curated collection of articles, tutorials, and interactive lessons.<br>
-        <br>
-        <strong>Featured Topics:</strong>
+    <p style="font-size: 1.1em; max-width: 500px; margin: 0 auto;">
+        Welcome to Code Universe, your future home for learning programming, web development, and digital skills.<br><br>
+        <strong>Coming Soon:</strong>
         <ul style="max-width: 400px; margin: 0 auto; text-align: left;">
-            <li>Introduction to Programming</li>
-            <li>Web Development Basics</li>
-            <li>Understanding Algorithms</li>
-            <li>Safe Internet Practices</li>
-            <li>And much more...</li>
+            <li>Quick-start coding guides</li>
+            <li>Interactive web tutorials</li>
+            <li>Algorithm basics explained</li>
+            <li>Safe internet tips</li>
+            <li>And more!</li>
         </ul>
         <br>
-        <span style="display:block; margin: 30px 0; font-size: 1.1em;">
-            <strong>About Code Universe</strong><br>
-            Welcome to Code Universe, your gateway to the digital cosmos! Our mission is to empower learners of all ages to explore the wonders of technology and programming.<br>
-            <br>
-            Whether you're a curious beginner or a seasoned coder, our platform offers something for everyone. Dive into interactive lessons, challenge yourself with coding puzzles, and connect with a vibrant community of fellow explorers.<br>
-            <br>
-            <em>New this month:</em> Try our "Algorithm Adventure" series and earn digital badges as you progress!<br>
-            <br>
-            <strong>Why choose Code Universe?</strong>
-            <ul style="max-width: 400px; margin: 0 auto; text-align: left;">
-                <li>Step-by-step tutorials crafted by expert educators</li>
-                <li>Hands-on coding playgrounds for real practice</li>
-                <li>Regularly updated content to keep you ahead</li>
-                <li>Safe, ad-free, and student-friendly environment</li>
-            </ul>
-            <br>
-            Start your learning journey today with Code Universe and unlock your potential in the digital age!
+        <span style="display:block; margin: 20px 0; font-size: 1em;">
+            We're working hard to bring you quality, hands-on resources for all ages.<br>
+            Stay tuned for updates and new features!
         </span>
     </p>
 </div>
 
-<div class="activate-btn-area">
-    <a href="/activate?key=ifquizesarequizaclthenwhataretests" class="activate-btn" tabindex="-1">Activate</a>
-</div>
+<script src="main.js"></script>
 
 <footer>
     <p>© 2025 Code Universe. All rights reserved.</p>
