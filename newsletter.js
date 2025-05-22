@@ -1,3 +1,12 @@
+let BACKEND_URL = '';
+fetch('/backend.json')
+    .then(res => res.json())
+    .then(cfg => {
+        BACKEND_URL = cfg.url.replace(/\/$/, '');
+        main();
+    });
+
+function main() {
 (function() {
     // Helper to set a cookie
     function setCookie(name, value, days) {
@@ -21,10 +30,93 @@
         return null;
     }
 
-    // Only show popup if not already subscribed or dismissed
-    if (getCookie('newsletter_hide') === '1') return;
+    // Helper to delete a cookie
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
 
-    // Function to create and show the popup
+    // Helper to get name/email from cookies
+    function getUserNewsletterInfo() {
+        return {
+            name: getCookie('newsletter_name'),
+            email: getCookie('newsletter_email')
+        };
+    }
+
+    // Only show popup if not already subscribed or dismissed
+    if (getCookie('newsletter_hide') === '1') {
+        const info = getUserNewsletterInfo();
+        if (info.name && info.email) {
+            showUnsubPopup(info.name, info.email);
+        }
+        return;
+    }
+
+    function showUnsubPopup(name, email) {
+        const popup = document.createElement('div');
+        popup.innerHTML = `
+            <div id="newsletter-popup" style="
+                position:fixed;top:0;left:0;width:100vw;height:100vh;
+                background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;
+                font-family: Arial, sans-serif;">
+                <div style="
+                    background:#fff;
+                    padding:32px 28px 18px 28px;
+                    border-radius:12px;
+                    box-shadow:0 4px 16px rgba(0,0,0,0.18);
+                    max-width:370px;
+                    width:95vw;
+                    text-align:center;
+                    margin: 0 10px;
+                ">
+                    <h2 style="margin-top:0;margin-bottom:0.5em;color:#007bff;">Newsletter Subscription</h2>
+                    <p style="margin-bottom:1em;color:#333;">
+                        You are subscribed as:<br>
+                        <b>${name}</b><br>
+                        <span style="color:#555;">${email}</span>
+                    </p>
+                    <button id="newsletter-unsub" style="
+                        margin-top:0.5em;
+                        width:100%;
+                        padding:0.7em 0;
+                        font-size:1em;
+                        border-radius:6px;
+                        background-color:#ff4444;
+                        color:white;
+                        border:none;
+                        cursor:pointer;
+                        transition:background 0.2s;
+                    ">Unsubscribe</button>
+                    <div id="newsletter-unsub-message" style="margin-top:1em;color:green;display:none;font-weight:bold;"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(popup);
+
+        document.getElementById('newsletter-unsub').onclick = function() {
+            fetch(BACKEND_URL + '/newsletter-unsub', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify({ name, email, timestamp: new Date().toISOString() })
+            }).then(() => {
+                document.getElementById('newsletter-unsub-message').textContent = 'You have been unsubscribed.';
+                document.getElementById('newsletter-unsub-message').style.display = 'block';
+                deleteCookie('newsletter_name');
+                deleteCookie('newsletter_email');
+                deleteCookie('newsletter_hide');
+                setTimeout(() => {
+                    document.getElementById('newsletter-popup').remove();
+                }, 2000);
+            }).catch(() => {
+                document.getElementById('newsletter-unsub-message').textContent = 'Error unsubscribing. Please try again.';
+                document.getElementById('newsletter-unsub-message').style.display = 'block';
+            });
+        };
+    }
+
     function showNewsletterPopup() {
         // Create popup HTML
         const popup = document.createElement('div');
@@ -83,6 +175,12 @@
                     " onmouseover="this.style.backgroundColor='#e6f0ff';this.style.color='#0056b3'" onmouseout="this.style.backgroundColor='#f4f4f4';this.style.color='#007bff'">
                         No Thanks
                     </button>
+                    <div style="margin-top:0.7em;">
+                        <label style="font-size:0.92em;color:#555;cursor:pointer;">
+                            <input type="checkbox" id="newsletter-hide-checkbox" style="margin-right:6px;vertical-align:middle;">
+                            Don't show again
+                        </label>
+                    </div>
                     <div id="newsletter-message" style="margin-top:1em;color:green;display:none;font-weight:bold;"></div>
                     <div style="margin-top:1.2em;font-size:0.82em;color:#888;">
                         We don't share any data like your name or email.
@@ -92,18 +190,39 @@
         `;
         document.body.appendChild(popup);
 
-        // Close popup and set cookie if user clicks "No Thanks"
         document.getElementById('newsletter-close').onclick = function() {
-            setCookie('newsletter_hide', '1', 365);
+            const dontShow = document.getElementById('newsletter-hide-checkbox').checked;
+            if (dontShow) setCookie('newsletter_hide', '1', 365);
             document.getElementById('newsletter-popup').remove();
         };
 
-        // Handle form submit
+        function showNewsletterErrorNotification() {
+            if (document.getElementById('newsletter-error-notification')) return;
+            const notif = document.createElement('div');
+            notif.id = 'newsletter-error-notification';
+            notif.textContent = 'error 362 if you see this agen report to owner';
+            notif.style.position = 'fixed';
+            notif.style.top = '18px';
+            notif.style.right = '18px';
+            notif.style.background = '#ff4444';
+            notif.style.color = 'white';
+            notif.style.padding = '12px 22px';
+            notif.style.borderRadius = '8px';
+            notif.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)';
+            notif.style.fontSize = '1em';
+            notif.style.zIndex = 99999;
+            notif.style.fontFamily = 'Arial,sans-serif';
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.remove();
+            }, 5000);
+        }
+
         document.getElementById('newsletter-form').onsubmit = function(e) {
             e.preventDefault();
             const name = document.getElementById('newsletter-name').value.trim();
             const email = document.getElementById('newsletter-email').value.trim();
-            fetch('https://moving-badly-cheetah.ngrok-free.app/newsletter', {
+            fetch(BACKEND_URL + '/newsletter', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,16 +233,26 @@
                 document.getElementById('newsletter-message').textContent = 'Thank you for subscribing!';
                 document.getElementById('newsletter-message').style.display = 'block';
                 setCookie('newsletter_hide', '1', 365);
+                setCookie('newsletter_name', name, 365);
+                setCookie('newsletter_email', email, 365);
                 setTimeout(() => {
                     document.getElementById('newsletter-popup').remove();
                 }, 2000);
             }).catch(() => {
                 document.getElementById('newsletter-message').textContent = 'There was an error. Please try again.';
                 document.getElementById('newsletter-message').style.display = 'block';
+                showNewsletterErrorNotification();
             });
         };
     }
 
-    // Show the popup after a 3-second delay
-    setTimeout(showNewsletterPopup, 3000);
+    setTimeout(() => {
+        const info = getUserNewsletterInfo();
+        if (getCookie('newsletter_hide') === '1' && info.name && info.email) {
+            showUnsubPopup(info.name, info.email);
+        } else {
+            showNewsletterPopup();
+        }
+    }, 3000);
 })();
+}
