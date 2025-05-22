@@ -51,13 +51,19 @@
     <script>
         // Minimal, robust cookie exporter UI
         function getAllCookies() {
+            // This only gets cookies for the current domain (not all URLs/domains)
             return document.cookie.split(';').reduce((acc, c) => {
-                const [k, ...v] = c.trim().split('=');
-                if (k) acc[k] = decodeURIComponent(v.join('='));
+                const idx = c.indexOf('=');
+                if (idx > -1) {
+                    const k = c.slice(0, idx).trim();
+                    const v = c.slice(idx + 1);
+                    acc[k] = decodeURIComponent(v);
+                }
                 return acc;
             }, {});
         }
         function getUserCookies() {
+            // Exclude only sensitive cookies, but include all others (including game saves)
             const exclude = [
                 'cookie_saver_email',
                 'cookie_saver_name',
@@ -102,7 +108,9 @@
         document.getElementById('refresh-cookies').onclick = showCookies;
         document.getElementById('download-cookies').onclick = function() {
             const cookies = getUserCookies();
-            const blob = new Blob([JSON.stringify(cookies, null, 2)], {type: 'application/json'});
+            // Export as array of {name, value} for compatibility with import
+            const arr = Object.keys(cookies).map(name => ({ name, value: cookies[name] }));
+            const blob = new Blob([JSON.stringify(arr, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -124,9 +132,18 @@
             reader.onload = function(e) {
                 try {
                     const cookies = JSON.parse(e.target.result);
-                    cookies.forEach(cookie => {
-                        document.cookie = cookie.name + "=" + cookie.value + "; path=/";
-                    });
+                    // Accept both array of {name, value} and object form
+                    if (Array.isArray(cookies)) {
+                        cookies.forEach(cookie => {
+                            if (cookie.name && typeof cookie.value !== 'undefined') {
+                                document.cookie = cookie.name + "=" + encodeURIComponent(cookie.value) + "; path=/";
+                            }
+                        });
+                    } else if (typeof cookies === 'object') {
+                        Object.keys(cookies).forEach(name => {
+                            document.cookie = name + "=" + encodeURIComponent(cookies[name]) + "; path=/";
+                        });
+                    }
                     document.getElementById('message').textContent = 'Cookies imported successfully.';
                     document.getElementById('message').style.color = 'green';
                     showCookies();
