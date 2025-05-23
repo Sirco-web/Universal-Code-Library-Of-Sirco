@@ -43,79 +43,10 @@ function main() {
         };
     }
 
-    // Only show popup if not already subscribed or dismissed
-    if (getCookie('newsletter_hide') === '1') {
-        const info = getUserNewsletterInfo();
-        if (info.name && info.email) {
-            showUnsubPopup(info.name, info.email);
-        }
-        return;
-    }
-
-    function showUnsubPopup(name, email) {
-        const popup = document.createElement('div');
-        popup.innerHTML = `
-            <div id="newsletter-popup" style="
-                position:fixed;top:0;left:0;width:100vw;height:100vh;
-                background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;
-                font-family: Arial, sans-serif;">
-                <div style="
-                    background:#fff;
-                    padding:32px 28px 18px 28px;
-                    border-radius:12px;
-                    box-shadow:0 4px 16px rgba(0,0,0,0.18);
-                    max-width:370px;
-                    width:95vw;
-                    text-align:center;
-                    margin: 0 10px;
-                ">
-                    <h2 style="margin-top:0;margin-bottom:0.5em;color:#007bff;">Newsletter Subscription</h2>
-                    <p style="margin-bottom:1em;color:#333;">
-                        You are subscribed as:<br>
-                        <b>${name}</b><br>
-                        <span style="color:#555;">${email}</span>
-                    </p>
-                    <button id="newsletter-unsub" style="
-                        margin-top:0.5em;
-                        width:100%;
-                        padding:0.7em 0;
-                        font-size:1em;
-                        border-radius:6px;
-                        background-color:#ff4444;
-                        color:white;
-                        border:none;
-                        cursor:pointer;
-                        transition:background 0.2s;
-                    ">Unsubscribe</button>
-                    <div id="newsletter-unsub-message" style="margin-top:1em;color:green;display:none;font-weight:bold;"></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(popup);
-
-        document.getElementById('newsletter-unsub').onclick = function() {
-            fetch(BACKEND_URL + '/newsletter-unsub', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'ngrok-skip-browser-warning': 'true'
-                },
-                body: JSON.stringify({ name, email, timestamp: new Date().toISOString() })
-            }).then(() => {
-                document.getElementById('newsletter-unsub-message').textContent = 'You have been unsubscribed.';
-                document.getElementById('newsletter-unsub-message').style.display = 'block';
-                deleteCookie('newsletter_name');
-                deleteCookie('newsletter_email');
-                deleteCookie('newsletter_hide');
-                setTimeout(() => {
-                    document.getElementById('newsletter-popup').remove();
-                }, 2000);
-            }).catch(() => {
-                document.getElementById('newsletter-unsub-message').textContent = 'Error unsubscribing. Please try again.';
-                document.getElementById('newsletter-unsub-message').style.display = 'block';
-            });
-        };
-    }
+    // Only show the newsletter popup, not the unsub popup
+    setTimeout(() => {
+        showNewsletterPopup();
+    }, 3000);
 
     function showNewsletterPopup() {
         // Create popup HTML
@@ -247,12 +178,7 @@ function main() {
     }
 
     setTimeout(() => {
-        const info = getUserNewsletterInfo();
-        if (getCookie('newsletter_hide') === '1' && info.name && info.email) {
-            showUnsubPopup(info.name, info.email);
-        } else {
-            showNewsletterPopup();
-        }
+        showNewsletterPopup();
     }, 3000);
 })();
 }
