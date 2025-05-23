@@ -176,9 +176,5 @@ function main() {
             });
         };
     }
-
-    setTimeout(() => {
-        showNewsletterPopup();
-    }, 3000);
 })();
 }
