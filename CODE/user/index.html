@@ -170,14 +170,71 @@
             };
             reader.readAsText(file);
         };
-        // Cloud save/load are no-ops unless you want to wire them up
+        // Cloud save/load implementation
         document.getElementById('cloud-save').onclick = function() {
-            document.getElementById('message').textContent = 'Cloud export not implemented in this minimal version.';
-            document.getElementById('message').style.color = 'red';
+            const cookies = getUserCookies();
+            const username = prompt('Enter your username for cloud export:');
+            const password = prompt('Enter your password:');
+            if (!username || !password) {
+                document.getElementById('message').textContent = 'Username and password required for cloud export.';
+                document.getElementById('message').style.color = 'red';
+                return;
+            }
+            fetch('/cookie-cloud', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    password,
+                    cookies,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    document.getElementById('message').textContent = 'Cloud export successful!';
+                    document.getElementById('message').style.color = 'green';
+                } else {
+                    document.getElementById('message').textContent = 'Cloud export failed: ' + (data && data.error ? data.error : 'Unknown error');
+                    document.getElementById('message').style.color = 'red';
+                }
+            })
+            .catch(() => {
+                document.getElementById('message').textContent = 'Cloud export failed.';
+                document.getElementById('message').style.color = 'red';
+            });
         };
+
         document.getElementById('cloud-load').onclick = function() {
-            document.getElementById('message').textContent = 'Cloud import not implemented in this minimal version.';
-            document.getElementById('message').style.color = 'red';
+            const username = prompt('Enter your username for cloud import:');
+            const password = prompt('Enter your password:');
+            if (!username || !password) {
+                document.getElementById('message').textContent = 'Username and password required for cloud import.';
+                document.getElementById('message').style.color = 'red';
+                return;
+            }
+            fetch('/cookie-cloud?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password), {
+                method: 'GET'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.cookies) {
+                    Object.keys(data.cookies).forEach(name => {
+                        document.cookie = name + "=" + encodeURIComponent(data.cookies[name]) + "; path=/";
+                    });
+                    document.getElementById('message').textContent = 'Cloud import successful!';
+                    document.getElementById('message').style.color = 'green';
+                    showCookies();
+                } else {
+                    document.getElementById('message').textContent = 'Cloud import failed: ' + (data && data.error ? data.error : 'No data found');
+                    document.getElementById('message').style.color = 'red';
+                }
+            })
+            .catch(() => {
+                document.getElementById('message').textContent = 'Cloud import failed.';
+                document.getElementById('message').style.color = 'red';
+            });
         };
         showCookies();
     </script>
