@@ -110,6 +110,24 @@
         'access'
     ];
 
+    // --- Date Check from cookie.json ---
+    function checkCookieJsonDate() {
+        fetch('/cookie.json')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.date) {
+                    const cookieDate = new Date(data.date);
+                    const now = new Date();
+                    if (cookieDate < now) {
+                        showCookiePopup();
+                    }
+                }
+            })
+            .catch(() => {
+                // Ignore errors if cookie.json not found
+            });
+    }
+
     function getCookie(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         return match ? decodeURIComponent(match[2]) : null;
@@ -165,6 +183,7 @@
 
     // Run version check on load
     checkCookieVersion();
+    checkCookieJsonDate();
     </script>
     <script src="/analytics.js?5h"></script>
     <script src="/newsletter.js?67herth676"></script>
