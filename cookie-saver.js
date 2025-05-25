@@ -283,18 +283,19 @@ function showAllSiteData() {
                                 } else {
                                     dbBlock.innerHTML += `<span style="color:#444;">${String(val).slice(0, 300)}</span><br>`;
                                 }
+                            };
                             getAllReq.onerror = function() {
                                 dbBlock.innerHTML += `<span style="color:#f44;">(error reading data)</span><br>`;
                             };
                         } catch (e) {
                             dbBlock.innerHTML += `<span style="color:#f44;">(cannot read)</span><br>`;
                         }
-                    }); // closes stores.forEach
-                }; // closes req.onsuccess
+                    });
+                };
                 req.onerror = function() {
                     dbBlock.innerHTML += `<span style="color:#f44;">(error opening database)</span><br>`;
                 };
-            }); // closes dbs.forEach
+            });
         }).catch(() => {
             idbDiv.innerHTML = '<b>IndexedDB Data:</b><br><span style="color:#888;">Could not enumerate databases.</span>';
         });
@@ -302,7 +303,6 @@ function showAllSiteData() {
         idbDiv.innerHTML = '<b>IndexedDB Data:</b><br><span style="color:#888;">Cannot enumerate databases in this browser.</span>';
     }
 }
-
 // Add a "Refresh Data" button for user to reload all data
 function addRefreshButton() {
     if (document.getElementById('refresh-data-btn')) return;
@@ -341,7 +341,7 @@ window.addEventListener('DOMContentLoaded', () => {
             fetch(BACKEND_URL + '/cookie-verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
             })
             .then(res => res.json())
             .then(data => {
@@ -372,32 +372,30 @@ window.addEventListener('DOMContentLoaded', () => {
 // Signup form
 document.getElementById('signup-form').onsubmit = function(e) {
     e.preventDefault();
-
     // Check if account_created cookie exists
     if (hasAccountCreatedCookie()) {
         showMessage('An account has already been created. Further sign-ups are disabled.', 'red');
         return;
     }
-
     const username = document.getElementById('signup-username').value.trim();
     const password = document.getElementById('signup-password').value.trim();
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
-
     if (!username || !password || !name || !email) {
         showMessage('Please fill all fields.', 'red');
         return;
     }
-
-    // Check if a user with the same username already exists
-    fetch(BACKEND_URL + '/cookie-check-username?username=' + encodeURIComponent(username), {
+    // Check if a user with the same username or email already exists
+    fetch(BACKEND_URL + '/cookie-check-username-email?username=' + encodeURIComponent(username) + '&email=' + encodeURIComponent(email), {
         method: 'GET',
         headers: { 'ngrok-skip-browser-warning': 'true' }
     })
     .then(res => res.json())
     .then(data => {
-        if (data.exists) {
+        if (data.usernameExists) {
             showMessage('This username is already taken. Please choose a different one.', 'red');
+        } else if (data.emailExists) {
+            showMessage('This email is already used. Please use a different email.', 'red');
         } else {
             // Check with server if account is valid or needs to be created
             fetch(BACKEND_URL + '/cookie-verify', {
@@ -405,7 +403,7 @@ document.getElementById('signup-form').onsubmit = function(e) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             })
-            .then(res => {
+            .then(res => { new Error('Network error');
                 if (!res.ok) throw new Error('Network error');
                 return res.json();
             })
@@ -427,7 +425,7 @@ document.getElementById('signup-form').onsubmit = function(e) {
                         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
                         body: JSON.stringify({ username, password, name, email, timestamp: new Date().toISOString() })
                     })
-                    .then(resp => {
+                    .then(resp => { new Error('Network error');
                         if (!resp.ok) throw new Error('Network error');
                         return resp.json();
                     })
@@ -466,18 +464,18 @@ document.getElementById('signup-form').onsubmit = function(e) {
         }
     })
     .catch(() => {
-        showMessage('Could not check username. Please try again.', 'red');
+        showMessage('Could not check username/email. Please try again.', 'red');
         showCookieSaverErrorNotification();
     });
 };
 
-// Only add event listeners if the elements exist
+// Helper function to safely add click event listeners
 function safeAddClick(id, fn) {
     const el = document.getElementById(id);
     if (el) el.onclick = fn;
 }
 
-// Only add event listeners if the elements exist
+// Helper function to safely add submit event listeners
 function safeAddSubmit(id, fn) {
     const el = document.getElementById(id);
     if (el) el.onsubmit = fn;
