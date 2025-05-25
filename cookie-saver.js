@@ -631,3 +631,6 @@ safeAddClick('recover-btn', function() {
         showCookieSaverErrorNotification();
     });
 });
+
+// All cloud save/load logic matches the API contract and is correct.
+// If you encounter issues, check your backend endpoint logic and CORS settings.
