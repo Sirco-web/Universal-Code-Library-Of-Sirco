@@ -7,19 +7,31 @@
         if (/windows phone/i.test(ua)) return "Windows Phone";
         if (/windows/i.test(ua)) return "Windows";
         if (/android/i.test(ua)) return "Android";
-        if (/linux/i.test(ua)) return "Linux";
+        if (/linux/i.test(ua) && !/cros/i.test(ua)) return "Linux";
+        if (/cros/i.test(ua)) return "Chrome OS";
         if (/iPhone|iPad|iPod/i.test(ua)) return "iOS";
         if (/mac/i.test(ua)) return "MacOS";
+        if (/freebsd/i.test(ua)) return "FreeBSD";
+        if (/openbsd/i.test(ua)) return "OpenBSD";
+        if (/netbsd/i.test(ua)) return "NetBSD";
+        if (/sunos|solaris/i.test(ua)) return "Solaris";
+        if (/unix/i.test(ua)) return "Unix";
         return "Unknown";
     }
 
     function getBrowser() {
         const ua = navigator.userAgent;
-        if (/chrome|crios/i.test(ua)) return "Chrome";
+        if (/edg\//i.test(ua)) return "Edge";
+        if (/opr\//i.test(ua) || /opera/i.test(ua)) return "Opera";
+        if (/vivaldi/i.test(ua)) return "Vivaldi";
+        if (/brave/i.test(ua)) return "Brave";
+        if (/duckduckgo/i.test(ua)) return "DuckDuckGo";
+        if (/yabrowser/i.test(ua)) return "Yandex";
+        if (/samsungbrowser/i.test(ua)) return "Samsung Internet";
+        if (/ucbrowser/i.test(ua)) return "UC Browser";
         if (/firefox|fxios/i.test(ua)) return "Firefox";
-        if (/safari/i.test(ua) && !/chrome|crios/i.test(ua)) return "Safari";
-        if (/edg/i.test(ua)) return "Edge";
-        if (/opr\//i.test(ua)) return "Opera";
+        if (/chrome|crios/i.test(ua) && !/edg\//i.test(ua) && !/opr\//i.test(ua) && !/vivaldi/i.test(ua) && !/brave/i.test(ua)) return "Chrome";
+        if (/safari/i.test(ua) && !/chrome|crios|edg|opr|vivaldi|brave/i.test(ua)) return "Safari";
         return "Unknown";
     }
 

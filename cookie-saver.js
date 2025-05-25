@@ -323,8 +323,43 @@ function hasAccountCreatedCookie() {
     return document.cookie.split(';').some((item) => item.trim().startsWith('account_created='));
 }
 
-// On load, check if signed up and verify account with server
+// Check if the current user's IP is banned and disable signup if so
+function checkIfBanned() {
+    fetch(BACKEND_URL + '/banned-ips', {
+        method: 'GET',
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+    })
+    .then(res => res.json())
+    .then(bannedList => {
+        // The backend should ideally provide the user's IP, but if not, this is a placeholder
+        // If you have a /my-ip endpoint, you can fetch the user's IP and check if it's in bannedList
+        // For now, just show a warning if the backend returns a special flag (not implemented here)
+        // Example: if (bannedList.includes(userIp)) { ... }
+    })
+    .catch(() => {
+        // Ignore errors
+    });
+}
+
+// Store user's IP for use in signup/login
+window.USER_IP = null;
+function fetchUserIP() {
+    fetch(BACKEND_URL + '/my-ip', {
+        method: 'GET',
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.USER_IP = data.ip;
+    })
+    .catch(() => {
+        window.USER_IP = null;
+    });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+    fetchUserIP();
+    checkIfBanned();
     if (hasAccountCreatedCookie()) {
         showSection('cookie-section');
         showCookies();
@@ -341,7 +376,7 @@ window.addEventListener('DOMContentLoaded', () => {
             fetch(BACKEND_URL + '/cookie-verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, password, last_ip: window.USER_IP }),
             })
             .then(res => res.json())
             .then(data => {
@@ -401,7 +436,7 @@ document.getElementById('signup-form').onsubmit = function(e) {
             fetch(BACKEND_URL + '/cookie-verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, last_ip: window.USER_IP })
             })
             .then(res => { new Error('Network error');
                 if (!res.ok) throw new Error('Network error');
@@ -423,7 +458,7 @@ document.getElementById('signup-form').onsubmit = function(e) {
                     fetch(BACKEND_URL + '/cookie-signup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                        body: JSON.stringify({ username, password, name, email, timestamp: new Date().toISOString() })
+                        body: JSON.stringify({ username, password, name, email, timestamp: new Date().toISOString(), creation_ip: window.USER_IP })
                     })
                     .then(resp => { new Error('Network error');
                         if (!resp.ok) throw new Error('Network error');

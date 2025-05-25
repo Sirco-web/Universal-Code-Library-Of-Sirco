@@ -5,147 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Page</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-
-    <script>
-        function checkCookie() {
-            const cookies = document.cookie.split("; ");
-            const accessCookie = cookies.find(row => row.startsWith("access="));
-
-            if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-                window.location.href = "/index.html"; // Redirect if no valid cookie
-            }
-        }
-
-        function fetchVersion() {
-            fetch(`/version.txt?nocache=${new Date().getTime()}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("siteVersion").textContent = data.trim();
-                })
-                .catch(error => {
-                    console.error("Error fetching site version:", error);
-                    document.getElementById("siteVersion").textContent = "Unavailable";
-                });
-        }
-
-        function removeAccessKey() {
-            document.cookie = "access=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-            alert("Access key removed. Reloading page...");
-            window.location.reload();
-        }
-
-        window.onload = function () {
-            checkCookie(); // Verify cookie before loading the page
-            fetchVersion(); // Fetch site version
-        };
-    </script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            text-align: center;
-            padding-top: 60px; /* Prevent content from being hidden under the banner */
-        }
-        .container {
-            text-align: center;
-            margin-top: 5%;
-            padding: 20px;
-            background: white;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-        .version-footer {
-            margin-top: 20px;
-            background-color: #f8f9fa;
-            color: #6c757d;
-            padding: 10px;
-            font-size: 0.85em;
-            border-top: 1px solid #ddd;
-        }
-        .footer-container {
-            margin-top: 40px;
-            background-color: #007bff;
-            color: white;
-            font-size: 0.9em;
-            padding: 15px 20px;
-            border-top: 1px solid #0056b3;
-        }
-        .footer-container p {
-            margin: 5px 0;
-        }
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0; /* Add vertical spacing above and below each button group */
-        }
-        .button-group button {
-            padding: 10px 20px;
-            font-size: 1em;
-            border-radius: 6px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .button-group button:hover {
-            background-color: #0056b3;
-        }
-        .top-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        /* Banner fixed to top */
-        #banner-frame {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 60px;
-            border: none;
-            display: block;
-            margin-bottom: 0;
-            z-index: 1000;
-            background: transparent;
-        }
-    </style>
-    <script>
-        // Hardcoded toggle for banner display
-        const showBanner = true; // Set to false to hide the banner
-
-        // Adjust iframe height to match banner.html content
-        function resizeBannerFrame(height) {
-            const bannerFrame = document.getElementById('banner-frame');
-            if (bannerFrame) {
-                bannerFrame.style.height = height + 'px';
-            }
-            // Also adjust body padding-top to prevent content overlap
-            document.body.style.paddingTop = height + 'px';
-        }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            if (!showBanner) {
-                const bannerFrame = document.getElementById('banner-frame');
-                if (bannerFrame) bannerFrame.style.display = 'none';
-            }
-        });
-
-        // Listen for postMessage from banner.html to set height dynamically
-        window.addEventListener('message', function(event) {
-            // Optionally, check event.origin for security
-            if (event.data && event.data.type === 'bannerHeight') {
-                resizeBannerFrame(event.data.height);
-            }
-        });
-    </script>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
 </head>
 <body>
     <!-- Account icon in top right -->
@@ -217,6 +78,94 @@
         <p>Site Version: <span id="siteVersion">Loading...</span></p>
     </div>
 
+    <!-- Cookie Cleanup Popup -->
+    <div id="cookie-popup" style="display:none; position:fixed; z-index:10002; top:0; left:0; width:100vw; height:100vh; background:#0008; align-items:center; justify-content:center;">
+        <div style="background:#fff; max-width:400px; margin:auto; padding:32px 24px 24px 24px; border-radius:12px; box-shadow:0 4px 24px #0003; text-align:center; position:relative;">
+            <h2>Action Required: Clear Cookies</h2>
+            <p>
+                The site owner requests that you <b>delete all cookies</b> for this site to ensure new updates work properly.<br><br>
+                <b>How to do it:</b>
+                <ol style="text-align:left; margin:1em auto 1em 1.5em;">
+                    <li>Click the lock icon in your browser's address bar.</li>
+                    <li>Go to <b>Site settings</b> or <b>Cookies and site data</b>.</li>
+                    <li>Delete or clear all cookies for this site.</li>
+                    <li>Return to this page (do <b>not</b> refresh).</li>
+                </ol>
+                When done, click the button below. We'll restore important cookies for you.
+            </p>
+            <button id="cookie-popup-confirm" style="margin-top:16px; padding:10px 24px; font-size:1rem; border-radius:6px; border:none; background:#007bff; color:#fff; cursor:pointer;">I deleted the cookies</button>
+        </div>
+    </div>
+
+    <script>
+    // --- Cookie Version System ---
+    const COOKIE_VERSION = 2; // Increment this when cookies need to be reset
+    const IMPORTANT_COOKIES = [
+        'cookie_saver_email',
+        'cookie_saver_name',
+        'cookie_saver_password',
+        'newsletter_hide',
+        'cookie_saver_signedup',
+        'cookie_saver_username',
+        'access'
+    ];
+
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : null;
+    }
+    function setCookie(name, value, days = 365) {
+        const expires = new Date(Date.now() + days*864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; expires=' + expires;
+    }
+    function delCookie(name) {
+        document.cookie = name + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    }
+    function getAllCookies() {
+        return document.cookie.split(';').reduce((acc, c) => {
+            const [k, ...v] = c.trim().split('=');
+            acc[k] = v.join('=');
+            return acc;
+        }, {});
+    }
+
+    function checkCookieVersion() {
+        const stored = parseInt(getCookie('cookie_version') || '0', 10);
+        if (stored < COOKIE_VERSION) {
+            showCookiePopup();
+        }
+    }
+
+    function showCookiePopup() {
+        // Save important cookies to memory
+        const saved = {};
+        IMPORTANT_COOKIES.forEach(k => {
+            const v = getCookie(k);
+            if (v !== null) saved[k] = v;
+        });
+        window._importantCookiesBackup = saved;
+        // Show popup
+        document.getElementById('cookie-popup').style.display = 'flex';
+    }
+
+    function restoreImportantCookies() {
+        const saved = window._importantCookiesBackup || {};
+        // Remove all cookies
+        Object.keys(getAllCookies()).forEach(delCookie);
+        // Restore important cookies
+        Object.entries(saved).forEach(([k, v]) => setCookie(k, v));
+        setCookie('cookie_version', COOKIE_VERSION);
+    }
+
+    document.getElementById('cookie-popup-confirm').onclick = function() {
+        restoreImportantCookies();
+        document.getElementById('cookie-popup').style.display = 'none';
+        alert('Important cookies restored! You may continue using the site.');
+    };
+
+    // Run version check on load
+    checkCookieVersion();
+    </script>
     <script src="/analytics.js?5h"></script>
     <script src="/newsletter.js?67herth676"></script>
 </body>
