@@ -550,8 +550,9 @@ safeAddClick('import-cookies', function() {
 });
 
 safeAddClick('cloud-save', function() {
-    const username = getAllCookies().cookie_saver_username;
-    const password = getAllCookies().cookie_saver_password;
+    const cookies = getAllCookies();
+    const username = cookies.cookie_saver_username;
+    const password = cookies.cookie_saver_password;
     if (!username || !password) {
         showMessage('No username/password found.', 'red');
         return;
@@ -570,8 +571,9 @@ safeAddClick('cloud-save', function() {
 });
 
 safeAddClick('cloud-load', function() {
-    const username = getAllCookies().cookie_saver_username;
-    const password = getAllCookies().cookie_saver_password;
+    const cookies = getAllCookies();
+    const username = cookies.cookie_saver_username;
+    const password = cookies.cookie_saver_password;
     if (!username || !password) {
         showMessage('No username/password found.', 'red');
         return;

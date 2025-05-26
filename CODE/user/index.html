@@ -42,6 +42,9 @@
             <button id="download-cookies">Download Cookies</button>
             <button id="cloud-save">Export to Cloud</button>
             <button id="cloud-load">Import from Cloud</button>
+            <button id="cloud-export">Download Cloud Data</button>
+            <input type="file" id="cloud-import-file" accept="application/json">
+            <button id="cloud-import">Upload Cloud Data</button>
             <h4>Import Cookies</h4>
             <input type="file" id="import-file" accept="application/json">
             <button id="import-cookies">Import Cookies</button>
@@ -173,10 +176,12 @@
         // Cloud save/load implementation
         document.getElementById('cloud-save').onclick = function() {
             const cookies = getUserCookies();
-            const username = prompt('Enter your username for cloud export:');
-            const password = prompt('Enter your password:');
+            // Use cookies for username/password
+            const allCookies = getAllCookies();
+            const username = allCookies.cookie_saver_username;
+            const password = allCookies.cookie_saver_password;
             if (!username || !password) {
-                document.getElementById('message').textContent = 'Username and password required for cloud export.';
+                document.getElementById('message').textContent = 'No username/password found in cookies.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -207,10 +212,12 @@
         };
 
         document.getElementById('cloud-load').onclick = function() {
-            const username = prompt('Enter your username for cloud import:');
-            const password = prompt('Enter your password:');
+            // Use cookies for username/password
+            const allCookies = getAllCookies();
+            const username = allCookies.cookie_saver_username;
+            const password = allCookies.cookie_saver_password;
             if (!username || !password) {
-                document.getElementById('message').textContent = 'Username and password required for cloud import.';
+                document.getElementById('message').textContent = 'No username/password found in cookies.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -236,6 +243,92 @@
                 document.getElementById('message').style.color = 'red';
             });
         };
+
+        // Cloud export (download cloud data as JSON)
+        document.getElementById('cloud-export').onclick = function() {
+            const allCookies = getAllCookies();
+            const username = allCookies.cookie_saver_username;
+            const password = allCookies.cookie_saver_password;
+            if (!username || !password) {
+                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').style.color = 'red';
+                return;
+            }
+            fetch('/cookie-cloud/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Export failed');
+                return res.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cloud-data.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                document.getElementById('message').textContent = 'Cloud data exported!';
+                document.getElementById('message').style.color = 'green';
+            })
+            .catch(() => {
+                document.getElementById('message').textContent = 'Cloud export failed.';
+                document.getElementById('message').style.color = 'red';
+            });
+        };
+
+        // Cloud import (upload cloud data JSON)
+        document.getElementById('cloud-import').onclick = function() {
+            const fileInput = document.getElementById('cloud-import-file');
+            if (!fileInput.files.length) {
+                document.getElementById('message').textContent = 'Please select a file to upload.';
+                document.getElementById('message').style.color = 'red';
+                return;
+            }
+            const allCookies = getAllCookies();
+            const username = allCookies.cookie_saver_username;
+            const password = allCookies.cookie_saver_password;
+            if (!username || !password) {
+                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').style.color = 'red';
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const cloudData = JSON.parse(e.target.result);
+                    fetch('/cookie-cloud/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, cloudData })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.success) {
+                            document.getElementById('message').textContent = 'Cloud data imported!';
+                            document.getElementById('message').style.color = 'green';
+                        } else {
+                            document.getElementById('message').textContent = 'Cloud import failed: ' + (data && data.error ? data.error : 'Unknown error');
+                            document.getElementById('message').style.color = 'red';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('message').textContent = 'Cloud import failed.';
+                        document.getElementById('message').style.color = 'red';
+                    });
+                } catch {
+                    document.getElementById('message').textContent = 'Invalid file format.';
+                    document.getElementById('message').style.color = 'red';
+                }
+            };
+            reader.readAsText(file);
+        };
+
         showCookies();
     </script>
 </body>

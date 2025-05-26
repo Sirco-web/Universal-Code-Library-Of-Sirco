@@ -45,7 +45,10 @@ function main() {
 
     // Only show the newsletter popup, not the unsub popup
     setTimeout(() => {
-        showNewsletterPopup();
+        // Check if the user has opted out
+        if (getCookie('newsletter_hide') !== '1') {
+            showNewsletterPopup();
+        }
     }, 3000);
 
     function showNewsletterPopup() {
