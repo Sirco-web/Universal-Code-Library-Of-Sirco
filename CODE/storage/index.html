@@ -29,19 +29,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
     }
     .popup-content {
       background: white;
       padding: 20px;
       border-radius: 10px;
-      text-align: center;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       position: relative;
     }
     .popup-text {
-      color: black; /* Ensures text is visible */
+      color: black;
       font-size: 1.2em;
       margin-bottom: 15px;
+    }
+    .popup-guide {
+      font-size: 1em;
+      color: black;
+      text-align: left;
+      margin-top: 10px;
     }
     .popup-button {
       margin-top: 10px;
@@ -72,6 +78,16 @@
     <div class="popup-content">
       <span class="popup-close" onclick="document.getElementById('warning-popup').style.display='none'">&times;</span>
       <p class="popup-text">⚠ Make sure you are using HTTP and not HTTPS!</p>
+      <div class="popup-guide">
+        <b>How to switch from HTTPS to HTTP:</b>
+        <ol>
+          <li>Click the address bar at the top of your browser.</li>
+          <li>Check if the URL starts with **https://**.</li>
+          <li>Manually change **https://** to **http://**.</li>
+          <li>Press **Enter** to reload the page using HTTP.</li>
+        </ol>
+        If your browser **forces HTTPS automatically**, try using **Incognito mode** or a different browser.
+      </div>
       <button class="popup-button" onclick="document.getElementById('warning-popup').style.display='none'">OK</button>
     </div>
   </div>
