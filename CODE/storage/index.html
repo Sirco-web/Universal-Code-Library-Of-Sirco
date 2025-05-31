@@ -26,7 +26,6 @@
       width: 100vw;
       height: 100vh;
       background: rgba(0, 0, 0, 0.6);
-      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -38,6 +37,11 @@
       text-align: center;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       position: relative;
+    }
+    .popup-text {
+      color: black; /* Ensures text is visible */
+      font-size: 1.2em;
+      margin-bottom: 15px;
     }
     .popup-button {
       margin-top: 10px;
@@ -67,7 +71,7 @@
   <div id="warning-popup">
     <div class="popup-content">
       <span class="popup-close" onclick="document.getElementById('warning-popup').style.display='none'">&times;</span>
-      <p>⚠ Make sure you are using HTTP and not HTTPS!</p>
+      <p class="popup-text">⚠ Make sure you are using HTTP and not HTTPS!</p>
       <button class="popup-button" onclick="document.getElementById('warning-popup').style.display='none'">OK</button>
     </div>
   </div>
