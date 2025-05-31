@@ -8,7 +8,6 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      border: 0;
       width: 100vw;
       height: 100vh;
       overflow: hidden;
@@ -26,18 +25,19 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.6);
       color: white;
-      text-align: center;
-      padding-top: 20vh;
-      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .popup-content {
       background: white;
       padding: 20px;
       border-radius: 10px;
-      display: inline-block;
       text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
     .popup-button {
       margin-top: 10px;
@@ -53,13 +53,16 @@
       position: absolute;
       top: 10px;
       right: 15px;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
       color: black;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+
+  <iframe src="http://syn-072-129-179-229.res.spectrum.com:3000" allowfullscreen></iframe>
 
   <div id="warning-popup">
     <div class="popup-content">
@@ -68,8 +71,6 @@
       <button class="popup-button" onclick="document.getElementById('warning-popup').style.display='none'">OK</button>
     </div>
   </div>
-
-  <iframe src="http://syn-072-129-179-229.res.spectrum.com:3000" allowfullscreen></iframe>
 
   <script>
     if (window.location.protocol !== 'http:') {
