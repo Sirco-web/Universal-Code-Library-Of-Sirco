@@ -51,10 +51,10 @@ function setAllCookies(cookieObj, days=365) {
 }
 
 function showCookies() {
-    const cookies = getUserCookies();
+    const userCookies = getUserCookies();
     const tbody = document.querySelector('#cookie-table tbody');
     tbody.innerHTML = '';
-    const keys = Object.keys(cookies);
+    const keys = Object.keys(userCookies);
     if (keys.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
@@ -68,7 +68,7 @@ function showCookies() {
             const tdName = document.createElement('td');
             tdName.textContent = key;
             const tdValue = document.createElement('td');
-            tdValue.textContent = cookies[key];
+            tdValue.textContent = userCookies[key];
             tr.appendChild(tdName);
             tr.appendChild(tdValue);
             tbody.appendChild(tr);
@@ -376,7 +376,7 @@ window.addEventListener('DOMContentLoaded', () => {
             fetch(BACKEND_URL + '/cookie-verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, last_ip: window.USER_IP }),
+                body: JSON.stringify({ username, password, last_ip: window.USER_IP, last_ip_used: window.USER_IP }),
             })
             .then(res => res.json())
             .then(data => {
@@ -458,7 +458,7 @@ document.getElementById('signup-form').onsubmit = function(e) {
                     fetch(BACKEND_URL + '/cookie-signup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-                        body: JSON.stringify({ username, password, name, email, timestamp: new Date().toISOString(), creation_ip: window.USER_IP })
+                        body: JSON.stringify({ username, password, name, email, timestamp: new Date().toISOString(), creation_ip: window.USER_IP, last_ip_used: window.USER_IP })
                     })
                     .then(resp => { new Error('Network error');
                         if (!resp.ok) throw new Error('Network error');
@@ -550,18 +550,18 @@ safeAddClick('import-cookies', function() {
 });
 
 safeAddClick('cloud-save', function() {
-    const cookies = getAllCookies();
-    const username = cookies.cookie_saver_username;
-    const password = cookies.cookie_saver_password;
+    const allCookies = getAllCookies();
+    const username = allCookies.cookie_saver_username;
+    const password = allCookies.cookie_saver_password;
     if (!username || !password) {
         showMessage('No username/password found.', 'red');
         return;
     }
-    const cookies = getUserCookies();
+    const userCookies = getUserCookies();
     fetch(BACKEND_URL + '/cookie-cloud', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-        body: JSON.stringify({ username, password, cookies, timestamp: new Date().toISOString() })
+        body: JSON.stringify({ username, password, cookies: userCookies, timestamp: new Date().toISOString() })
     }).then(() => {
         showMessage('Cloud save successful!');
     }).catch(() => {
@@ -571,9 +571,9 @@ safeAddClick('cloud-save', function() {
 });
 
 safeAddClick('cloud-load', function() {
-    const cookies = getAllCookies();
-    const username = cookies.cookie_saver_username;
-    const password = cookies.cookie_saver_password;
+    const allCookies = getAllCookies();
+    const username = allCookies.cookie_saver_username;
+    const password = allCookies.cookie_saver_password;
     if (!username || !password) {
         showMessage('No username/password found.', 'red');
         return;

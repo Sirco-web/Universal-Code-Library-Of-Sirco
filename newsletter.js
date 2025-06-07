@@ -45,10 +45,11 @@ function main() {
 
     // Only show the newsletter popup, not the unsub popup
     setTimeout(() => {
-        // Check if the user has opted out
-        if (getCookie('newsletter_hide') !== '1') {
-            showNewsletterPopup();
+        // Check if the user has opted out (localStorage first, then cookie for backward compatibility)
+        if (localStorage.getItem('newsletter_hide') === '1' || getCookie('newsletter_hide') === '1') {
+            return;
         }
+        showNewsletterPopup();
     }, 3000);
 
     function showNewsletterPopup() {
@@ -126,7 +127,10 @@ function main() {
 
         document.getElementById('newsletter-close').onclick = function() {
             const dontShow = document.getElementById('newsletter-hide-checkbox').checked;
-            if (dontShow) setCookie('newsletter_hide', '1', 365);
+            if (dontShow) {
+                localStorage.setItem('newsletter_hide', '1');
+                setCookie('newsletter_hide', '1', 365);
+            }
             document.getElementById('newsletter-popup').remove();
         };
 
@@ -166,6 +170,7 @@ function main() {
             }).then(() => {
                 document.getElementById('newsletter-message').textContent = 'Thank you for subscribing!';
                 document.getElementById('newsletter-message').style.display = 'block';
+                localStorage.setItem('newsletter_hide', '1');
                 setCookie('newsletter_hide', '1', 365);
                 setCookie('newsletter_name', name, 365);
                 setCookie('newsletter_email', email, 365);

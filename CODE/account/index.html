@@ -164,6 +164,19 @@
             .catch(() => cb(username));
         }
 
+        function fetchUserIP(cb) {
+            fetch(BACKEND_URL + '/my-ip', {
+                method: 'GET',
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.ip) cb(data.ip);
+                else cb(null);
+            })
+            .catch(() => cb(null));
+        }
+
         function showAccountInfo(username) {
             document.getElementById('account-info').classList.remove('hidden');
             document.getElementById('signin-section').classList.add('hidden');
@@ -226,9 +239,26 @@
             document.getElementById('recover-section').classList.remove('hidden');
         }
 
+        // Helper to generate a pseudo MAC code (device fingerprint)
+        function getOrCreateMacCode() {
+            let code = localStorage.getItem('mac_code');
+            if (!code) {
+                // Use a hash of userAgent + platform + random
+                const raw = navigator.userAgent + navigator.platform + Math.random();
+                code = btoa(raw).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+                localStorage.setItem('mac_code', code);
+            }
+            return code;
+        }
+
         function main() {
             const username = getCookie('cookie_saver_username');
             const signedup = getCookie('cookie_saver_signedup');
+            // Check for permanent ban on page load
+            if (localStorage.getItem('banned_permanent') === '1') {
+                alert('This device is permanently banned from creating or accessing accounts.');
+                window.location.href = '/'; // Or show a blocked message
+            }
             if (username && signedup === '1') {
                 showAccountInfo(username);
             } else {
@@ -246,32 +276,41 @@
                 e.preventDefault();
                 const username = document.getElementById('signin-username').value.trim();
                 const password = document.getElementById('signin-password').value.trim();
+                const mac_code = getOrCreateMacCode();
                 if (!username || !password) {
                     document.getElementById('message').textContent = 'Please enter username and password.';
                     document.getElementById('message').style.color = 'red';
                     return;
                 }
-                fetch(BACKEND_URL + '/cookie-verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.valid) {
-                        document.cookie = 'cookie_saver_signedup=1; path=/;';
-                        document.cookie = 'cookie_saver_username=' + encodeURIComponent(username) + '; path=/;';
-                        document.cookie = 'cookie_saver_password=' + encodeURIComponent(password) + '; path=/;';
-                        document.getElementById('message').textContent = '';
-                        showAccountInfo(username);
-                    } else {
-                        document.getElementById('message').textContent = 'Invalid username or password.';
+                fetchUserIP(function(ip) {
+                    fetch(BACKEND_URL + '/cookie-verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, last_ip_used: ip, last_ip: ip, mac_code })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.valid) {
+                            // Save to localStorage
+                            localStorage.setItem('cookie_saver_signedup', '1');
+                            localStorage.setItem('cookie_saver_username', username);
+                            localStorage.setItem('cookie_saver_password', password);
+                            localStorage.setItem('mac_code', mac_code);
+                            document.getElementById('message').textContent = '';
+                            showAccountInfo(username);
+                        } else if (data.error === 'Account is banned.') {
+                            localStorage.setItem('banned_permanent', '1');
+                            alert('Your account is banned. This device is now permanently blocked.');
+                            window.location.href = '/';
+                        } else {
+                            document.getElementById('message').textContent = 'Invalid username, password, or device.';
+                            document.getElementById('message').style.color = 'red';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('message').textContent = 'Could not sign in. Please try again.';
                         document.getElementById('message').style.color = 'red';
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('message').textContent = 'Could not sign in. Please try again.';
-                    document.getElementById('message').style.color = 'red';
+                    });
                 });
             };
 
@@ -281,30 +320,41 @@
                 const password = document.getElementById('signup-password').value.trim();
                 const name = document.getElementById('signup-name').value.trim();
                 const email = document.getElementById('signup-email').value.trim();
+                const mac_code = getOrCreateMacCode();
                 if (!username || !password || !name || !email) {
                     document.getElementById('message-signup').textContent = 'Please fill in all fields.';
                     document.getElementById('message-signup').style.color = 'red';
                     return;
                 }
-                fetch(BACKEND_URL + '/cookie-signup', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, name, email })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('message-signup').textContent = 'Sign up successful! You can now sign in.';
-                        document.getElementById('message-signup').style.color = 'green';
-                        showSignin();
-                    } else {
-                        document.getElementById('message-signup').textContent = 'Sign up failed: ' + data.error;
+                fetchUserIP(function(ip) {
+                    fetch(BACKEND_URL + '/cookie-signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, name, email, creation_ip: ip, last_ip_used: ip, mac_code })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            localStorage.setItem('cookie_saver_signedup', '1');
+                            localStorage.setItem('cookie_saver_username', username);
+                            localStorage.setItem('cookie_saver_password', password);
+                            localStorage.setItem('mac_code', mac_code);
+                            document.getElementById('message-signup').textContent = 'Sign up successful! You can now sign in.';
+                            document.getElementById('message-signup').style.color = 'green';
+                            showSignin();
+                        } else if (data.error === 'This device is permanently banned.') {
+                            localStorage.setItem('banned_permanent', '1');
+                            alert('This device is permanently banned from creating accounts.');
+                            window.location.href = '/';
+                        } else {
+                            document.getElementById('message-signup').textContent = 'Sign up failed: ' + data.error;
+                            document.getElementById('message-signup').style.color = 'red';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('message-signup').textContent = 'Could not sign up. Please try again.';
                         document.getElementById('message-signup').style.color = 'red';
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('message-signup').textContent = 'Could not sign up. Please try again.';
-                    document.getElementById('message-signup').style.color = 'red';
+                    });
                 });
             };
 
@@ -344,6 +394,65 @@
                 document.cookie = 'cookie_saver_password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 showSignin();
             };
+
+            // Example cloud export button logic
+            document.getElementById('cloud-save-all')?.addEventListener('click', function() {
+                const username = localStorage.getItem('cookie_saver_username');
+                const password = localStorage.getItem('cookie_saver_password');
+                if (!username || !password) {
+                    alert('No username/password found in localStorage. Please sign in first.');
+                    return;
+                }
+                // Verify credentials with server before exporting
+                fetch(BACKEND_URL + '/cookie-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        // Proceed with export to cloud (implement as needed)
+                        alert('Credentials valid. Proceed with export to cloud.');
+                        // ...
+                    } else {
+                        alert('Invalid username or password. Please sign in again.');
+                    }
+                })
+                .catch(() => {
+                    alert('Could not verify credentials.');
+                });
+            });
+            // Example cloud import button logic
+            document.getElementById('cloud-load-all')?.addEventListener('click', function() {
+                const username = localStorage.getItem('cookie_saver_username');
+                const password = localStorage.getItem('cookie_saver_password');
+                if (!username || !password) {
+                    alert('No username/password found in localStorage. Please sign in first.');
+                    return;
+                }
+                // Verify credentials with server before importing
+                fetch(BACKEND_URL + '/cookie-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        // Proceed with import from cloud (implement as needed)
+                        alert('Credentials valid. Proceed with import from cloud.');
+                        // ...
+                    } else {
+                        alert('Invalid username or password. Please sign in again.');
+                    }
+                })
+                .catch(() => {
+                    alert('Could not verify credentials.');
+                });
+            });
+
+        // (Removed newsletter popup logic from account page)
         }
     </script>
 </body>

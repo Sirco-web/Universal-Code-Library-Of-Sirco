@@ -24,13 +24,14 @@
     <div id="container">
         <h2>Cookie Saver & Exporter</h2>
         <div id="cookie-section">
-            <h3>Your Cookies</h3>
+            <h3>Your Cookies & Local Storage</h3>
             <div id="cookie-table-container">
                 <table id="cookie-table">
                     <thead>
                         <tr>
                             <th>Cookie Name</th>
                             <th>Value</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -38,18 +39,18 @@
                     </tbody>
                 </table>
             </div>
-            <button id="refresh-cookies">Refresh Cookies</button>
-            <button id="download-cookies">Download Cookies</button>
-            <button id="cloud-save">Export to Cloud</button>
-            <button id="cloud-load">Import from Cloud</button>
-            <button id="cloud-export">Download Cloud Data</button>
-            <input type="file" id="cloud-import-file" accept="application/json">
-            <button id="cloud-import">Upload Cloud Data</button>
-            <h4>Import Cookies</h4>
-            <input type="file" id="import-file" accept="application/json">
-            <button id="import-cookies">Import Cookies</button>
+            <div id="localstorage-table-container" style="max-height:250px; overflow:auto; margin-bottom:1em; background:#f4f4f4; border-radius:4px;"></div>
+            <button id="refresh-cookies">Refresh Data</button>
+            <button id="export-all">Export All (Cookies + Local Storage)</button>
+            <input type="file" id="import-all-file" accept="application/json">
+            <button id="import-all">Import All (Cookies + Local Storage)</button>
+            <button id="cloud-save-all">Export All to Cloud</button>
+            <button id="cloud-load-all">Import All from Cloud</button>
+            <button id="cloud-export-all">Download Cloud Data</button>
+            <input type="file" id="cloud-import-all-file" accept="application/json">
+            <button id="cloud-import-all">Upload Cloud Data</button>
+            <div id="message" style="color:green;"></div>
         </div>
-        <div id="message" style="color:green;"></div>
     </div>
 
 <script>
@@ -64,6 +65,12 @@
 
     window.onload = function () {
         checkCookie(); // Verify cookie before loading the page
+
+        // Check for permanent ban on page load
+        if (localStorage.getItem('banned_permanent') === '1') {
+            alert('This device is permanently banned from creating or accessing accounts.');
+            window.location.href = '/'; // Or show a blocked message
+        }
     };
 </script>
 
@@ -107,7 +114,7 @@
             if (keys.length === 0) {
                 const tr = document.createElement('tr');
                 const td = document.createElement('td');
-                td.colSpan = 2;
+                td.colSpan = 3;
                 td.textContent = 'No cookies found.';
                 tr.appendChild(td);
                 tbody.appendChild(tr);
@@ -118,29 +125,134 @@
                     tdName.textContent = key;
                     const tdValue = document.createElement('td');
                     tdValue.textContent = cookies[key];
+                    // Edit button
+                    const tdEdit = document.createElement('td');
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = function() {
+                        const newValue = prompt('Edit cookie value for ' + key + ':', cookies[key]);
+                        if (newValue !== null) {
+                            document.cookie = key + '=' + encodeURIComponent(newValue) + '; path=/';
+                            showCookies();
+                        }
+                    };
+                    // Delete button
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Delete';
+                    delBtn.style.marginLeft = '8px';
+                    delBtn.onclick = function() {
+                        document.cookie = key + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        showCookies();
+                    };
+                    tdEdit.appendChild(editBtn);
+                    tdEdit.appendChild(delBtn);
                     tr.appendChild(tdName);
                     tr.appendChild(tdValue);
+                    tr.appendChild(tdEdit);
+                    tbody.appendChild(tr);
+                });
+            }
+            showLocalStorage();
+        }
+        // Helper to get/set/remove from localStorage
+        function getLocal(key) {
+            return localStorage.getItem(key);
+        }
+        function setLocal(key, value) {
+            localStorage.setItem(key, value);
+        }
+        function removeLocal(key) {
+            localStorage.removeItem(key);
+        }
+        // Use localStorage for account data
+        function getAccountUsername() {
+            return getLocal('cookie_saver_username');
+        }
+        function getAccountPassword() {
+            return getLocal('cookie_saver_password');
+        }
+        // Show localStorage data
+        function showLocalStorage() {
+            let container = document.getElementById('localstorage-table-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'localstorage-table-container';
+                container.style = 'max-height:250px; overflow:auto; margin-bottom:1em; background:#f4f4f4; border-radius:4px;';
+                document.getElementById('cookie-section').appendChild(container);
+            }
+            let table = document.getElementById('localstorage-table');
+            if (!table) {
+                table = document.createElement('table');
+                table.id = 'localstorage-table';
+                table.style = 'width:100%; min-width:400px; background:#f4f4f4; border-radius:4px; overflow-x:auto;';
+                table.innerHTML = '<thead><tr><th>Key</th><th>Value</th><th>Actions</th></tr></thead><tbody></tbody>';
+                container.appendChild(table);
+            }
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            if (localStorage.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 3;
+                td.textContent = 'No localStorage data found.';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            } else {
+                Object.keys(localStorage).forEach(key => {
+                    const tr = document.createElement('tr');
+                    const tdKey = document.createElement('td');
+                    tdKey.textContent = key;
+                    const tdValue = document.createElement('td');
+                    tdValue.textContent = localStorage.getItem(key);
+                    tdValue.style.maxWidth = '300px';
+                    tdValue.style.overflow = 'auto';
+                    tdValue.style.whiteSpace = 'pre-wrap';
+                    // Edit button
+                    const tdEdit = document.createElement('td');
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = function() {
+                        const newValue = prompt('Edit localStorage value for ' + key + ':', localStorage.getItem(key));
+                        if (newValue !== null) {
+                            localStorage.setItem(key, newValue);
+                            showLocalStorage();
+                        }
+                    };
+                    // Delete button
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = 'Delete';
+                    delBtn.style.marginLeft = '8px';
+                    delBtn.onclick = function() {
+                        localStorage.removeItem(key);
+                        showLocalStorage();
+                    };
+                    tdEdit.appendChild(editBtn);
+                    tdEdit.appendChild(delBtn);
+                    tr.appendChild(tdKey);
+                    tr.appendChild(tdValue);
+                    tr.appendChild(tdEdit);
                     tbody.appendChild(tr);
                 });
             }
         }
         document.getElementById('refresh-cookies').onclick = showCookies;
-        document.getElementById('download-cookies').onclick = function() {
+        document.getElementById('export-all').onclick = function() {
             const cookies = getUserCookies();
-            // Export as array of {name, value} for compatibility with import
-            const arr = Object.keys(cookies).map(name => ({ name, value: cookies[name] }));
-            const blob = new Blob([JSON.stringify(arr, null, 2)], {type: 'application/json'});
+            const local = {};
+            Object.keys(localStorage).forEach(key => { local[key] = localStorage.getItem(key); });
+            const data = { cookies, localStorage: local };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'cookies.json';
+            a.download = 'cookies-localstorage.json';
             document.body.appendChild(a);
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
         };
-        document.getElementById('import-cookies').onclick = function() {
-            const fileInput = document.getElementById('import-file');
+        document.getElementById('import-all').onclick = function() {
+            const fileInput = document.getElementById('import-all-file');
             if (!fileInput.files.length) {
                 document.getElementById('message').textContent = 'Please select a file to import.';
                 document.getElementById('message').style.color = 'red';
@@ -150,20 +262,18 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const cookies = JSON.parse(e.target.result);
-                    // Accept both array of {name, value} and object form
-                    if (Array.isArray(cookies)) {
-                        cookies.forEach(cookie => {
-                            if (cookie.name && typeof cookie.value !== 'undefined') {
-                                document.cookie = cookie.name + "=" + encodeURIComponent(cookie.value) + "; path=/";
-                            }
-                        });
-                    } else if (typeof cookies === 'object') {
-                        Object.keys(cookies).forEach(name => {
-                            document.cookie = name + "=" + encodeURIComponent(cookies[name]) + "; path=/";
+                    const data = JSON.parse(e.target.result);
+                    if (data.cookies && typeof data.cookies === 'object') {
+                        Object.keys(data.cookies).forEach(name => {
+                            document.cookie = name + '=' + encodeURIComponent(data.cookies[name]) + '; path=/';
                         });
                     }
-                    document.getElementById('message').textContent = 'Cookies imported successfully.';
+                    if (data.localStorage && typeof data.localStorage === 'object') {
+                        Object.keys(data.localStorage).forEach(key => {
+                            localStorage.setItem(key, data.localStorage[key]);
+                        });
+                    }
+                    document.getElementById('message').textContent = 'Data imported successfully.';
                     document.getElementById('message').style.color = 'green';
                     showCookies();
                 } catch {
@@ -173,15 +283,15 @@
             };
             reader.readAsText(file);
         };
-        // Cloud save/load implementation
-        document.getElementById('cloud-save').onclick = function() {
+        // Combined cloud save
+        document.getElementById('cloud-save-all').onclick = function() {
             const cookies = getUserCookies();
-            // Use cookies for username/password
-            const allCookies = getAllCookies();
-            const username = allCookies.cookie_saver_username;
-            const password = allCookies.cookie_saver_password;
+            const local = {};
+            Object.keys(localStorage).forEach(key => { local[key] = localStorage.getItem(key); });
+            const username = getAccountUsername();
+            const password = getAccountPassword();
             if (!username || !password) {
-                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').textContent = 'No username/password found in localStorage.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -192,6 +302,7 @@
                     username,
                     password,
                     cookies,
+                    localStorage: local,
                     timestamp: new Date().toISOString()
                 })
             })
@@ -210,14 +321,12 @@
                 document.getElementById('message').style.color = 'red';
             });
         };
-
-        document.getElementById('cloud-load').onclick = function() {
-            // Use cookies for username/password
-            const allCookies = getAllCookies();
-            const username = allCookies.cookie_saver_username;
-            const password = allCookies.cookie_saver_password;
+        // Combined cloud load
+        document.getElementById('cloud-load-all').onclick = function() {
+            const username = getAccountUsername();
+            const password = getAccountPassword();
             if (!username || !password) {
-                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').textContent = 'No username/password found in localStorage.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -226,10 +335,17 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data && data.cookies) {
-                    Object.keys(data.cookies).forEach(name => {
-                        document.cookie = name + "=" + encodeURIComponent(data.cookies[name]) + "; path=/";
-                    });
+                if (data && (data.cookies || data.localStorage)) {
+                    if (data.cookies) {
+                        Object.keys(data.cookies).forEach(name => {
+                            document.cookie = name + '=' + encodeURIComponent(data.cookies[name]) + '; path=/';
+                        });
+                    }
+                    if (data.localStorage) {
+                        Object.keys(data.localStorage).forEach(key => {
+                            localStorage.setItem(key, data.localStorage[key]);
+                        });
+                    }
                     document.getElementById('message').textContent = 'Cloud import successful!';
                     document.getElementById('message').style.color = 'green';
                     showCookies();
@@ -243,14 +359,12 @@
                 document.getElementById('message').style.color = 'red';
             });
         };
-
-        // Cloud export (download cloud data as JSON)
-        document.getElementById('cloud-export').onclick = function() {
-            const allCookies = getAllCookies();
-            const username = allCookies.cookie_saver_username;
-            const password = allCookies.cookie_saver_password;
+        // Combined cloud export to file
+        document.getElementById('cloud-export-all').onclick = function() {
+            const username = getAccountUsername();
+            const password = getAccountPassword();
             if (!username || !password) {
-                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').textContent = 'No username/password found in localStorage.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -280,20 +394,18 @@
                 document.getElementById('message').style.color = 'red';
             });
         };
-
-        // Cloud import (upload cloud data JSON)
-        document.getElementById('cloud-import').onclick = function() {
-            const fileInput = document.getElementById('cloud-import-file');
+        // Combined cloud import from file
+        document.getElementById('cloud-import-all').onclick = function() {
+            const fileInput = document.getElementById('cloud-import-all-file');
             if (!fileInput.files.length) {
                 document.getElementById('message').textContent = 'Please select a file to upload.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
-            const allCookies = getAllCookies();
-            const username = allCookies.cookie_saver_username;
-            const password = allCookies.cookie_saver_password;
+            const username = getAccountUsername();
+            const password = getAccountPassword();
             if (!username || !password) {
-                document.getElementById('message').textContent = 'No username/password found in cookies.';
+                document.getElementById('message').textContent = 'No username/password found in localStorage.';
                 document.getElementById('message').style.color = 'red';
                 return;
             }
@@ -305,7 +417,7 @@
                     fetch('/cookie-cloud/import', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password, cloudData })
+                        body: JSON.stringify({ username, password, data: cloudData })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -328,7 +440,6 @@
             };
             reader.readAsText(file);
         };
-
         showCookies();
     </script>
 </body>
