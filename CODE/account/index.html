@@ -392,7 +392,15 @@
                     if (data.success) {
                         document.getElementById('message-verify').textContent = 'Account verified! You can now sign in.';
                         document.getElementById('message-verify').style.color = 'green';
-                        showSignin();
+                        // Hide verify section after success
+                        document.getElementById('verify-section').classList.add('hidden');
+                        // Save username and password to localStorage
+                        const password = document.getElementById('signup-password').value.trim();
+                        localStorage.setItem('cookie_saver_signedup', '1');
+                        localStorage.setItem('cookie_saver_username', username);
+                        localStorage.setItem('cookie_saver_password', password);
+                        localStorage.setItem('mac_code', getOrCreateMacCode());
+                        showAccountInfo(username);
                     } else {
                         document.getElementById('message-verify').textContent = data.error || 'Incorrect code.';
                         document.getElementById('message-verify').style.color = 'red';

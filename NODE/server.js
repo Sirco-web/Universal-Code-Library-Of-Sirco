@@ -106,8 +106,11 @@ function checkLatestPassword(req) {
     return pwd === LATEST_PASSWORD;
 }
 
-// Serve /latest as a single-page app
+// Serve /latest as a single-page app (with or without query params)
 app.get('/latest', (req, res) => {
+    res.sendFile('latest.html', { root: __dirname });
+});
+app.get('/latest.html', (req, res) => {
     res.sendFile('latest.html', { root: __dirname });
 });
 
@@ -642,6 +645,27 @@ app.get('/pi', (req, res) => {
     res.json({ pi: Math.PI });
 });
 
+// Node.js version check for Raspberry Pi compatibility
+const requiredNodeVersion = 16;
+const currentMajor = parseInt(process.versions.node.split('.')[0], 10);
+if (currentMajor < requiredNodeVersion) {
+    console.warn(`Warning: Node.js version ${process.versions.node} detected. Please use Node.js ${requiredNodeVersion}.x or newer for best compatibility.`);
+}
+
+// Helper to get local IP address for Pi
+function getLocalIP() {
+    const os = require('os');
+    const ifaces = os.networkInterfaces();
+    for (const iface of Object.values(ifaces)) {
+        for (const info of iface) {
+            if (info.family === 'IPv4' && !info.internal) {
+                return info.address;
+            }
+        }
+    }
+    return 'localhost';
+}
+
 // HTTPS server if certs exist, otherwise HTTP
 if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
     const sslOptions = {
@@ -650,9 +674,11 @@ if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
     };
     https.createServer(sslOptions, app).listen(HTTPS_PORT, () => {
         console.log(`Analytics backend listening on HTTPS port ${HTTPS_PORT}`);
+        console.log(`Access from your Pi's browser: https://` + getLocalIP() + `:${HTTPS_PORT}`);
     });
 } else {
     app.listen(PORT, () => {
         console.log(`Analytics backend listening on HTTP port ${PORT} (SSL certs not found)`);
+        console.log(`Access from your Pi's browser: http://` + getLocalIP() + `:${PORT}`);
     });
 }
