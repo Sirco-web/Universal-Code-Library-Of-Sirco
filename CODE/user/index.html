@@ -53,28 +53,57 @@
         </div>
     </div>
 
+    <div id="signup-modal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;">
+        <div style="background:#fff;padding:2em 2em 1.5em 2em;border-radius:10px;box-shadow:0 4px 16px #0002;max-width:350px;width:95vw;text-align:center;">
+            <h3 style='margin-top:0'>Sign Up</h3>
+            <input id='signup-username' type='text' maxlength='32' placeholder='Username' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
+            <input id='signup-password' type='password' maxlength='64' placeholder='Password' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
+            <input id='signup-name' type='text' maxlength='64' placeholder='Full Name' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
+            <input id='signup-email' type='email' maxlength='64' placeholder='Email' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
+            <div id='signup-error' style='color:red;min-height:1.5em;'></div>
+            <button id='signup-btn' style='background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;'>Sign Up</button>
+            <button id='signup-cancel' style='margin-left:1em;background:#f4f4f4;color:#007bff;border:1px solid #007bff;border-radius:6px;'>Cancel</button>
+        </div>
+    </div>
+    <div id="verify-modal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;">
+        <div style="background:#fff;padding:2em 2em 1.5em 2em;border-radius:10px;box-shadow:0 4px 16px #0002;max-width:350px;width:95vw;text-align:center;">
+            <h3 style='margin-top:0'>Verify Your Account</h3>
+            <p style='font-size:1em;color:#333;'>A verification code was sent to your email.<br>Enter it below to activate your account.</p>
+            <input id='verify-code-input' type='text' maxlength='8' placeholder='Verification Code' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'>
+            <div id='verify-error' style='color:red;min-height:1.5em;'></div>
+            <button id='verify-btn' style='background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;'>Verify</button>
+        </div>
+    </div>
+
 <script>
-    function checkCookie() {
-        const cookies = document.cookie.split("; ");
-        const accessCookie = cookies.find(row => row.startsWith("access="));
+    let BACKEND_URL = '';
+    fetch('/backend.json')
+        .then(res => res.json())
+        .then(cfg => {
+            BACKEND_URL = cfg.url.replace(/\/$/, '');
+            initApp();
+        });
 
-        if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-            window.location.href = "/index.html"; // Redirect if no valid cookie
+    function initApp() {
+        function checkCookie() {
+            const cookies = document.cookie.split("; ");
+            const accessCookie = cookies.find(row => row.startsWith("access="));
+
+            if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+                window.location.href = "/index.html"; // Redirect if no valid cookie
+            }
         }
-    }
 
-    window.onload = function () {
-        checkCookie(); // Verify cookie before loading the page
+        window.onload = function () {
+            checkCookie(); // Verify cookie before loading the page
 
-        // Check for permanent ban on page load
-        if (localStorage.getItem('banned_permanent') === '1') {
-            alert('This device is permanently banned from creating or accessing accounts.');
-            window.location.href = '/'; // Or show a blocked message
-        }
-    };
-</script>
+            // Check for permanent ban on page load
+            if (localStorage.getItem('banned_permanent') === '1') {
+                alert('This device is permanently banned from creating or accessing accounts.');
+                window.location.href = '/'; // Or show a blocked message
+            }
+        };
 
-    <script>
         // Minimal, robust cookie exporter UI
         function getAllCookies() {
             // This only gets cookies for the current domain (not all URLs/domains)
@@ -295,7 +324,7 @@
                 document.getElementById('message').style.color = 'red';
                 return;
             }
-            fetch('/cookie-cloud', {
+            fetch(BACKEND_URL + '/cookie-cloud', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -330,7 +359,7 @@
                 document.getElementById('message').style.color = 'red';
                 return;
             }
-            fetch('/cookie-cloud?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password), {
+            fetch(BACKEND_URL + '/cookie-cloud?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password), {
                 method: 'GET'
             })
             .then(res => res.json())
@@ -368,7 +397,7 @@
                 document.getElementById('message').style.color = 'red';
                 return;
             }
-            fetch('/cookie-cloud/export', {
+            fetch(BACKEND_URL + '/cookie-cloud/export', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -414,7 +443,7 @@
             reader.onload = function(e) {
                 try {
                     const cloudData = JSON.parse(e.target.result);
-                    fetch('/cookie-cloud/import', {
+                    fetch(BACKEND_URL + '/cookie-cloud/import', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password, data: cloudData })
@@ -441,6 +470,87 @@
             reader.readAsText(file);
         };
         showCookies();
-    </script>
+
+        // Show signup modal
+        function showSignupModal() {
+            document.getElementById('signup-modal').classList.remove('hidden');
+        }
+        // Hide signup modal
+        function hideSignupModal() {
+            document.getElementById('signup-modal').classList.add('hidden');
+        }
+        // Show verify modal
+        function showVerifyModal() {
+            document.getElementById('verify-modal').classList.remove('hidden');
+        }
+        // Hide verify modal
+        function hideVerifyModal() {
+            document.getElementById('verify-modal').classList.add('hidden');
+        }
+        // Attach signup button to open modal
+        const signupBtn = document.createElement('button');
+        signupBtn.textContent = 'Sign Up for Account';
+        signupBtn.style = 'margin-bottom:1em;background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;';
+        signupBtn.onclick = showSignupModal;
+        document.getElementById('container').insertBefore(signupBtn, document.getElementById('cookie-section'));
+        // Signup logic
+        document.getElementById('signup-btn').onclick = function() {
+            const username = document.getElementById('signup-username').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            if (!username || !password || !name || !email) {
+                document.getElementById('signup-error').textContent = 'Please fill all fields.';
+                return;
+            }
+            fetch(BACKEND_URL + '/cookie-signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, name, email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.verification_required) {
+                    hideSignupModal();
+                    showVerifyModal();
+                    // Store username for verification
+                    window._signupUsername = username;
+                } else {
+                    document.getElementById('signup-error').textContent = data.error || 'Signup failed.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('signup-error').textContent = 'Could not sign up.';
+            });
+        };
+        document.getElementById('signup-cancel').onclick = hideSignupModal;
+        // Verification logic
+        document.getElementById('verify-btn').onclick = function() {
+            const code = document.getElementById('verify-code-input').value.trim();
+            if (!window._signupUsername || !code) {
+                document.getElementById('verify-error').textContent = 'Please enter the code.';
+                return;
+            }
+            fetch(BACKEND_URL + '/verify-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: window._signupUsername, code })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    hideVerifyModal();
+                    alert('Account verified and created! You can now use all features.');
+                    location.reload();
+                } else {
+                    document.getElementById('verify-error').textContent = data.error || 'Incorrect code.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('verify-error').textContent = 'Could not verify code.';
+            });
+        };
+    }
+</script>
 </body>
 </html>

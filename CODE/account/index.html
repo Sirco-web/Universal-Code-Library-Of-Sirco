@@ -84,6 +84,13 @@
             </div>
             <div id="message-recover"></div>
         </div>
+        <div id="verify-section" class="hidden">
+            <h4>Verify Your Account</h4>
+            <p>A verification code was sent to your email. Enter it below to activate your account.</p>
+            <input id="verify-code" type="text" maxlength="8" placeholder="Verification Code">
+            <button id="verify-btn" type="button">Verify</button>
+            <div id="message-verify"></div>
+        </div>
     </div>
 
 <script>
@@ -238,6 +245,13 @@
             document.getElementById('signup-section').classList.add('hidden');
             document.getElementById('recover-section').classList.remove('hidden');
         }
+        function showVerify() {
+            document.getElementById('account-info').classList.add('hidden');
+            document.getElementById('signin-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('recover-section').classList.add('hidden');
+            document.getElementById('verify-section').classList.remove('hidden');
+        }
 
         // Helper to generate a pseudo MAC code (device fingerprint)
         function getOrCreateMacCode() {
@@ -334,7 +348,10 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.success && data.verification_required) {
+                            window._pendingVerifyUser = username;
+                            showVerify();
+                        } else if (data.success) {
                             localStorage.setItem('cookie_saver_signedup', '1');
                             localStorage.setItem('cookie_saver_username', username);
                             localStorage.setItem('cookie_saver_password', password);
@@ -357,34 +374,33 @@
                     });
                 });
             };
-
-            document.getElementById('recover-btn').onclick = function() {
-                const email = document.getElementById('recover-email').value.trim();
-                const name = document.getElementById('recover-name').value.trim();
-                if (!email || !name) {
-                    document.getElementById('message-recover').textContent = 'Please enter your email and name.';
-                    document.getElementById('message-recover').style.color = 'red';
+            document.getElementById('verify-btn').onclick = function() {
+                const code = document.getElementById('verify-code').value.trim();
+                const username = window._pendingVerifyUser;
+                if (!username || !code) {
+                    document.getElementById('message-verify').textContent = 'Please enter the code.';
+                    document.getElementById('message-verify').style.color = 'red';
                     return;
                 }
-                fetch(BACKEND_URL + '/cookie-recover', {
+                fetch(BACKEND_URL + '/verify-account', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, name })
+                    body: JSON.stringify({ username, code })
                 })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('message-recover').textContent = 'Recovery email sent! Please check your inbox.';
-                        document.getElementById('message-recover').style.color = 'green';
+                        document.getElementById('message-verify').textContent = 'Account verified! You can now sign in.';
+                        document.getElementById('message-verify').style.color = 'green';
                         showSignin();
                     } else {
-                        document.getElementById('message-recover').textContent = 'Recovery failed: ' + data.error;
-                        document.getElementById('message-recover').style.color = 'red';
+                        document.getElementById('message-verify').textContent = data.error || 'Incorrect code.';
+                        document.getElementById('message-verify').style.color = 'red';
                     }
                 })
                 .catch(() => {
-                    document.getElementById('message-recover').textContent = 'Could not recover account. Please try again.';
-                    document.getElementById('message-recover').style.color = 'red';
+                    document.getElementById('message-verify').textContent = 'Could not verify code.';
+                    document.getElementById('message-verify').style.color = 'red';
                 });
             };
 
