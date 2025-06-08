@@ -26,6 +26,32 @@
             transition: background 0.2s;
         }
         a.button-link:hover { background: #0056b3; }
+        #clear-account-container {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            width: 32px;
+            height: 32px;
+        }
+        #clear-account-btn {
+            opacity: 0.3;
+            transition: opacity 0.2s;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            padding: 0.2em 0.5em;
+            width: 32px;
+            height: 32px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        #clear-account-btn:hover {
+            background: #e03e3e;
+        }
     </style>
 </head>
 <body>
@@ -86,11 +112,15 @@
         </div>
         <div id="verify-section" class="hidden">
             <h4>Verify Your Account</h4>
-            <p>A verification code was sent to your email. Enter it below to activate your account.</p>
+            <p>A verification code was sent to your email. Enter it below to activate your account.<br><span style="color:#888;font-size:0.95em;">(Check your spam folder if you don't see it.)</span></p>
             <input id="verify-code" type="text" maxlength="8" placeholder="Verification Code">
             <button id="verify-btn" type="button">Verify</button>
+            <div id="verify-resend-container" style="margin-top:1em;"></div>
             <div id="message-verify"></div>
         </div>
+    </div>
+    <div id="clear-account-container" style="position:absolute;top:20px;right:30px;z-index:10;opacity:0;pointer-events:none;">
+      <button id="clear-account-btn" style="opacity:0.3;transition:opacity 0.2s;">Clear Account</button>
     </div>
 
 <script>
@@ -245,24 +275,65 @@
             document.getElementById('signup-section').classList.add('hidden');
             document.getElementById('recover-section').classList.remove('hidden');
         }
+        let verifyResendTimer = null;
+        let verifyResendCountdown = 120;
         function showVerify() {
             document.getElementById('account-info').classList.add('hidden');
             document.getElementById('signin-section').classList.add('hidden');
             document.getElementById('signup-section').classList.add('hidden');
             document.getElementById('recover-section').classList.add('hidden');
             document.getElementById('verify-section').classList.remove('hidden');
+            // Start resend timer
+            verifyResendCountdown = 120;
+            updateVerifyResendUI();
+            if (verifyResendTimer) clearInterval(verifyResendTimer);
+            verifyResendTimer = setInterval(() => {
+                verifyResendCountdown--;
+                updateVerifyResendUI();
+                if (verifyResendCountdown <= 0) {
+                    clearInterval(verifyResendTimer);
+                }
+            }, 1000);
         }
-
-        // Helper to generate a pseudo MAC code (device fingerprint)
-        function getOrCreateMacCode() {
-            let code = localStorage.getItem('mac_code');
-            if (!code) {
-                // Use a hash of userAgent + platform + random
-                const raw = navigator.userAgent + navigator.platform + Math.random();
-                code = btoa(raw).replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
-                localStorage.setItem('mac_code', code);
+        function updateVerifyResendUI() {
+            const container = document.getElementById('verify-resend-container');
+            if (verifyResendCountdown > 0) {
+                container.innerHTML = `<span style='color:#888;'>You can resend the code in ${verifyResendCountdown}s</span>`;
+            } else {
+                container.innerHTML = `<button id='resend-verify-btn' style='background:#1976d2;color:#fff;border:none;border-radius:4px;padding:0.3em 1em;cursor:pointer;'>Resend Code</button>`;
+                document.getElementById('resend-verify-btn').onclick = function() {
+                    resendVerificationCode();
+                };
             }
-            return code;
+        }
+        function resendVerificationCode() {
+            const username = window._pendingVerifyUser;
+            if (!username) return;
+            // You may need to store the email in a global var as well
+            fetch(BACKEND_URL + '/resend-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('message-verify').textContent = data.success ? 'Verification code resent! Check your email (and spam folder).' : (data.error || 'Failed to resend code.');
+                document.getElementById('message-verify').style.color = data.success ? 'green' : 'red';
+                verifyResendCountdown = 120;
+                updateVerifyResendUI();
+                if (verifyResendTimer) clearInterval(verifyResendTimer);
+                verifyResendTimer = setInterval(() => {
+                    verifyResendCountdown--;
+                    updateVerifyResendUI();
+                    if (verifyResendCountdown <= 0) {
+                        clearInterval(verifyResendTimer);
+                    }
+                }, 1000);
+            })
+            .catch(() => {
+                document.getElementById('message-verify').textContent = 'Failed to resend code.';
+                document.getElementById('message-verify').style.color = 'red';
+            });
         }
 
         function main() {
@@ -478,6 +549,38 @@
 
         // (Removed newsletter popup logic from account page)
         }
+    </script>
+    <script>
+        // Show clear button on hover of container
+        const clearBtn = document.getElementById('clear-account-btn');
+        const clearContainer = document.getElementById('clear-account-container');
+        document.body.addEventListener('mousemove', function(e) {
+            const rect = clearContainer.getBoundingClientRect();
+            if (
+                e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom
+            ) {
+                clearContainer.style.opacity = 1;
+                clearContainer.style.pointerEvents = 'auto';
+                clearBtn.style.opacity = 1;
+            } else {
+                clearContainer.style.opacity = 0;
+                clearContainer.style.pointerEvents = 'none';
+                clearBtn.style.opacity = 0.3;
+            }
+        });
+        clearBtn.onclick = function() {
+            if (confirm('Are you sure you want to clear all account data from this browser? This will remove your username, password, and all local account info.')) {
+                localStorage.removeItem('cookie_saver_signedup');
+                localStorage.removeItem('cookie_saver_username');
+                localStorage.removeItem('cookie_saver_password');
+                localStorage.removeItem('mac_code');
+                document.cookie = 'cookie_saver_signedup=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = 'cookie_saver_username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = 'cookie_saver_password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.reload();
+            }
+        };
     </script>
 </body>
 </html>
