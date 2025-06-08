@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -89,7 +88,7 @@ if (GMAIL_USER && GMAIL_PASS) {
 async function sendVerificationEmail(email, code) {
     if (!transporter) return;
     const mailOptions = {
-        from: GMAIL_USER,
+        from: 'timco307@gmail.com', // Use a valid, verified sender for Mailjet
         to: email,
         subject: 'Your Verification Code',
         text: `Your verification code is: ${code}`
@@ -626,6 +625,22 @@ app.post('/collect', (req, res) => {
 
 // Serve favicon.ico with 204 No Content
 app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// --- Health check endpoint ---
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// --- Example custom endpoint ---
+app.get('/random-number', (req, res) => {
+    const num = Math.floor(Math.random() * 1000);
+    res.json({ random: num });
+});
+
+// --- Fun custom endpoint ---
+app.get('/pi', (req, res) => {
+    res.json({ pi: Math.PI });
+});
 
 // HTTPS server if certs exist, otherwise HTTP
 if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
