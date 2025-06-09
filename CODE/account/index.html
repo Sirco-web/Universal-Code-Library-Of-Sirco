@@ -419,9 +419,22 @@
                 const password = document.getElementById('signup-password').value.trim();
                 const name = document.getElementById('signup-name').value.trim();
                 const email = document.getElementById('signup-email').value.trim();
+
+                // Check for restricted usernames
+                const restrictedAdminWords = ['admin', 'administrator', 'owner', 'mod', 'moderator', 'staff', 'system', 'official', 'dev', 'developer', 'support'];
+                const lowerUsername = username.toLowerCase();
+                
+                // Check for admin/restricted words
+                if (restrictedAdminWords.some(word => lowerUsername.includes(word))) {
+                    document.getElementById('message-signup').textContent = 'This username is not allowed. Please choose another one.';
+                    document.getElementById('message-signup').style.color = 'red';
+                    return;
+                }
+
                 // Get all connected accounts
                 let connected = [];
                 try { connected = JSON.parse(localStorage.getItem('all_usernames') || '[]'); } catch {}
+
                 if (!username || !password || !name || !email) {
                     document.getElementById('message-signup').textContent = 'Please fill in all fields.';
                     document.getElementById('message-signup').style.color = 'red';
