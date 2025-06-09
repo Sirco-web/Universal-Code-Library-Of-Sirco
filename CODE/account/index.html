@@ -135,6 +135,16 @@
 
     window.onload = function () {
         checkCookie(); // Verify cookie before loading the page
+        // --- Restore verify screen if ?verify=username or localStorage pendingVerifyUser exists ---
+        const params = new URLSearchParams(window.location.search);
+        let verifyUser = params.get('verify');
+        if (!verifyUser && localStorage.getItem('_pendingVerifyUser')) {
+            verifyUser = localStorage.getItem('_pendingVerifyUser');
+        }
+        if (verifyUser) {
+            window._pendingVerifyUser = verifyUser;
+            showVerify();
+        }
     };
 </script>
 
@@ -277,12 +287,19 @@
         }
         let verifyResendTimer = null;
         let verifyResendCountdown = 120;
+        // --- When showing verify, store pending user in localStorage and update URL ---
         function showVerify() {
             document.getElementById('account-info').classList.add('hidden');
             document.getElementById('signin-section').classList.add('hidden');
             document.getElementById('signup-section').classList.add('hidden');
             document.getElementById('recover-section').classList.add('hidden');
             document.getElementById('verify-section').classList.remove('hidden');
+            if (window._pendingVerifyUser) {
+                localStorage.setItem('_pendingVerifyUser', window._pendingVerifyUser);
+                const url = new URL(window.location.href);
+                url.searchParams.set('verify', window._pendingVerifyUser);
+                window.history.replaceState({}, '', url);
+            }
             // Start resend timer
             verifyResendCountdown = 120;
             updateVerifyResendUI();
@@ -290,7 +307,7 @@
             verifyResendTimer = setInterval(() => {
                 verifyResendCountdown--;
                 updateVerifyResendUI();
-                if (verifyResendCountdown <= 0) {
+                if (verifyResendTimer <= 0) {
                     clearInterval(verifyResendTimer);
                 }
             }, 1000);
@@ -461,13 +478,16 @@
                     if (data.success) {
                         document.getElementById('message-verify').textContent = 'Account verified! You can now sign in.';
                         document.getElementById('message-verify').style.color = 'green';
-                        // Hide verify section after success
                         document.getElementById('verify-section').classList.add('hidden');
-                        // Save username and password to localStorage
                         const password = document.getElementById('signup-password').value.trim();
                         localStorage.setItem('cookie_saver_signedup', '1');
                         localStorage.setItem('cookie_saver_username', username);
                         localStorage.setItem('cookie_saver_password', password);
+                        // Remove pending verify user from localStorage and URL
+                        localStorage.removeItem('_pendingVerifyUser');
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('verify');
+                        window.history.replaceState({}, '', url);
                         showAccountInfo(username);
                     } else {
                         document.getElementById('message-verify').textContent = data.error || 'Incorrect code.';
