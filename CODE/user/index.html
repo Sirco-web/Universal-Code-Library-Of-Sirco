@@ -51,29 +51,6 @@
             <button id="cloud-import-all">Upload Cloud Data</button>
             <div id="message" style="color:green;"></div>
         </div>
-    </div>
-
-    <div id="signup-modal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;">
-        <div style="background:#fff;padding:2em 2em 1.5em 2em;border-radius:10px;box-shadow:0 4px 16px #0002;max-width:350px;width:95vw;text-align:center;">
-            <h3 style='margin-top:0'>Sign Up</h3>
-            <input id='signup-username' type='text' maxlength='32' placeholder='Username' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
-            <input id='signup-password' type='password' maxlength='64' placeholder='Password' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
-            <input id='signup-name' type='text' maxlength='64' placeholder='Full Name' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
-            <input id='signup-email' type='email' maxlength='64' placeholder='Email' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'><br>
-            <div id='signup-error' style='color:red;min-height:1.5em;'></div>
-            <button id='signup-btn' style='background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;'>Sign Up</button>
-            <button id='signup-cancel' style='margin-left:1em;background:#f4f4f4;color:#007bff;border:1px solid #007bff;border-radius:6px;'>Cancel</button>
-        </div>
-    </div>
-    <div id="verify-modal" class="hidden" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:9999;">
-        <div style="background:#fff;padding:2em 2em 1.5em 2em;border-radius:10px;box-shadow:0 4px 16px #0002;max-width:350px;width:95vw;text-align:center;">
-            <h3 style='margin-top:0'>Verify Your Account</h3>
-            <p style='font-size:1em;color:#333;'>A verification code was sent to your email.<br>Enter it below to activate your account.</p>
-            <input id='verify-code-input' type='text' maxlength='8' placeholder='Verification Code' style='width:90%;padding:0.7em;margin-bottom:1em;font-size:1em;'>
-            <div id='verify-error' style='color:red;min-height:1.5em;'></div>
-            <button id='verify-btn' style='background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;'>Verify</button>
-        </div>
-    </div>
 
 <script>
     let BACKEND_URL = '';
@@ -99,6 +76,9 @@
 
             // Check for permanent ban on page load
             if (localStorage.getItem('banned_permanent') === '1') {
+                localStorage.removeItem('cookie_saver_username');
+                localStorage.removeItem('cookie_saver_password');
+                localStorage.removeItem('cookie_saver_signedup');
                 alert('This device is permanently banned from creating or accessing accounts.');
                 window.location.href = '/'; // Or show a blocked message
             }
@@ -135,6 +115,23 @@
             });
             return filtered;
         }
+        function getUserLocalStorage() {
+            // Exclude only sensitive keys, but include all others
+            const exclude = [
+                'cookie_saver_email',
+                'cookie_saver_name',
+                'cookie_saver_password',
+                'newsletter_hide',
+                'cookie_saver_signedup',
+                'cookie_saver_username',
+                'access'
+            ];
+            const filtered = {};
+            Object.keys(localStorage).forEach(key => {
+                if (!exclude.includes(key)) filtered[key] = localStorage.getItem(key);
+            });
+            return filtered;
+        }
         function showCookies() {
             const cookies = getUserCookies();
             const tbody = document.querySelector('#cookie-table tbody');
@@ -154,10 +151,15 @@
                     tdName.textContent = key;
                     const tdValue = document.createElement('td');
                     tdValue.textContent = cookies[key];
-                    // Edit button
+                    // Edit and Delete buttons, small and side by side
                     const tdEdit = document.createElement('td');
+                    tdEdit.style.display = 'flex';
+                    tdEdit.style.gap = '4px';
+                    tdEdit.style.alignItems = 'center';
                     const editBtn = document.createElement('button');
                     editBtn.textContent = 'Edit';
+                    editBtn.style.fontSize = '0.85em';
+                    editBtn.style.padding = '2px 8px';
                     editBtn.onclick = function() {
                         const newValue = prompt('Edit cookie value for ' + key + ':', cookies[key]);
                         if (newValue !== null) {
@@ -165,10 +167,10 @@
                             showCookies();
                         }
                     };
-                    // Delete button
                     const delBtn = document.createElement('button');
                     delBtn.textContent = 'Delete';
-                    delBtn.style.marginLeft = '8px';
+                    delBtn.style.fontSize = '0.85em';
+                    delBtn.style.padding = '2px 8px';
                     delBtn.onclick = function() {
                         document.cookie = key + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                         showCookies();
@@ -213,13 +215,24 @@
             if (!table) {
                 table = document.createElement('table');
                 table.id = 'localstorage-table';
-                table.style = 'width:100%; min-width:400px; background:#f4f4f4; border-radius:4px; overflow-x:auto;';
+                table.style = 'width:100%; min-width:400px; background:#f4f4f4; border-radius:4px; overflow-x:auto; border-collapse:collapse;';
                 table.innerHTML = '<thead><tr><th>Key</th><th>Value</th><th>Actions</th></tr></thead><tbody></tbody>';
                 container.appendChild(table);
             }
             const tbody = table.querySelector('tbody');
             tbody.innerHTML = '';
-            if (localStorage.length === 0) {
+            // Only show non-sensitive keys
+            const exclude = [
+                'cookie_saver_email',
+                'cookie_saver_name',
+                'cookie_saver_password',
+                'newsletter_hide',
+                'cookie_saver_signedup',
+                'cookie_saver_username',
+                'access'
+            ];
+            const keys = Object.keys(localStorage).filter(key => !exclude.includes(key));
+            if (keys.length === 0) {
                 const tr = document.createElement('tr');
                 const td = document.createElement('td');
                 td.colSpan = 3;
@@ -227,7 +240,7 @@
                 tr.appendChild(td);
                 tbody.appendChild(tr);
             } else {
-                Object.keys(localStorage).forEach(key => {
+                keys.forEach(key => {
                     const tr = document.createElement('tr');
                     const tdKey = document.createElement('td');
                     tdKey.textContent = key;
@@ -236,10 +249,15 @@
                     tdValue.style.maxWidth = '300px';
                     tdValue.style.overflow = 'auto';
                     tdValue.style.whiteSpace = 'pre-wrap';
-                    // Edit button
+                    // Edit and Delete buttons, small and side by side
                     const tdEdit = document.createElement('td');
+                    tdEdit.style.display = 'flex';
+                    tdEdit.style.gap = '4px';
+                    tdEdit.style.alignItems = 'center';
                     const editBtn = document.createElement('button');
                     editBtn.textContent = 'Edit';
+                    editBtn.style.fontSize = '0.85em';
+                    editBtn.style.padding = '2px 8px';
                     editBtn.onclick = function() {
                         const newValue = prompt('Edit localStorage value for ' + key + ':', localStorage.getItem(key));
                         if (newValue !== null) {
@@ -247,10 +265,10 @@
                             showLocalStorage();
                         }
                     };
-                    // Delete button
                     const delBtn = document.createElement('button');
                     delBtn.textContent = 'Delete';
-                    delBtn.style.marginLeft = '8px';
+                    delBtn.style.fontSize = '0.85em';
+                    delBtn.style.padding = '2px 8px';
                     delBtn.onclick = function() {
                         localStorage.removeItem(key);
                         showLocalStorage();
@@ -315,8 +333,7 @@
         // Combined cloud save
         document.getElementById('cloud-save-all').onclick = function() {
             const cookies = getUserCookies();
-            const local = {};
-            Object.keys(localStorage).forEach(key => { local[key] = localStorage.getItem(key); });
+            const local = getUserLocalStorage();
             const username = getAccountUsername();
             const password = getAccountPassword();
             if (!username || !password) {
@@ -470,86 +487,6 @@
             reader.readAsText(file);
         };
         showCookies();
-
-        // Show signup modal
-        function showSignupModal() {
-            document.getElementById('signup-modal').classList.remove('hidden');
-        }
-        // Hide signup modal
-        function hideSignupModal() {
-            document.getElementById('signup-modal').classList.add('hidden');
-        }
-        // Show verify modal
-        function showVerifyModal() {
-            document.getElementById('verify-modal').classList.remove('hidden');
-        }
-        // Hide verify modal
-        function hideVerifyModal() {
-            document.getElementById('verify-modal').classList.add('hidden');
-        }
-        // Attach signup button to open modal
-        const signupBtn = document.createElement('button');
-        signupBtn.textContent = 'Sign Up for Account';
-        signupBtn.style = 'margin-bottom:1em;background:#007bff;color:#fff;padding:0.7em 1.5em;border:none;border-radius:6px;font-size:1em;cursor:pointer;';
-        signupBtn.onclick = showSignupModal;
-        document.getElementById('container').insertBefore(signupBtn, document.getElementById('cookie-section'));
-        // Signup logic
-        document.getElementById('signup-btn').onclick = function() {
-            const username = document.getElementById('signup-username').value.trim();
-            const password = document.getElementById('signup-password').value.trim();
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            if (!username || !password || !name || !email) {
-                document.getElementById('signup-error').textContent = 'Please fill all fields.';
-                return;
-            }
-            fetch(BACKEND_URL + '/cookie-signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, name, email })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.verification_required) {
-                    hideSignupModal();
-                    showVerifyModal();
-                    // Store username for verification
-                    window._signupUsername = username;
-                } else {
-                    document.getElementById('signup-error').textContent = data.error || 'Signup failed.';
-                }
-            })
-            .catch(() => {
-                document.getElementById('signup-error').textContent = 'Could not sign up.';
-            });
-        };
-        document.getElementById('signup-cancel').onclick = hideSignupModal;
-        // Verification logic
-        document.getElementById('verify-btn').onclick = function() {
-            const code = document.getElementById('verify-code-input').value.trim();
-            if (!window._signupUsername || !code) {
-                document.getElementById('verify-error').textContent = 'Please enter the code.';
-                return;
-            }
-            fetch(BACKEND_URL + '/verify-account', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: window._signupUsername, code })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    hideVerifyModal();
-                    alert('Account verified and created! You can now use all features.');
-                    location.reload();
-                } else {
-                    document.getElementById('verify-error').textContent = data.error || 'Incorrect code.';
-                }
-            })
-            .catch(() => {
-                document.getElementById('verify-error').textContent = 'Could not verify code.';
-            });
-        };
     }
 </script>
 </body>

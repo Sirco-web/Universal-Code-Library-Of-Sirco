@@ -55,8 +55,8 @@
     </div>
 
     <div class="container">
-        <h1>Welcome to UBG UNIVERSE</h1>
-        <p>Welcome to the brand new UBG lineup called UBG UNIVERSE.</p>
+        <h1>Welcome to Code-Universe</h1>
+        <p>Welcome to the brand new Code-Universe lineup.</p>
 
         <!-- Top Buttons -->
         <div class="button-group">
@@ -79,113 +79,6 @@
         <p>Site Version: <span id="siteVersion">Loading...</span></p>
     </div>
 
-    <!-- Cookie Cleanup Popup -->
-    <div id="cookie-popup" style="display:none; position:fixed; z-index:10002; top:0; left:0; width:100vw; height:100vh; background:#0008; align-items:center; justify-content:center;">
-        <div style="background:#fff; max-width:400px; margin:auto; padding:32px 24px 24px 24px; border-radius:12px; box-shadow:0 4px 24px #0003; text-align:center; position:relative;">
-            <h2>Action Required: Clear Cookies</h2>
-            <p>
-                The site owner requests that you <b>delete all cookies</b> for this site to ensure new updates work properly.<br><br>
-                <b>How to do it:</b>
-                <ol style="text-align:left; margin:1em auto 1em 1.5em;">
-                    <li>Click the lock icon in your browser's address bar.</li>
-                    <li>Go to <b>Site settings</b> or <b>Cookies and site data</b>.</li>
-                    <li>Delete or clear all cookies for this site.</li>
-                    <li>Return to this page (do <b>not</b> refresh).</li>
-                </ol>
-                When done, click the button below. We'll restore important cookies for you.
-            </p>
-            <button id="cookie-popup-confirm" style="margin-top:16px; padding:10px 24px; font-size:1rem; border-radius:6px; border:none; background:#007bff; color:#fff; cursor:pointer;">I deleted the cookies</button>
-        </div>
-    </div>
-
-    <script>
-    // --- Cookie Version System ---
-    const COOKIE_VERSION = 2; // Increment this when cookies need to be reset
-    const IMPORTANT_COOKIES = [
-        'cookie_saver_email',
-        'cookie_saver_name',
-        'cookie_saver_password',
-        'newsletter_hide',
-        'cookie_saver_signedup',
-        'cookie_saver_username',
-        'access'
-    ];
-
-    // --- Date Check from cookie.json ---
-    function checkCookieJsonDate() {
-        fetch('/cookie.json')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.date) {
-                    const cookieDate = new Date(data.date);
-                    const now = new Date();
-                    if (cookieDate < now) {
-                        showCookiePopup();
-                    }
-                }
-            })
-            .catch(() => {
-                // Ignore errors if cookie.json not found
-            });
-    }
-
-    function getCookie(name) {
-        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        return match ? decodeURIComponent(match[2]) : null;
-    }
-    function setCookie(name, value, days = 365) {
-        const expires = new Date(Date.now() + days*864e5).toUTCString();
-        document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; expires=' + expires;
-    }
-    function delCookie(name) {
-        document.cookie = name + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    }
-    function getAllCookies() {
-        return document.cookie.split(';').reduce((acc, c) => {
-            const [k, ...v] = c.trim().split('=');
-            acc[k] = v.join('=');
-            return acc;
-        }, {});
-    }
-
-    function checkCookieVersion() {
-        const stored = parseInt(getCookie('cookie_version') || '0', 10);
-        if (stored < COOKIE_VERSION) {
-            showCookiePopup();
-        }
-    }
-
-    function showCookiePopup() {
-        // Save important cookies to memory
-        const saved = {};
-        IMPORTANT_COOKIES.forEach(k => {
-            const v = getCookie(k);
-            if (v !== null) saved[k] = v;
-        });
-        window._importantCookiesBackup = saved;
-        // Show popup
-        document.getElementById('cookie-popup').style.display = 'flex';
-    }
-
-    function restoreImportantCookies() {
-        const saved = window._importantCookiesBackup || {};
-        // Remove all cookies
-        Object.keys(getAllCookies()).forEach(delCookie);
-        // Restore important cookies
-        Object.entries(saved).forEach(([k, v]) => setCookie(k, v));
-        setCookie('cookie_version', COOKIE_VERSION);
-    }
-
-    document.getElementById('cookie-popup-confirm').onclick = function() {
-        restoreImportantCookies();
-        document.getElementById('cookie-popup').style.display = 'none';
-        alert('Important cookies restored! You may continue using the site.');
-    };
-
-    // Run version check on load
-    checkCookieVersion();
-    checkCookieJsonDate();
-    </script>
     <script src="/analytics.js?5h"></script>
     <script src="/newsletter.js?67herth676"></script>
 </body>

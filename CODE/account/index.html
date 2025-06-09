@@ -339,13 +339,10 @@
         function main() {
             const username = getCookie('cookie_saver_username');
             const signedup = getCookie('cookie_saver_signedup');
-            // Check for permanent ban on page load
-            if (localStorage.getItem('banned_permanent') === '1') {
-                alert('This device is permanently banned from creating or accessing accounts.');
-                window.location.href = '/'; // Or show a blocked message
-            }
+            // If already signed in, don't show sign-in
             if (username && signedup === '1') {
                 showAccountInfo(username);
+                addToAllUsernames(username);
             } else {
                 showSignin();
             }
@@ -361,7 +358,6 @@
                 e.preventDefault();
                 const username = document.getElementById('signin-username').value.trim();
                 const password = document.getElementById('signin-password').value.trim();
-                const mac_code = getOrCreateMacCode();
                 if (!username || !password) {
                     document.getElementById('message').textContent = 'Please enter username and password.';
                     document.getElementById('message').style.color = 'red';
@@ -371,7 +367,7 @@
                     fetch(BACKEND_URL + '/cookie-verify', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password, last_ip_used: ip, last_ip: ip, mac_code })
+                        body: JSON.stringify({ username, password, last_ip_used: ip, last_ip: ip })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -380,13 +376,14 @@
                             localStorage.setItem('cookie_saver_signedup', '1');
                             localStorage.setItem('cookie_saver_username', username);
                             localStorage.setItem('cookie_saver_password', password);
-                            localStorage.setItem('mac_code', mac_code);
+                            addToAllUsernames(username);
                             document.getElementById('message').textContent = '';
                             showAccountInfo(username);
                         } else if (data.error === 'Account is banned.') {
                             localStorage.setItem('banned_permanent', '1');
-                            alert('Your account is banned. This device is now permanently blocked.');
-                            window.location.href = '/';
+                            addToAllUsernames(username);
+                            localStorage.setItem('banned_account', username); // Track which account is banned
+                            // Ban overlay will be handled by ban-blocker.js
                         } else {
                             document.getElementById('message').textContent = 'Invalid username, password, or device.';
                             document.getElementById('message').style.color = 'red';
@@ -405,17 +402,19 @@
                 const password = document.getElementById('signup-password').value.trim();
                 const name = document.getElementById('signup-name').value.trim();
                 const email = document.getElementById('signup-email').value.trim();
-                const mac_code = getOrCreateMacCode();
+                // Get all connected accounts
+                let connected = [];
+                try { connected = JSON.parse(localStorage.getItem('all_usernames') || '[]'); } catch {}
                 if (!username || !password || !name || !email) {
                     document.getElementById('message-signup').textContent = 'Please fill in all fields.';
                     document.getElementById('message-signup').style.color = 'red';
                     return;
                 }
                 fetchUserIP(function(ip) {
-                    fetch(BACKEND_URL + '/cookie-signup', {
+                    fetch(BACKEND_URL + '/account-signup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password, name, email, creation_ip: ip, last_ip_used: ip, mac_code })
+                        body: JSON.stringify({ username, password, name, email, creation_ip: ip, last_ip_used: ip, connected_accounts: connected })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -426,7 +425,6 @@
                             localStorage.setItem('cookie_saver_signedup', '1');
                             localStorage.setItem('cookie_saver_username', username);
                             localStorage.setItem('cookie_saver_password', password);
-                            localStorage.setItem('mac_code', mac_code);
                             document.getElementById('message-signup').textContent = 'Sign up successful! You can now sign in.';
                             document.getElementById('message-signup').style.color = 'green';
                             showSignin();
@@ -470,7 +468,6 @@
                         localStorage.setItem('cookie_saver_signedup', '1');
                         localStorage.setItem('cookie_saver_username', username);
                         localStorage.setItem('cookie_saver_password', password);
-                        localStorage.setItem('mac_code', getOrCreateMacCode());
                         showAccountInfo(username);
                     } else {
                         document.getElementById('message-verify').textContent = data.error || 'Incorrect code.';
@@ -574,7 +571,6 @@
                 localStorage.removeItem('cookie_saver_signedup');
                 localStorage.removeItem('cookie_saver_username');
                 localStorage.removeItem('cookie_saver_password');
-                localStorage.removeItem('mac_code');
                 document.cookie = 'cookie_saver_signedup=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 document.cookie = 'cookie_saver_username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 document.cookie = 'cookie_saver_password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
