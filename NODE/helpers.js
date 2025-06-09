@@ -26,14 +26,22 @@ function getLocalIP() {
     return 'localhost';
 }
 
-function checkLatestPassword(req, LATEST_PASSWORD, LATEST_COOKIE) {
-    const pwd = req.body?.password || req.query?.password || req.cookies?.[LATEST_COOKIE];
-    return pwd === LATEST_PASSWORD;
+function checkLatestPassword(req) {
+    return (
+        req.body?.password === process.env.LATEST_PASSWORD ||
+        req.query?.password === process.env.LATEST_PASSWORD || 
+        req.cookies?.latest_auth === process.env.LATEST_PASSWORD
+    );
 }
 
-function loadNewsletterDB(NEWSLETTER_FILE_PATH) {
+function loadNewsletterDB() {
+    const NEWSLETTER_FILE_PATH = path.join(__dirname, 'data/newsletter-signups.json');
     if (!fs.existsSync(NEWSLETTER_FILE_PATH)) return {};
-    try { return JSON.parse(fs.readFileSync(NEWSLETTER_FILE_PATH, 'utf8')); } catch { return {}; }
+    try {
+        return JSON.parse(fs.readFileSync(NEWSLETTER_FILE_PATH, 'utf8'));
+    } catch {
+        return {};
+    }
 }
 
 module.exports = {
