@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monster Hunter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Monster Hunter</h1>
+    <div id="shop-icon" title="Open Shop">🛍️</div>
+  </header>
+  
+  <div id="stats">
+    <p><strong>World:</strong> <span id="world">1</span></p>
+    <p><strong>Position:</strong> <span id="position">0</span> / 10</p>
+    <p><strong>HP:</strong> <span id="hp">100</span> / <span id="max-hp">100</span></p>
+    <p><strong>Gold:</strong> <span id="gold">0</span></p>
+    <p><strong>Sword:</strong> <span id="sword">Wood (80% damage taken)</span></p>
+    <p><strong>Dice Item:</strong> <span id="dice-item">None</span></p>
+  </div>
+  
+  <div id="board-container">
+    <div id="board"></div>
+  </div>
+  
+  <div id="controls">
+    <button id="roll-button">Roll Dice</button>
+  </div>
+  
+  <!-- Shop Modal -->
+  <div id="shop-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Shop</h2>
+      <div id="shop-items"></div>
+    </div>
+  </div>
+  
+  <!-- Picky Die Modal -->
+  <div id="picky-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-picky">&times;</span>
+      <h2>Choose Your Dice Number</h2>
+      <input type="number" id="picky-input" min="1" max="6">
+      <button id="picky-confirm">Confirm</button>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+  <script src="ui-logic.js"></script>
+</body>
+</html>

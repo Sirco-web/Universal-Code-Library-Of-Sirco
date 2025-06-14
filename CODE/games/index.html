@@ -1,187 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games Page</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games Page</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
 
-    <style>
-        body {
-            display: none; /* Hide content until validation */
-            background-color: #ffffff;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            text-align: center;
+  <!-- Preload images for instant loading -->
+  <link rel="preload" href="form.png" as="image">
+  <link rel="preload" href="imgs/1v1lol.png" as="image">
+  <link rel="preload" href="imgs/basketballstars.png" as="image">
+  <link rel="preload" href="imgs/basketrandom.png" as="image">
+  <link rel="preload" href="imgs/bitlife.png" as="image">
+  <link rel="preload" href="imgs/blockblast.png" as="image">
+  <link rel="preload" href="imgs/boxingrandom.png" as="image">
+  <link rel="preload" href="imgs/cookieclicker.png" as="image">
+  <link rel="preload" href="imgs/clusterrush.png" as="image">
+  <link rel="preload" href="imgs/draw.png" as="image">
+  <link rel="preload" href="imgs/drivemad.png" as="image">
+  <link rel="preload" href="imgs/eagler.png" as="image">
+  <link rel="preload" href="imgs/eaglercraftbeta.png" as="image">
+  <link rel="preload" href="imgs/eaglergc.png" as="image">
+  <link rel="preload" href="imgs/eaglymc.jpg" as="image">
+  <link rel="preload" href="imgs/flappybird.png" as="image">
+  <link rel="preload" href="imgs/fridaynightfunkin.png" as="image">
+  <link rel="preload" href="imgs/getawayshootout.png" as="image">
+  <link rel="preload" href="imgs/letssurf.png" as="image">
+  <link rel="preload" href="imgs/mcstart.png" as="image">
+  <link rel="preload" href="imgs/monkeymart.png" as="image">
+  <link rel="preload" href="imgs/paperio.png" as="image">
+  <link rel="preload" href="imgs/retrobowl.png" as="image">
+  <link rel="preload" href="imgs/retrohaunt.png" as="image">
+  <link rel="preload" href="imgs/rooftopsnipers.png" as="image">
+  <link rel="preload" href="imgs/slope.png" as="image">
+  <link rel="preload" href="imgs/soccerrandom.png" as="image">
+  <link rel="preload" href="imgs/stack.png" as="image">
+  <link rel="preload" href="imgs/tinyfishing.png" as="image">
+  <link rel="preload" href="imgs/tombofthemask.png" as="image">
+
+  <!-- Originals area images -->
+  <link rel="preload" href="imgs/pixelquest.png" as="image">
+  <link rel="preload" href="imgs/neonrunner.png" as="image">
+  <link rel="preload" href="imgs/retroracer.png" as="image">
+  <link rel="preload" href="imgs/spaceminer.png" as="image">
+  <link rel="preload" href="imgs/mysticmaze.png" as="image">
+
+  <style>
+    body {
+      background-color: #ffffff;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .game-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .game {
+      width: 200px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      background: #f9f9f9;
+    }
+    .game img {
+      width: 100%;
+      border-radius: 5px;
+    }
+    .back-button {
+      margin: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .back-button:hover {
+      background-color: #0056b3;
+    }
+    footer {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f1f1f1;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+
+  <script>
+    function checkAccessCookie() {
+      const cookies = document.cookie.split("; ");
+      const accessCookie = cookies.find(row => row.startsWith("access="));
+      if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+      }
+    }
+
+    function loadGames() {
+      const gamesList = document.getElementById("gamesList");
+      const games = [
+        { title: "Request games", img: "form.png", link: "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUM0QyRUFTUTFGSDVLRVBHRUQwTzA3TVJDNi4u", status: 1 },
+        { title: "1v1.lol", img: "imgs/1v1lol.png", link: "game/1v1lol/index.html", status: 1 },
+        { title: "Basketball Stars", img: "imgs/basketballstars.png", link: "game/basketballstars/index.html", status: 1 },
+        { title: "Basket Random", img: "imgs/basketrandom.png", link: "game/basketrandom/index.html", status: 1 },
+        { title: "Bitlife", img: "imgs/bitlife.png", link: "game/bitlife/index.html", status: 1 },
+        { title: "Block Blast", img: "imgs/blockblast.png", link: "game/blockblast/index.html", status: 1 },
+        { title: "Boxing Random", img: "imgs/boxingrandom.png", link: "game/boxingrandom/index.html", status: 1 },
+        { title: "Cookie Clicker", img: "imgs/cookieclicker.png", link: "game/cookieclicker/index.html", status: 1 },
+        { title: "Cluster Rush", img: "imgs/clusterrush.png", link: "game/ClusterRush/index.html" },
+        { title: "Draw", img: "imgs/draw.png", link: "game/draw/index.html", status: 1 },
+        { title: "Drive Mad", img: "imgs/drivemad.png", link: "game/drivemad/index.html", status: 1 },
+        { title: "Eaglercraft", img: "imgs/eagler.png", link: "game/eaglercraft/index.html", status: 1 },
+        { title: "Eaglercraft Beta", img: "imgs/eaglercraftbeta.png", link: "game/eaglercraftbeta/index.html", status: 2 },
+        { title: "Eaglercraft GC", img: "imgs/eaglergc.png", link: "game/eaglercraftgc/index.html", status: 2 },
+        { title: "Eagly MC", img: "imgs/eaglymc.jpg", link: "game/eaglymc/index.html", status: 1 },
+        { title: "Flappy Bird", img: "imgs/flappybird.png", link: "game/flappybird/index.html", status: 1 },
+        { title: "Friday Night Funkin'", img: "imgs/fridaynightfunkin.png", link: "game/fridaynightfunkin/index.html", status: 1 },
+        { title: "Getaway Shootout (New)", img: "imgs/getawayshootout.png", link: "game/getawayshootoutnew/index.html", status: 1 },
+        { title: "Let's Surf", img: "imgs/letssurf.png", link: "game/letssurf/index.html", status: 1 },
+        { title: "Minecraft Start", img: "imgs/mcstart.png", link: "game/mcstart/index.html", status: 1 },
+        { title: "Monkey Mart", img: "imgs/monkeymart.png", link: "game/monkeymart/index.html", status: 1 },
+        { title: "Paper IO 2", img: "imgs/paperio.png", link: "game/paperio/index.html", status: 1 },
+        { title: "Retro Bowl", img: "imgs/retrobowl.png", link: "game/retrobowl/index.html", status: 1 },
+        { title: "Retro Haunt", img: "imgs/retrohaunt.png", link: "game/retrohaunt/index.html", status: 1 },
+        { title: "Rooftop Snipers", img: "imgs/rooftopsnipers.png", link: "game/rooftopsnipers/index.html", status: 1 },
+        { title: "Slope", img: "imgs/slope.png", link: "game/slope/index.html", status: 1 },
+        { title: "Soccer Random", img: "imgs/soccerrandom.png", link: "game/soccerrandom/index.html", status: 1 },
+        { title: "Stack", img: "imgs/stack.png", link: "game/stack/index.html", status: 1 },
+        { title: "Tiny Fishing", img: "imgs/tinyfishing.png", link: "game/tinyfishing/index.html", status: 1 },
+        { title: "Tomb of the Mask", img: "imgs/tombofthemask.png", link: "game/tombofthemask/index.html", status: 1 }
+      ];
+
+      games.forEach(game => {
+        const gameDiv = document.createElement("div");
+        gameDiv.classList.add("game");
+
+        gameDiv.innerHTML = `
+          <img src="${game.img}" alt="${game.title}" loading="eager">
+          <h3>${game.title}</h3>
+          <a href="${game.link}" class="${game.status === 1 ? 'active' : game.status === 2 ? 'risky' : 'disabled'}">
+            ${game.status === 3 ? 'Disabled' : 'Play Now'}
+          </a>
+        `;
+
+        if (game.status === 2) {
+          gameDiv.querySelector("a").onclick = () => alert('Use this game at your own risk.');
+        } else if (game.status === 3) {
+          gameDiv.querySelector("a").onclick = () => {
+            alert('Sorry, this game has been disabled.');
+            return false;
+          };
         }
-        .game-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
+
+        gamesList.appendChild(gameDiv);
+      });
+    }
+
+    // --- Originals Area Function ---
+    function loadOriginalGames() {
+      const originalGames = [
+        { title: "Beyond Rare", img: "imgs/beyond-rare.png", link: "game/beyond-rare", status: 1 },
+        { title: "Neon Runner", img: "imgs/neonrunner.png", link: "game/neonrunner/index.html", status: 1 }
+      ];
+
+      const originalsContainer = document.getElementById("originalGamesList");
+      originalGames.forEach(game => {
+        const gameDiv = document.createElement("div");
+        gameDiv.classList.add("game");
+        gameDiv.innerHTML = `
+          <img src="${game.img}" alt="${game.title}" loading="eager">
+          <h3>${game.title}</h3>
+          <a href="${game.link}" class="${game.status === 1 ? 'active' : game.status === 2 ? 'risky' : 'disabled'}">
+            ${game.status === 3 ? 'Disabled' : 'Play Now'}
+          </a>
+        `;
+        if (game.status === 2) {
+          gameDiv.querySelector("a").onclick = () => alert('Use this game at your own risk.');
+        } else if (game.status === 3) {
+          gameDiv.querySelector("a").onclick = () => {
+            alert('Sorry, this game has been disabled.');
+            return false;
+          };
         }
-        .game {
-            width: 200px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            background: #f9f9f9;
-        }
-        .game img {
-            width: 100%;
-            border-radius: 5px;
-        }
-        .back-button {
-            margin: 20px;
-            padding: 10px 20px;
-            font-size: 1em;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .back-button:hover {
-            background-color: #0056b3;
-        }
-        footer {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f1f1f1;
-            font-size: 0.9em;
-            color: #555;
-        }
-    </style>
+        originalsContainer.appendChild(gameDiv);
+      });
+    }
 
-    <script>
-        const enableAgreementCheck = false; // Set to true to enable, false to disable
-        const agreementVersion = new Date("2025-04-25T07:28:10Z");
-
-        function checkAgreement() {
-            if (!enableAgreementCheck) {
-                console.log("Agreement check is disabled.");
-                return;
-            }
-
-            const cookies = document.cookie.split("; ");
-            const agreementCookie = cookies.find(row => row.startsWith("agreementTimestamp="));
-
-            if (agreementCookie) {
-                const userAgreementDate = new Date(agreementCookie.split("=")[1]);
-                if (userAgreementDate < agreementVersion) {
-                    alert("To continue using this site, you must agree to the updated rules.");
-                    window.location.href = "/activate?agreement";
-                } else {
-                    console.log("User agreement is valid.");
-                }
-            } else {
-                alert("To continue using this site, you must agree to the rules.");
-                window.location.href = "/activate?agreement";
-            }
-        }
-
-        function checkAccessCookie() {
-            const cookies = document.cookie.split("; ");
-            const accessCookie = cookies.find(row => row.startsWith("access="));
-
-            if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-                window.location.href = "/index.html"; // Redirect if no valid cookie
-            } else {
-                document.body.style.display = "block"; // Show content
-            }
-        }
-
-        function loadGames() {
-            const gamesList = document.getElementById("gamesList");
-            const games = [
-            { title: "Request games", img: "form.png", link: "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUM0QyRUFTUTFGSDVLRVBHRUQwTzA3TVJDNi4u", status: 1 },
-            { title: "1v1.lol", img: "imgs/1v1lol.png", link: "game/1v1lol/index.html", status: 1 },
-    { title: "Basketball Stars", img: "imgs/basketballstars.png", link: "game/basketballstars/index.html", status: 1 },
-    { title: "Basket Random", img: "imgs/basketrandom.png", link: "game/basketrandom/index.html", status: 1 },
-    { title: "Bitlife", img: "imgs/bitlife.png", link: "game/bitlife/index.html", status: 1 },
-    { title: "Block Blast", img: "imgs/blockblast.png", link: "game/blockblast/index.html", status: 1 },
-    { title: "Boxing Random", img: "imgs/boxingrandom.png", link: "game/boxingrandom/index.html", status: 1 },
-    { title: "Cookie Clicker", img: "imgs/cookieclicker.png", link: "game/cookieclicker/index.html", status: 1 },
-    { title: "Cluster Rush", img: "imgs/clusterrush.png", link: "game/ClusterRush/index.html" },
-    { title: "Draw", img: "imgs/draw.png", link: "game/draw/index.html", status: 1 },
-    { title: "Drive Mad", img: "imgs/drivemad.png", link: "game/drivemad/index.html", status: 1 },
-    { title: "Eaglercraft", img: "imgs/eagler.png", link: "game/eaglercraft/index.html", status: 1 },
-    { title: "Eaglercraft Beta", img: "imgs/eaglercraftbeta.png", link: "game/eaglercraftbeta/index.html", status: 2 },
-    { title: "Eaglercraft GC", img: "imgs/eaglergc.png", link: "game/eaglercraftgc/index.html", status: 2 },
-    { title: "Eagly MC", img: "imgs/eaglymc.jpg", link: "game/eaglymc/index.html", status: 1 },
-    { title: "Flappy Bird", img: "imgs/flappybird.png", link: "game/flappybird/index.html", status: 1 },
-    { title: "Friday Night Funkin'", img: "imgs/fridaynightfunkin.png", link: "game/fridaynightfunkin/index.html", status: 1 },
-    { title: "Getaway Shootout (New)", img: "imgs/getawayshootout.png", link: "game/getawayshootoutnew/index.html", status: 1 },
-    { title: "Let's Surf", img: "imgs/letssurf.png", link: "game/letssurf/index.html", status: 1 },
-    { title: "Minecraft Start", img: "imgs/mcstart.png", link: "game/mcstart/index.html", status: 1 },
-    { title: "Monkey Mart", img: "imgs/monkeymart.png", link: "game/monkeymart/index.html", status: 1 },
-    { title: "Paper IO 2", img: "imgs/paperio.png", link: "game/paperio/index.html", status: 1 },
-    { title: "Retro Bowl", img: "imgs/retrobowl.png", link: "game/retrobowl/index.html", status: 1 },
-    { title: "Retro Haunt", img: "imgs/retrohaunt.png", link: "game/retrohaunt/index.html", status: 1 },
-    { title: "Rooftop Snipers", img: "imgs/rooftopsnipers.png", link: "game/rooftopsnipers/index.html", status: 1 },
-    { title: "Slope", img: "imgs/slope.png", link: "game/slope/index.html", status: 1 },
-    { title: "Soccer Random", img: "imgs/soccerrandom.png", link: "game/soccerrandom/index.html", status: 1 },
-    { title: "Stack", img: "imgs/stack.png", link: "game/stack/index.html", status: 1 },
-    { title: "Tiny Fishing", img: "imgs/tinyfishing.png", link: "game/tinyfishing/index.html", status: 1 },
-    { title: "Tomb of the Mask", img: "imgs/tombofthemask.png", link: "game/tombofthemask/index.html", status: 1 }
-            ];
-
-            games.forEach(game => {
-                const gameDiv = document.createElement("div");
-                gameDiv.classList.add("game");
-
-                gameDiv.innerHTML = `
-                    <img src="${game.img}" alt="${game.title}">
-                    <h3>${game.title}</h3>
-                    <a href="${game.link}" class="${game.status === 1 ? 'active' : game.status === 2 ? 'risky' : 'disabled'}">
-                        ${game.status === 3 ? 'Disabled' : 'Play Now'}
-                    </a>
-                `;
-
-                if (game.status === 2) {
-                    gameDiv.querySelector("a").onclick = () => alert('Use this game at your own risk.');
-                } else if (game.status === 3) {
-                    gameDiv.querySelector("a").onclick = () => {
-                        alert('Sorry, this game has been disabled.');
-                        return false;
-                    };
-                }
-
-                gamesList.appendChild(gameDiv);
-            });
-        }
-
-        window.onload = function () {
-            if (enableAgreementCheck) {
-                checkAgreement(); // Only validate agreement if enabled
-            }
-            checkAccessCookie(); // Validate access
-            loadGames(); // Load games dynamically
-        };
-    </script>
+    window.onload = function () {
+      checkAccessCookie();
+      loadGames();
+      loadOriginalGames();
+    };
+  </script>
 </head>
 <body>
+  <h1>Welcome to the Games Page</h1>
 
-    <h1>Welcome to the Games Page</h1>
+  <!-- Back Button -->
+  <button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
 
-    <!-- Back Button -->
-    <button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
+  <!-- Standard Games List Container -->
+  <div class="game-container" id="gamesList"></div>
 
-    <!-- Game List Container -->
-    <div class="game-container" id="gamesList"></div>
+  <!-- Originals Area -->
+  <h2>Original Games</h2>
+  <div class="game-container" id="originalGamesList"></div>
 
-    <footer>
-        <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
-        <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners.</p>
-    </footer>
+  <footer>
+    <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
+    <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
+  </footer>
 
-    <!-- Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
-
-<script src="/analytics.js?5h"></script>
-
+  <script src="/analytics.js?5h"></script>
 </body>
 </html>

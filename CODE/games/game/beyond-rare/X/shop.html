@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Shop - Buy a Background</title>
+    <style type="text/css">
+      body {
+        background-color: white;
+        font-family: Arial, sans-serif;
+        color: black;
+        margin: 20px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+      .bg-option {
+        margin: 10px 0;
+      }
+      a {
+        text-decoration: none;
+        font-size: 16px;
+        color: blue;
+        cursor: pointer;
+      }
+      button {
+        font-size: 14px;
+        padding: 6px 12px;
+        margin-top: 20px;
+        background-color: red;
+        color: white;
+        border: none;
+      }
+    </style>
+    <script type="text/javascript">
+      function loadPurchased() {
+        var purchased = localStorage.getItem("purchasedBackgrounds_for_model_X");
+        if (!purchased) { return []; }
+        return JSON.parse(purchased);
+      }
+      
+      // For standard backgrounds (cost: 200 points)
+      function purchase(bgColor, cost) {
+        var currentScore = parseInt(localStorage.getItem("score_for_model_X"), 10);
+        if (isNaN(currentScore)) { currentScore = 0; }
+        if (currentScore < cost) {
+          alert("You need at least " + cost + " points to buy this background.");
+          return false;
+        }
+        var newScore = currentScore - cost;
+        localStorage.setItem("score_for_model_X", newScore);
+        var purchased = loadPurchased();
+        if (purchased.indexOf(bgColor) === -1) {
+          purchased.push(bgColor);
+          localStorage.setItem("purchasedBackgrounds_for_model_X", JSON.stringify(purchased));
+        }
+        window.location.href = "index.html?bg=" + encodeURIComponent(bgColor);
+        return false;
+      }
+      
+      // For selecting an already purchased background.
+      function selectBg(bgColor) {
+        window.location.href = "index.html?bg=" + encodeURIComponent(bgColor);
+        return false;
+      }
+      
+      // For purchasing the Rainbow background (cost: 1000 points). It appears only after all 5 standard backgrounds are owned.
+      function purchaseRainbow() {
+        var currentScore = parseInt(localStorage.getItem("score_for_model_X"), 10);
+        var cost = 1000;
+        if (isNaN(currentScore)) { currentScore = 0; }
+        if (currentScore < cost) {
+          alert("You need at least " + cost + " points to buy the Rainbow background.");
+          return false;
+        }
+        var newScore = currentScore - cost;
+        localStorage.setItem("score_for_model_X", newScore);
+        var purchased = loadPurchased();
+        if (purchased.indexOf("rainbow") === -1) {
+          purchased.push("rainbow");
+          localStorage.setItem("purchasedBackgrounds_for_model_X", JSON.stringify(purchased));
+        }
+        window.location.href = "index.html?bg=" + encodeURIComponent("rainbow");
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Buy a Background</h1>
+    <p>Each standard background costs 200 points. (Total cost for all 5: 1000 points)</p>
+    <div class="bg-option">
+      <script type="text/javascript">
+        var purchased = loadPurchased();
+        if (purchased.indexOf("#FFCCCC") === -1) {
+          document.write('<a href="#" onclick="return purchase(\'#FFCCCC\', 200);">Buy Light Red (#FFCCCC) for 200 points</a>');
+        } else {
+          document.write('<a href="#" onclick="return selectBg(\'#FFCCCC\');">Select Light Red (#FFCCCC)</a>');
+        }
+      </script>
+    </div>
+    <div class="bg-option">
+      <script type="text/javascript">
+        if (purchased.indexOf("#CCCCFF") === -1) {
+          document.write('<a href="#" onclick="return purchase(\'#CCCCFF\', 200);">Buy Light Blue (#CCCCFF) for 200 points</a>');
+        } else {
+          document.write('<a href="#" onclick="return selectBg(\'#CCCCFF\');">Select Light Blue (#CCCCFF)</a>');
+        }
+      </script>
+    </div>
+    <div class="bg-option">
+      <script type="text/javascript">
+        if (purchased.indexOf("#CCFFCC") === -1) {
+          document.write('<a href="#" onclick="return purchase(\'#CCFFCC\', 200);">Buy Light Green (#CCFFCC) for 200 points</a>');
+        } else {
+          document.write('<a href="#" onclick="return selectBg(\'#CCFFCC\');">Select Light Green (#CCFFCC)</a>');
+        }
+      </script>
+    </div>
+    <div class="bg-option">
+      <script type="text/javascript">
+        if (purchased.indexOf("#FFFFCC") === -1) {
+          document.write('<a href="#" onclick="return purchase(\'#FFFFCC\', 200);">Buy Light Yellow (#FFFFCC) for 200 points</a>');
+        } else {
+          document.write('<a href="#" onclick="return selectBg(\'#FFFFCC\');">Select Light Yellow (#FFFFCC)</a>');
+        }
+      </script>
+    </div>
+    <div class="bg-option">
+      <script type="text/javascript">
+        if (purchased.indexOf("#FFCC99") === -1) {
+          document.write('<a href="#" onclick="return purchase(\'#FFCC99\', 200);">Buy Light Orange (#FFCC99) for 200 points</a>');
+        } else {
+          document.write('<a href="#" onclick="return selectBg(\'#FFCC99\');">Select Light Orange (#FFCC99)</a>');
+        }
+      </script>
+    </div>
+    <!-- Rainbow option appears only if all 5 standard backgrounds are purchased -->
+    <div class="bg-option">
+      <script type="text/javascript">
+        if (purchased.length >= 5) {
+          if (purchased.indexOf("rainbow") === -1) {
+            document.write('<a href="#" onclick="return purchaseRainbow();">Buy Rainbow background for 1000 points</a>');
+          } else {
+            document.write('<a href="#" onclick="return selectBg(\'rainbow\');">Select Rainbow background</a>');
+          }
+        }
+      </script>
+    </div>
+    <p><a href="index.html">Back to Rarity Clicker</a></p>
+    <!-- RESET button styled red -->
+    <button onclick="if(confirm('Are you sure you want to reset all data? This will clear your score, log, and purchased backgrounds.')) { localStorage.removeItem('score_for_model_X'); localStorage.removeItem('rarityLog_for_model_X'); localStorage.removeItem('purchasedBackgrounds_for_model_X'); localStorage.removeItem('bg_for_model_X'); window.location.href='index.html'; }">RESET</button>
+  </body>
+</html>
