@@ -38,21 +38,12 @@
         id="banner-frame"
         title="Banner"
         scrolling="no"
-        style="height:60px;" <!-- fallback height -->
+        style="height:60px;border:2px solid #222;border-radius:10px;" <!-- fallback height -->
     ></iframe>
     <script>
         // Set the banner iframe src with cache-busting using JS (like fetchVersion)
         document.getElementById('banner-frame').src = `/banner.html?nocache=${new Date().getTime()}`;
     </script>
-
-    <div class="footer-container">
-        <p>
-            Disclaimer: This website and its contents are provided for entertainment purposes only. 
-            We are not responsible for any misuse of the services offered, including violations of 
-            rules, policies, or laws in your location or institution. Accessing this site using unauthorized 
-            devices or networks is prohibited. By using this site, you accept full responsibility for compliance.
-        </p>
-    </div>
 
     <div class="container">
         <h1>Welcome to Code-Universe</h1>
@@ -75,6 +66,13 @@
 
     <div class="version-footer">
         <p>Site Version: <span id="siteVersion">Loading...</span></p>
+
+        <p>
+        Disclaimer: This website and its contents are provided for entertainment purposes only. 
+        We are not responsible for any misuse of the services offered, including violations of 
+        rules, policies, or laws in your location or institution. Accessing this site using unauthorized 
+        devices or networks is prohibited. By using this site, you accept full responsibility for compliance.
+        </p>
     </div>
 
     <script src="/analytics.js?5h"></script>
