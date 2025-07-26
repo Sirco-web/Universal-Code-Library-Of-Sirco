@@ -450,6 +450,10 @@
                     .then(data => {
                         if (data.success && data.verification_required) {
                             window._pendingVerifyUser = username;
+                            sessionStorage.setItem('_pendingVerifyUser', username);
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('verify', username);
+                            window.history.replaceState({}, '', url);
                             showVerify();
                         } else if (data.success) {
                             localStorage.setItem('cookie_saver_signedup', '1');
