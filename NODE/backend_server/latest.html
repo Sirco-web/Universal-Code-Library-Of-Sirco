@@ -40,6 +40,7 @@
     <span class="tab" data-type="accounts">Accounts</span>
     <span class="tab" data-type="admin">Admin</span>
     <span class="tab" data-type="banned-devices">Banned Devices</span>
+    <span class="tab" data-type="verify-user">Verify User</span>
     <div id="newsletter-email" style="display:none;margin:1em 0;padding:1em;background:#f4f8ff;border-radius:6px;">
       <h3>Send Email to All Newsletter Signups</h3>
       <input id="newsletter-subject" type="text" placeholder="Subject" style="width:60%;margin-bottom:0.5em;"><br>
@@ -64,7 +65,7 @@
   </div>
 
   <script>
-    let currentType = 'analytics';
+    let currentType = localStorage.getItem('latestTab') || 'analytics';
     
     async function checkAuth() {
       try {
@@ -114,11 +115,21 @@
           document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           showTab(tab.getAttribute('data-type'));
+          localStorage.setItem('latestTab', tab.getAttribute('data-type'));
         };
       });
+      // Set active tab on load
+      document.querySelectorAll('.tab').forEach(tab => {
+        if (tab.getAttribute('data-type') === currentType) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+      showTab(currentType);
       // Start data refresh
-      fetchLatest();
       setInterval(() => {
+        // Only refresh the current tab, don't switch tabs
         if (document.getElementById('entries').style.display !== 'none') {
           fetchLatest();
         }
@@ -130,7 +141,16 @@
 
     function showTab(type) {
       currentType = type;
-      if (type === 'banned-devices') {
+      localStorage.setItem('latestTab', type);
+      if (type === 'verify-user') {
+        document.getElementById('entries').style.display = 'block';
+        document.getElementById('status').style.display = 'block';
+        document.getElementById('filelist').style.display = 'none';
+        document.getElementById('fileedit').style.display = 'none';
+        document.getElementById('newsletter-email').style.display = 'none';
+        document.getElementById('admin-settings').style.display = 'none';
+        showVerifyUserForm();
+      } else if (type === 'banned-devices') {
         document.getElementById('entries').style.display = 'block';
         document.getElementById('status').style.display = 'block';
         document.getElementById('filelist').style.display = 'none';
@@ -175,14 +195,21 @@
 
     async function fetchLatest() {
       try {
-        const res = await fetch('/latest.json?type=' + encodeURIComponent(currentType), {
+        let urlType = currentType;
+        if (currentType === 'accounts') urlType = 'accounts';
+        else if (currentType === 'newsletter') urlType = 'newsletter';
+        const res = await fetch('/latest.json?type=' + encodeURIComponent(urlType), {
           credentials: 'same-origin'
         });
         if (!res.ok) throw new Error('Failed to fetch');
-        
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           document.getElementById('entries').innerHTML = data.map(entry => 
+            '<pre>' + JSON.stringify(entry, null, 2) + '</pre>'
+          ).join('');
+          document.getElementById('status').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        } else if (data && data.data && Array.isArray(data.data)) {
+          document.getElementById('entries').innerHTML = data.data.map(entry => 
             '<pre>' + JSON.stringify(entry, null, 2) + '</pre>'
           ).join('');
           document.getElementById('status').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
@@ -252,13 +279,13 @@
 
     async function fetchAccounts() {
       function escapeHTML(str) {
-        return str.replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+        return str.replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','`':'&#96;'}[c]));
       }
       try {
-        const res = await fetch('/latest.json?type=newsletter', { credentials: 'same-origin' });
+        const res = await fetch('/latest.json?type=accounts', { credentials: 'same-origin' });
         const data = await res.json();
-        if (data && data.data && Array.isArray(data.data)) {
-          document.getElementById('entries').innerHTML = data.data.map(acc => {
+        if (Array.isArray(data) && data.length > 0) {
+          document.getElementById('entries').innerHTML = data.map(acc => {
             const accStr = escapeHTML(JSON.stringify(acc, null, 2));
             return '<pre style="position:relative;">' +
               accStr +
@@ -409,6 +436,44 @@
         body: JSON.stringify({ mac })
       });
       fetchBannedDevices();
+    }
+
+    function showVerifyUserForm() {
+      document.getElementById('entries').innerHTML = `
+        <div style="max-width:400px;margin:2em auto;padding:1.5em;background:#f4f4f4;border-radius:8px;">
+          <h3>Verify User</h3>
+          <input id="verify-username" type="text" placeholder="Username" style="width:100%;margin-bottom:0.7em;">
+          <input id="verify-code" type="text" placeholder="Verification Code" style="width:100%;margin-bottom:0.7em;">
+          <button onclick="verifyUser()">Verify</button>
+          <span id="verify-status" style="margin-left:1em;"></span>
+        </div>
+      `;
+      document.getElementById('status').textContent = '';
+    }
+
+    async function verifyUser() {
+      const username = document.getElementById('verify-username').value.trim();
+      const code = document.getElementById('verify-code').value.trim();
+      if (!username || !code) {
+        document.getElementById('verify-status').textContent = 'Enter username and code.';
+        return;
+      }
+      document.getElementById('verify-status').textContent = 'Verifying...';
+      try {
+        const res = await fetch('/verify-account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, code })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('verify-status').textContent = 'Verified!';
+        } else {
+          document.getElementById('verify-status').textContent = data.error || 'Failed.';
+        }
+      } catch {
+        document.getElementById('verify-status').textContent = 'Failed.';
+      }
     }
 
     // Initialize

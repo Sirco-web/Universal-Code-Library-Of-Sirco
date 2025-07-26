@@ -183,31 +183,110 @@ app.get('/my-ip', (req, res) => {
 // --- Traffic Monitoring Menu ---
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-function printMenu() {
+function printMenu(selected) {
     console.log('\n=== Traffic Monitor Menu ===');
-    console.log('1. View ALL traffic');
-    console.log('2. View only Analytics traffic');
-    console.log('3. View only Newsletter traffic');
-    console.log('4. View only Cookie Signup traffic');
-    console.log('5. View only Cookie Cloud traffic');
-    console.log('6. View only Shortener traffic');
-    console.log('0. Stop viewing traffic');
-    console.log('q. Quit menu');
+    console.log((selected === 'all' ? '>' : ' ') + ' 1. View ALL traffic');
+    console.log((selected === 'analytics' ? '>' : ' ') + ' 2. View only Analytics traffic');
+    console.log((selected === 'newsletter' ? '>' : ' ') + ' 3. View only Newsletter traffic');
+    console.log((selected === 'cookie-signup' ? '>' : ' ') + ' 4. View only Cookie Signup traffic');
+    console.log((selected === 'cookie-cloud' ? '>' : ' ') + ' 5. View only Cookie Cloud traffic');
+    console.log((selected === 'shortener' ? '>' : ' ') + ' 6. View only Shortener traffic');
+    console.log((selected === 'newsletter-signups' ? '>' : ' ') + ' 7. View Newsletter Signups');
+    console.log((selected === 'accounts' ? '>' : ' ') + ' 9. View Accounts');
+    console.log((selected === 'verify-user' ? '>' : ' ') + ' 8. Verify a User');
+    console.log(' 0. Stop viewing traffic');
+    console.log(' q. Quit menu');
     console.log('===========================');
     process.stdout.write('Select option: ');
 }
 
+let lastMenuTab = null;
+
 function setTrafficMode(mode) {
     TRAFFIC_MODE = mode;
+    lastMenuTab = mode;
     if (mode === null) {
         console.log('\n[Monitor] Traffic viewing stopped.');
-    } else {
+    } else if (mode !== 'newsletter-signups' && mode !== 'verify-user') {
         console.log('\n[Monitor] Now viewing: ' + (mode === 'all' ? 'ALL traffic' : mode + ' traffic only'));
     }
 }
 
+function showNewsletterSignups() {
+    try {
+        const NEWSLETTER_FILE_PATH = path.join(__dirname, 'data', 'newsletter-signups.json');
+        if (!fs.existsSync(NEWSLETTER_FILE_PATH)) {
+            console.log('No newsletter signups found.');
+        } else {
+            const data = fs.readFileSync(NEWSLETTER_FILE_PATH, 'utf8');
+            const signups = JSON.parse(data);
+            console.log('\n--- Newsletter Signups ---');
+            if (signups && typeof signups === 'object' && !Array.isArray(signups)) {
+                Object.values(signups).forEach((entry, i) => {
+                    console.log(`${i + 1}. Name: ${entry.name}, Email: ${entry.email}, Time: ${entry.timestamp}`);
+                });
+            } else if (Array.isArray(signups)) {
+                signups.forEach((entry, i) => {
+                    console.log(`${i + 1}. Name: ${entry.name}, Email: ${entry.email}, Time: ${entry.timestamp}`);
+                });
+            } else {
+                console.log(signups);
+            }
+            console.log('--------------------------\n');
+        }
+    } catch (e) {
+        console.log('Error reading newsletter signups:', e.message);
+    }
+}
+
+function showAccounts() {
+    try {
+        const ACCOUNTS_FILE_PATH = path.join(__dirname, 'data', 'accounts.json');
+        if (!fs.existsSync(ACCOUNTS_FILE_PATH)) {
+            console.log('No accounts found.');
+        } else {
+            const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+            const accounts = JSON.parse(data);
+            console.log('\n--- Accounts ---');
+            if (accounts && typeof accounts === 'object' && !Array.isArray(accounts)) {
+                Object.values(accounts).forEach((entry, i) => {
+                    console.log(`${i + 1}. Username: ${entry.username}, Name: ${entry.name}, Email: ${entry.email}, Time: ${entry.timestamp}`);
+                });
+            } else if (Array.isArray(accounts)) {
+                accounts.forEach((entry, i) => {
+                    console.log(`${i + 1}. Username: ${entry.username}, Name: ${entry.name}, Email: ${entry.email}, Time: ${entry.timestamp}`);
+                });
+            } else {
+                console.log(accounts);
+            }
+            console.log('--------------------------\n');
+        }
+    } catch (e) {
+        console.log('Error reading accounts:', e.message);
+    }
+}
+
+async function verifyUserPrompt() {
+    const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl2.question('Enter username to verify: ', (username) => {
+        rl2.question('Enter verification code: ', (code) => {
+            // Call verifyAccount endpoint
+            const axios = require('axios');
+            axios.post('http://localhost:' + PORT + '/verify-account', { username, code })
+                .then(res => {
+                    console.log('Verification result:', res.data);
+                    rl2.close();
+                })
+                .catch(err => {
+                    console.log('Error verifying user:', err.message);
+                    rl2.close();
+                });
+        });
+    });
+}
+
 function startMenu() {
-    printMenu();
+    printMenu(lastMenuTab);
     rl.on('line', (input) => {
         switch (input.trim()) {
             case '1': setTrafficMode('all'); break;
@@ -216,13 +295,52 @@ function startMenu() {
             case '4': setTrafficMode('cookie-signup'); break;
             case '5': setTrafficMode('cookie-cloud'); break;
             case '6': setTrafficMode('shortener'); break;
+            case '7':
+                lastMenuTab = 'newsletter-signups';
+                showNewsletterSignups();
+                break;
+            case '9':
+                lastMenuTab = 'accounts';
+                showAccounts();
+                break;
+            case '8':
+                lastMenuTab = 'verify-user';
+                verifyUserPrompt();
+                break;
             case '0': setTrafficMode(null); break;
             case 'q': rl.close(); return;
             default: console.log('Invalid option.');
         }
-        printMenu();
+        printMenu(lastMenuTab);
     });
 }
+
+// --- Auto-delete unverified accounts older than 72 hours ---
+setInterval(() => {
+    const ACCOUNTS_FILE_PATH = path.join(__dirname, 'data', 'accounts.json');
+    if (!fs.existsSync(ACCOUNTS_FILE_PATH)) return;
+    let changed = false;
+    try {
+        const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+        let accounts = JSON.parse(data);
+        const now = Date.now();
+        for (const [username, acc] of Object.entries(accounts)) {
+            if (!acc.verified && acc.timestamp) {
+                const created = new Date(acc.timestamp).getTime();
+                if (now - created > 72 * 60 * 60 * 1000) {
+                    delete accounts[username];
+                    changed = true;
+                    console.log(`[Auto-Delete] Removed unverified account: ${username}`);
+                }
+            }
+        }
+        if (changed) {
+            fs.writeFileSync(ACCOUNTS_FILE_PATH, JSON.stringify(accounts, null, 2));
+        }
+    } catch (e) {
+        console.log('Error in auto-delete unverified accounts:', e.message);
+    }
+}, 60 * 60 * 1000); // Run every hour
 
 // --- Start server ---
 if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
