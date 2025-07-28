@@ -187,6 +187,17 @@
         // --- Main for device code ---
         let deviceCode = getStoredDeviceCode();
         function registerAndPing(BACKEND_URL) {
+            function pingAvailable() {
+                fetch(BACKEND_URL + '/device-available', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ device_code: deviceCode })
+                })
+                .catch(() => {
+                    // Do nothing, just a ping
+                });
+            }
+
             fetch(BACKEND_URL + "/device-check", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -219,9 +230,11 @@
                 if (!pingInterval) {
                     pingInterval = setInterval(() => {
                         sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
+                        pingAvailable();
                     }, 15000);
                 }
                 setupVisibility(deviceCode, geo, BACKEND_URL);
+                pingAvailable();
             })
             .catch(error => {
                 console.error("Error in registerAndPing:", error);

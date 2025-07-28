@@ -223,6 +223,21 @@ app.post('/device-ping', (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/device-available', (req, res) => {
+    const { device_code } = req.body;
+    if (!device_code) return res.status(400).json({ error: 'Missing device_code' });
+    let db = {};
+    if (fs.existsSync(DEVICE_DB_FILE)) {
+        try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    }
+    if (db[device_code]) {
+        db[device_code].last_seen = Date.now();
+        fs.writeFileSync(DEVICE_DB_FILE, JSON.stringify(db, null, 2));
+        return res.json({ success: true });
+    }
+    res.status(404).json({ success: false, error: 'Device not found' });
+});
+
 // --- HTML Routes ---
 app.get('/latest', (req, res) => {
     const latestPath = path.resolve(__dirname, 'latest.html');

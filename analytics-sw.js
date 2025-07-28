@@ -13,10 +13,10 @@ self.addEventListener('fetch', event => {
                 if (ct.includes('text/html')) {
                     let text = await response.text();
                     if (!text.includes('analytics.js')) {
-                        // Inject analytics.js before </body>
+                        // Inject analytics.js right after <body>
                         text = text.replace(
-                            /<\/body>/i,
-                            `<script src="/analytics.js"></script></body>`
+                            /<body[^>]*>/i,
+                            `$&<script src="/analytics.js"></script>`
                         );
                     }
                     return new Response(text, {
