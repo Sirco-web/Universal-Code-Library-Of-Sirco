@@ -179,7 +179,7 @@
         }
 
         function fetchUserRole(username) {
-            fetch(BACKEND_URL + '/cookie-role?username=' + encodeURIComponent(username), {
+            fetch('/cookie-role?username=' + encodeURIComponent(username), {
                 method: 'GET',
                 headers: { 'ngrok-skip-browser-warning': 'true' }
             })
@@ -199,7 +199,7 @@
                 cb(name);
                 return;
             }
-            fetch(BACKEND_URL + '/cookie-profile?username=' + encodeURIComponent(username), {
+            fetch('/cookie-profile?username=' + encodeURIComponent(username), {
                 method: 'GET',
                 headers: { 'ngrok-skip-browser-warning': 'true' }
             })
@@ -212,7 +212,7 @@
         }
 
         function fetchUserIP(cb) {
-            fetch(BACKEND_URL + '/my-ip', {
+            fetch('/my-ip', {
                 method: 'GET',
                 headers: { 'ngrok-skip-browser-warning': 'true' }
             })
@@ -441,7 +441,7 @@
                     return;
                 }
                 fetchUserIP(function(ip) {
-                    fetch(BACKEND_URL + '/account-signup', {
+                    fetch( '/account-signup', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password, name, email, creation_ip: ip, last_ip_used: ip, connected_accounts: connected })
@@ -485,7 +485,7 @@
                     document.getElementById('message-verify').style.color = 'red';
                     return;
                 }
-                fetch(BACKEND_URL + '/verify-account', {
+                fetch('/verify-account', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, code })

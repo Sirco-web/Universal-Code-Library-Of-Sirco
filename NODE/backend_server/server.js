@@ -78,6 +78,15 @@ if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// --- Initialize JSON Files ---
+const FILES_TO_INIT = ['profiles.json', 'roles.json', 'users.json'];
+FILES_TO_INIT.forEach(file => {
+    const filepath = path.join(DATA_DIR, file);
+    if (!fs.existsSync(filepath)) {
+        fs.writeFileSync(filepath, '{}');
+    }
+});
+
 // --- Helper Functions ---
 function getTrafficType(req) {
     const url = req.originalUrl.split('?')[0];
@@ -236,7 +245,7 @@ app.get('/my-ip', (req, res) => {
     res.json({ ip });
 });
 
-// Add live endpoints here
+// --- Live endpoints ---
 app.get('/live', (req, res) => {
     const livePath = path.resolve(__dirname, 'live.html');
     if (!fs.existsSync(livePath)) {
@@ -252,65 +261,6 @@ app.get('/live-data', (req, res) => {
     let db = {};
     try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
     res.json(db);
-});
-
-// --- /live page ---
-app.get('/live', (req, res) => {
-    if (!fs.existsSync(DEVICE_DB_FILE)) {
-        return res.send('<h2>No devices found</h2>');
-    }
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
-    const now = Date.now();
-    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
-    let html = `
-    <html>
-    <head>
-        <title>Live Devices</title>
-        <style>
-            body { font-family: Arial,sans-serif; background: #f9f9f9; margin: 0; padding: 2em; }
-            #container { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2em; max-width: 900px; margin: auto; }
-            .device { margin-bottom: 1em; }
-            .new { color: #1976d2; font-weight: bold; }
-            .online { color: green; }
-            .away { color: orange; }
-            .offline { color: #888; }
-            .id-link { cursor:pointer; text-decoration:underline; color:#1976d2; }
-            #info { margin-top:2em; background:#f4f4f4; padding:1em; border-radius:6px; }
-        </style>
-    </head>
-    <body>
-    <div id="container">
-        <h2>Live Devices</h2>
-        <div id="devicelist">
-    `;
-    Object.values(db).forEach(dev => {
-        const isNew = (dev.timestamp && new Date(dev.timestamp).getTime() > weekAgo);
-        const status = (dev.status === 'online') ? 'online' : (dev.status === 'online-away' ? 'away' : 'offline');
-        html += `<div class="device">
-            <span class="id-link${isNew ? ' new' : ''}" onclick="showInfo('${dev.device_code}')">${dev.device_code}</span>
-            <span class="${status}">[${status}]</span>
-            ${isNew ? '<span class="new">(new this week)</span>' : ''}
-        </div>`;
-    });
-    html += `
-        </div>
-        <div id="info"></div>
-    </div>
-    <script>
-        const db = ${JSON.stringify(db)};
-        function showInfo(id) {
-            const dev = db[id];
-            if (!dev) return;
-            let html = '<h3>Device: ' + id + '</h3>';
-            html += '<pre>' + JSON.stringify(dev, null, 2) + '</pre>';
-            document.getElementById('info').innerHTML = html;
-        }
-    </script>
-    </body>
-    </html>
-    `;
-    res.send(html);
 });
 
 // --- Traffic Monitoring Menu ---
@@ -493,3 +443,63 @@ if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
 }
 
 startMenu();
+
+// --- Add new cookie-related endpoints ---
+app.get('/cookie-profile', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ error: 'Missing username' });
+    
+    let profiles = {};
+    const profilesPath = path.join(DATA_DIR, 'profiles.json');
+    
+    if (fs.existsSync(profilesPath)) {
+        try {
+            profiles = JSON.parse(fs.readFileSync(profilesPath, 'utf8'));
+        } catch (e) { /* ignore error */ }
+    }
+    
+    res.json(profiles[username] || { name: username });
+});
+
+app.get('/cookie-role', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ error: 'Missing username' });
+    
+    let roles = {};
+    const rolesPath = path.join(DATA_DIR, 'roles.json');
+    
+    if (fs.existsSync(rolesPath)) {
+        try {
+            roles = JSON.parse(fs.readFileSync(rolesPath, 'utf8'));
+        } catch (e) { /* ignore error */ }
+    }
+    
+    res.json(roles[username] || { role: 'Active user' });
+});
+
+app.post('/cookie-verify', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Missing username or password' });
+    }
+
+    let users = {};
+    const usersPath = path.join(DATA_DIR, 'users.json');
+
+    if (fs.existsSync(usersPath)) {
+        try {
+            users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+        } catch (e) { /* ignore error */ }
+    }
+
+    const user = users[username];
+    if (!user || user.password !== password) {
+        return res.json({ valid: false, error: 'Invalid credentials' });
+    }
+
+    if (user.banned) {
+        return res.json({ valid: false, error: 'Account is banned.' });
+    }
+
+    res.json({ valid: true });
+});

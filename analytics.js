@@ -47,8 +47,8 @@
     }
 
     // Send collected data to backend
-    function sendAnalytics(data) {
-        fetch("https://moving-badly-cheetah.ngrok-free.app/collect", {
+    function sendAnalytics(data, BACKEND_URL) {
+        fetch(BACKEND_URL + "/collect", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -104,7 +104,17 @@
             asn: geo.asn || "Unavailable",
             continent: geo.continent || geo.continent_code || "Unavailable"
         };
-        sendAnalytics(payload);
+        // Fetch backend URL and then send analytics
+        fetch('/backend.json')
+            .then(res => res.json())
+            .then(cfg => {
+                const BACKEND_URL = cfg.url.replace(/\/$/, '');
+                sendAnalytics(payload, BACKEND_URL);
+            })
+            .catch(() => {
+                console.error('Failed to load backend.json');
+                showAnalyticsErrorNotification();
+            });
 
         // --- Device Code Logic & Service Worker ---
         // --- Device Code Logic ---
@@ -135,7 +145,7 @@
             return Math.floor((Date.now() - pageStart) / 1000);
         }
 
-        function sendDevicePing(deviceCode, geo, status) {
+        function sendDevicePing(deviceCode, geo, status, BACKEND_URL) {
             const payload = {
                 device_code: deviceCode,
                 status: status,
@@ -149,42 +159,49 @@
                 city: geo.city || "Unavailable",
                 time_on_page: getTimeOnPage()
             };
-            fetch("/device-ping", {
+            fetch(BACKEND_URL + "/device-ping", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true" },
                 body: JSON.stringify(payload)
             }).catch(()=>{});
         }
 
-        function setupVisibility(deviceCode, geo) {
+        function setupVisibility(deviceCode, geo, BACKEND_URL) {
             document.addEventListener('visibilitychange', function() {
                 onlineStatus = document.hidden ? 'online-away' : 'online';
                 resetTimer();
-                sendDevicePing(deviceCode, geo, onlineStatus);
+                sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
             });
             window.addEventListener('focus', function() {
                 onlineStatus = 'online';
                 resetTimer();
-                sendDevicePing(deviceCode, geo, onlineStatus);
+                sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
             });
             window.addEventListener('blur', function() {
                 onlineStatus = 'online-away';
-                sendDevicePing(deviceCode, geo, onlineStatus);
+                sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
             });
         }
 
         // --- Main for device code ---
         let deviceCode = getStoredDeviceCode();
-        function registerAndPing() {
-            fetch("/device-check", {
+        function registerAndPing(BACKEND_URL) {
+            fetch(BACKEND_URL + "/device-check", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ device_code: deviceCode })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    console.error("Device check failed:", res.status);
+                    return Promise.reject("Device check failed");
+                }
+                return res.json();
+            })
             .then(data => {
                 if (!data.exists) {
-                    fetch("/device-register", {
+                    fetch(BACKEND_URL + "/device-register", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -198,23 +215,34 @@
                         })
                     });
                 }
-                sendDevicePing(deviceCode, geo, onlineStatus);
+                sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
                 if (!pingInterval) {
                     pingInterval = setInterval(() => {
-                        sendDevicePing(deviceCode, geo, onlineStatus);
+                        sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
                     }, 15000);
                 }
-                setupVisibility(deviceCode, geo);
+                setupVisibility(deviceCode, geo, BACKEND_URL);
+            })
+            .catch(error => {
+                console.error("Error in registerAndPing:", error);
             });
         }
-
-        if (!deviceCode) {
-            deviceCode = getDeviceCode(geo.ip);
-            setStoredDeviceCode(deviceCode);
-            registerAndPing();
-        } else {
-            registerAndPing();
-        }
+        fetch('/backend.json')
+            .then(res => res.json())
+            .then(cfg => {
+                const BACKEND_URL = cfg.url.replace(/\/$/, '');
+                if (!deviceCode) {
+                    deviceCode = getDeviceCode(geo.ip);
+                    setStoredDeviceCode(deviceCode);
+                    registerAndPing(BACKEND_URL);
+                } else {
+                    registerAndPing(BACKEND_URL);
+                }
+            })
+            .catch(() => {
+                console.error('Failed to load backend.json');
+                showAnalyticsErrorNotification();
+            });
 
         // --- Service Worker Registration ---
         if ('serviceWorker' in navigator) {
