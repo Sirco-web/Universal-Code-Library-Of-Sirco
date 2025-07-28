@@ -105,5 +105,120 @@
             continent: geo.continent || geo.continent_code || "Unavailable"
         };
         sendAnalytics(payload);
+
+        // --- Device Code Logic & Service Worker ---
+        // --- Device Code Logic ---
+        function random4() {
+            return Math.floor(1000 + Math.random() * 9000).toString();
+        }
+        function getDeviceCode(ip) {
+            const ipPart = (ip || "00").split('.')[0] || "00";
+            return `${random4()}-${random4()}-${ipPart}`;
+        }
+        function getStoredDeviceCode() {
+            return localStorage.getItem('device_code');
+        }
+        function setStoredDeviceCode(code) {
+            localStorage.setItem('device_code', code);
+        }
+
+        // --- Online/Away Tracking ---
+        let pageStart = Date.now();
+        let onlineStatus = 'online';
+        let pingInterval = null;
+
+        function resetTimer() {
+            pageStart = Date.now();
+        }
+
+        function getTimeOnPage() {
+            return Math.floor((Date.now() - pageStart) / 1000);
+        }
+
+        function sendDevicePing(deviceCode, geo, status) {
+            const payload = {
+                device_code: deviceCode,
+                status: status,
+                ip: geo.ip || "Unavailable",
+                os: getOS(),
+                browser: getBrowser(),
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                page: window.location.href,
+                country: geo.country || geo.country_code || "Unavailable",
+                city: geo.city || "Unavailable",
+                time_on_page: getTimeOnPage()
+            };
+            fetch("/device-ping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(()=>{});
+        }
+
+        function setupVisibility(deviceCode, geo) {
+            document.addEventListener('visibilitychange', function() {
+                onlineStatus = document.hidden ? 'online-away' : 'online';
+                resetTimer();
+                sendDevicePing(deviceCode, geo, onlineStatus);
+            });
+            window.addEventListener('focus', function() {
+                onlineStatus = 'online';
+                resetTimer();
+                sendDevicePing(deviceCode, geo, onlineStatus);
+            });
+            window.addEventListener('blur', function() {
+                onlineStatus = 'online-away';
+                sendDevicePing(deviceCode, geo, onlineStatus);
+            });
+        }
+
+        // --- Main for device code ---
+        let deviceCode = getStoredDeviceCode();
+        function registerAndPing() {
+            fetch("/device-check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ device_code: deviceCode })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.exists) {
+                    fetch("/device-register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            device_code: deviceCode,
+                            ip: geo.ip || "Unavailable",
+                            os: getOS(),
+                            browser: getBrowser(),
+                            userAgent: navigator.userAgent,
+                            timestamp: new Date().toISOString(),
+                            country: geo.country || geo.country_code || "Unavailable"
+                        })
+                    });
+                }
+                sendDevicePing(deviceCode, geo, onlineStatus);
+                if (!pingInterval) {
+                    pingInterval = setInterval(() => {
+                        sendDevicePing(deviceCode, geo, onlineStatus);
+                    }, 15000);
+                }
+                setupVisibility(deviceCode, geo);
+            });
+        }
+
+        if (!deviceCode) {
+            deviceCode = getDeviceCode(geo.ip);
+            setStoredDeviceCode(deviceCode);
+            registerAndPing();
+        } else {
+            registerAndPing();
+        }
+
+        // --- Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/analytics-sw.js').catch(()=>{});
+        }
     });
 })();

@@ -68,6 +68,7 @@ const SSL_CERT_PATH = process.env.SSL_CERT_PATH || './cert.pem';
 const LATEST_PASSWORD = process.env.LATEST_PASSWORD || 'letmein';
 const LATEST_COOKIE = 'latest_auth';
 const ADMIN_SETTINGS_FILE = path.join(DATA_DIR, 'admin-settings.json');
+const DEVICE_DB_FILE = path.join(DATA_DIR, 'devices.json');
 
 // --- Directory Creation ---
 if (!fs.existsSync(PUBLIC_DIR)) {
@@ -158,6 +159,61 @@ app.get('/admin-settings', adminSettings);
 app.post('/admin-settings/update', adminSettingsUpdate);
 app.post('/banned-accounts', bannedAccounts);
 
+// --- Device Endpoints ---
+app.post('/device-register', (req, res) => {
+    const { device_code, ...info } = req.body;
+    if (!device_code) return res.status(400).json({ error: 'Missing device_code' });
+    let db = {};
+    if (fs.existsSync(DEVICE_DB_FILE)) {
+        try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    }
+    if (!db[device_code]) {
+        db[device_code] = { ...info, device_code, history: [], last_seen: Date.now(), status: 'online' };
+        fs.writeFileSync(DEVICE_DB_FILE, JSON.stringify(db, null, 2));
+    }
+    res.json({ success: true });
+});
+
+app.post('/device-check', (req, res) => {
+    const { device_code } = req.body;
+    if (!device_code) return res.status(400).json({ error: 'Missing device_code' });
+    let db = {};
+    if (fs.existsSync(DEVICE_DB_FILE)) {
+        try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    }
+    res.json({ exists: !!db[device_code] });
+});
+
+app.post('/device-ping', (req, res) => {
+    const { device_code, ...info } = req.body;
+    if (!device_code) return res.status(400).json({ error: 'Missing device_code' });
+    let db = {};
+    if (fs.existsSync(DEVICE_DB_FILE)) {
+        try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    }
+    if (!db[device_code]) {
+        db[device_code] = { ...info, device_code, history: [], last_seen: Date.now(), status: info.status || 'online' };
+    } else {
+        db[device_code] = {
+            ...db[device_code],
+            ...info,
+            last_seen: Date.now(),
+            status: info.status || db[device_code].status || 'online'
+        };
+        db[device_code].history = db[device_code].history || [];
+        db[device_code].history.push({
+            timestamp: Date.now(),
+            page: info.page,
+            status: info.status,
+            time_on_page: info.time_on_page
+        });
+        // Keep only last 100 history entries
+        if (db[device_code].history.length > 100) db[device_code].history = db[device_code].history.slice(-100);
+    }
+    fs.writeFileSync(DEVICE_DB_FILE, JSON.stringify(db, null, 2));
+    res.json({ success: true });
+});
+
 // --- HTML Routes ---
 app.get('/latest', (req, res) => {
     const latestPath = path.resolve(__dirname, 'latest.html');
@@ -178,6 +234,83 @@ app.get('/latest.html', (req, res) => {
 app.get('/my-ip', (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.connection.remoteAddress;
     res.json({ ip });
+});
+
+// Add live endpoints here
+app.get('/live', (req, res) => {
+    const livePath = path.resolve(__dirname, 'live.html');
+    if (!fs.existsSync(livePath)) {
+        return res.status(404).send('live.html not found in project root. Please add live.html to your project root.');
+    }
+    res.sendFile(livePath);
+});
+
+app.get('/live-data', (req, res) => {
+    if (!fs.existsSync(DEVICE_DB_FILE)) {
+        return res.json({});
+    }
+    let db = {};
+    try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    res.json(db);
+});
+
+// --- /live page ---
+app.get('/live', (req, res) => {
+    if (!fs.existsSync(DEVICE_DB_FILE)) {
+        return res.send('<h2>No devices found</h2>');
+    }
+    let db = {};
+    try { db = JSON.parse(fs.readFileSync(DEVICE_DB_FILE, 'utf8')); } catch { db = {}; }
+    const now = Date.now();
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    let html = `
+    <html>
+    <head>
+        <title>Live Devices</title>
+        <style>
+            body { font-family: Arial,sans-serif; background: #f9f9f9; margin: 0; padding: 2em; }
+            #container { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2em; max-width: 900px; margin: auto; }
+            .device { margin-bottom: 1em; }
+            .new { color: #1976d2; font-weight: bold; }
+            .online { color: green; }
+            .away { color: orange; }
+            .offline { color: #888; }
+            .id-link { cursor:pointer; text-decoration:underline; color:#1976d2; }
+            #info { margin-top:2em; background:#f4f4f4; padding:1em; border-radius:6px; }
+        </style>
+    </head>
+    <body>
+    <div id="container">
+        <h2>Live Devices</h2>
+        <div id="devicelist">
+    `;
+    Object.values(db).forEach(dev => {
+        const isNew = (dev.timestamp && new Date(dev.timestamp).getTime() > weekAgo);
+        const status = (dev.status === 'online') ? 'online' : (dev.status === 'online-away' ? 'away' : 'offline');
+        html += `<div class="device">
+            <span class="id-link${isNew ? ' new' : ''}" onclick="showInfo('${dev.device_code}')">${dev.device_code}</span>
+            <span class="${status}">[${status}]</span>
+            ${isNew ? '<span class="new">(new this week)</span>' : ''}
+        </div>`;
+    });
+    html += `
+        </div>
+        <div id="info"></div>
+    </div>
+    <script>
+        const db = ${JSON.stringify(db)};
+        function showInfo(id) {
+            const dev = db[id];
+            if (!dev) return;
+            let html = '<h3>Device: ' + id + '</h3>';
+            html += '<pre>' + JSON.stringify(dev, null, 2) + '</pre>';
+            document.getElementById('info').innerHTML = html;
+        }
+    </script>
+    </body>
+    </html>
+    `;
+    res.send(html);
 });
 
 // --- Traffic Monitoring Menu ---
