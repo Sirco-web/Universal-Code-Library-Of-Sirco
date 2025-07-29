@@ -12,6 +12,7 @@ const { v4: uuidv4 } = require('uuid');
 const nodemailer = require('nodemailer');
 const readline = require('readline');
 const { getLocalIP, checkLatestPassword, loadNewsletterDB } = require('./helpers');
+const merge = require('utils-merge');
 
 // --- Initialize Express app ---
 const app = express();
@@ -150,12 +151,132 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => res.send('Server is running'));
 app.use(express.static(PUBLIC_DIR));
 
-app.post('/verify-account', verifyAccount);
-app.post('/account-signup', banSystem.bannedIPMiddleware, accountSignup);
+app.post('/verify-account', (req, res) => {
+    const { username, code } = req.body;
+    if (!username || !code) return res.status(400).json({ error: 'Missing username or code' });
+
+    const ACCOUNTS_FILE_PATH = path.join(DATA_DIR, 'users.json');
+    let accounts = {};
+    if (fs.existsSync(ACCOUNTS_FILE_PATH)) {
+        try {
+            const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+            accounts = JSON.parse(data);
+        } catch (e) {
+            console.error('Error parsing accounts.json:', e.message);
+            return res.status(500).json({ error: 'Error reading accounts data' });
+        }
+    }
+
+    const user = accounts[username];
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.code !== code) {
+        return res.status(400).json({ error: 'Invalid code' });
+    }
+
+    user.verified = true;
+    delete user.code; // Remove code after verification
+    accounts[username] = user;
+    fs.writeFileSync(ACCOUNTS_FILE_PATH, JSON.stringify(accounts, null, 2));
+
+    res.json({ success: true });
+});
+
+app.post('/account-signup', banSystem.bannedIPMiddleware, (req, res) => {
+    const { username, password, name, email, creation_ip, last_ip_used, connected_accounts } = req.body;
+    if (!username || !password || !name || !email) return res.status(400).json({ error: 'Missing fields' });
+
+    const ACCOUNTS_FILE_PATH = path.join(DATA_DIR, 'users.json');
+    let accounts = {};
+    if (fs.existsSync(ACCOUNTS_FILE_PATH)) {
+        try {
+            const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+            accounts = JSON.parse(data);
+        } catch (e) {
+            console.error('Error parsing accounts.json:', e.message);
+            return res.status(500).json({ error: 'Error reading accounts data' });
+        }
+    }
+
+    if (accounts[username]) {
+        return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const code = uuidv4().substring(0, 8).toUpperCase();
+    const newAccount = {
+        username,
+        password,
+        name,
+        email,
+        creation_ip,
+        last_ip_used,
+        connected_accounts,
+        timestamp: new Date().toISOString(),
+        verified: false,
+        code,
+        banned: false
+    };
+
+    accounts[username] = newAccount;
+
+    fs.writeFileSync(ACCOUNTS_FILE_PATH, JSON.stringify(accounts, null, 2));
+
+    // Send verification email
+    const mailOptions = {
+        from: GMAIL_USER,
+        to: email,
+        subject: 'Verify your account',
+        html: `Hello ${name},<br><br>Please verify your account by entering the following code: <b>${code}</b><br><br>Thanks,<br>Cookie Saver Team`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log('Error sending email:', error);
+            res.json({ success: true, verification_required: true, email_sent: false });
+        } else {
+            console.log('Email sent:', info.response);
+            res.json({ success: true, verification_required: true, email_sent: true });
+        }
+    });
+});
+
 app.post('/ban-user', banUser);
 app.post('/temp-ban-user', tempBanUser);
 app.post('/delete-user', deleteUser);
-app.post('/cookie-verify', cookieVerify);
+app.post('/cookie-verify', (req, res) => {
+    const { username, password, last_ip_used, last_ip } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Missing username or password' });
+
+    const ACCOUNTS_FILE_PATH = path.join(DATA_DIR, 'users.json');
+    let accounts = {};
+    if (fs.existsSync(ACCOUNTS_FILE_PATH)) {
+        try {
+            const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+            accounts = JSON.parse(data);
+        } catch (e) {
+            console.error('Error parsing accounts.json:', e.message);
+            return res.status(500).json({ error: 'Error reading accounts data' });
+        }
+    }
+
+    const user = accounts[username];
+    if (!user || user.password !== password) {
+        return res.json({ valid: false, error: 'Invalid credentials' });
+    }
+
+    if (user.banned) {
+        return res.json({ valid: false, error: 'Account is banned.' });
+    }
+
+    // Update last IP used
+    user.last_ip_used = last_ip_used;
+    accounts[username] = user;
+    fs.writeFileSync(ACCOUNTS_FILE_PATH, JSON.stringify(accounts, null, 2));
+
+    res.json({ valid: true });
+});
 app.post('/cookie-signup', banSystem.bannedIPMiddleware, cookieSignup);
 app.post('/send-newsletter', sendNewsletter);
 app.post('/collect', collect);
@@ -493,21 +614,19 @@ app.get('/cookie-role', (req, res) => {
 });
 
 app.post('/cookie-verify', (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Missing username or password' });
-    }
+    const { username, password, last_ip_used, last_ip } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Missing username or password' });
 
-    let users = {};
-    const usersPath = path.join(DATA_DIR, 'users.json');
-
-    if (fs.existsSync(usersPath)) {
+    const ACCOUNTS_FILE_PATH = path.join(DATA_DIR, 'users.json');
+    let accounts = {};
+    if (fs.existsSync(ACCOUNTS_FILE_PATH)) {
         try {
-            users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+            const data = fs.readFileSync(ACCOUNTS_FILE_PATH, 'utf8');
+            accounts = JSON.parse(data);
         } catch (e) { /* ignore error */ }
     }
 
-    const user = users[username];
+    const user = accounts[username];
     if (!user || user.password !== password) {
         return res.json({ valid: false, error: 'Invalid credentials' });
     }
@@ -515,6 +634,11 @@ app.post('/cookie-verify', (req, res) => {
     if (user.banned) {
         return res.json({ valid: false, error: 'Account is banned.' });
     }
+
+    // Update last IP used
+    user.last_ip_used = last_ip_used;
+    accounts[username] = user;
+    fs.writeFileSync(ACCOUNTS_FILE_PATH, JSON.stringify(accounts, null, 2));
 
     res.json({ valid: true });
 });
