@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- Account icon in top right -->
-    <a href="/CODE/account" id="account-icon-link" style="
+    <a href="/CODE/user/" id="account-icon-link" style="
         position:fixed;
         top:18px;
         right:22px;
@@ -32,6 +32,49 @@
             <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="#007bff" stroke-width="2" fill="none"/>
         </svg>
     </a>
+    <!-- Download button next to account button -->
+    <button id="download-offline-btn" title="Enable offline mode" style="
+        position:fixed;
+        top:18px;
+        right:74px;
+        z-index:10001;
+        background:#fff;
+        border-radius:50%;
+        box-shadow:0 2px 8px #0002;
+        width:44px;
+        height:44px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:1px solid #eee;
+        transition:box-shadow 0.2s;
+        cursor:pointer;
+    ">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block;" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4v12m0 0l-5-5m5 5l5-5" stroke="#28a745" stroke-width="2" fill="none"/>
+            <rect x="4" y="18" width="16" height="2" rx="1" fill="#28a745"/>
+        </svg>
+    </button>
+    <!-- Modal for offline confirmation -->
+    <div id="offline-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20000;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
+      <div style="background:#fff;padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px #0003;text-align:center;max-width:90vw;position:relative;">
+        <button id="offline-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#888;cursor:pointer;">&times;</button>
+        <p style="font-size:1.1em;">Download the whole site for offline use?<br><small>Pages you visit will be saved for offline access.</small></p>
+        <button id="offline-confirm-btn" class="blue-btn" style="margin:0 1em 0 0;">Yes</button>
+        <button id="offline-cancel-btn" class="blue-btn" style="background:#e0e7ef;color:#007bff;">No</button>
+        <button id="view-offline-btn" class="blue-btn" style="margin-left:1em;">View Offline Content</button>
+      </div>
+    </div>
+    <!-- Modal for viewing offline content -->
+    <div id="offline-list-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20001;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
+      <div style="background:#fff;padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px #0003;text-align:left;max-width:95vw;max-height:90vh;overflow:auto;">
+        <h3>Offline Content</h3>
+        <div id="offline-list-content">
+          <em>Loading...</em>
+        </div>
+        <button id="offline-list-close-btn" class="blue-btn" style="margin-top:1em;">Close</button>
+      </div>
+    </div>
 
     <!-- Banner iframe, visibility controlled by showBanner -->
     <iframe 
@@ -43,6 +86,260 @@
     <script>
         // Set the banner iframe src with cache-busting using JS (like fetchVersion)
         document.getElementById('banner-frame').src = `/banner.html?nocache=${new Date().getTime()}`;
+
+        // Offline download button logic
+        // Button references
+        const offlineBtn = document.getElementById('download-offline-btn');
+        const offlineModal = document.getElementById('offline-modal');
+        const offlineModalClose = document.getElementById('offline-modal-close');
+        const offlineConfirm = document.getElementById('offline-confirm-btn');
+        const offlineCancel = document.getElementById('offline-cancel-btn');
+        const viewOfflineBtn = document.getElementById('view-offline-btn');
+        const offlineListModal = document.getElementById('offline-list-modal');
+        const offlineListContent = document.getElementById('offline-list-content');
+        const offlineListCloseBtn = document.getElementById('offline-list-close-btn');
+
+        offlineBtn.onclick = () => {
+            // Change "No" button to "Deactivate" if downloader is active
+            const offlineCancel = document.getElementById('offline-cancel-btn');
+            if (localStorage.downloader_enabled === "1") {
+                offlineCancel.textContent = "Deactivate";
+            } else {
+                offlineCancel.textContent = "No";
+            }
+            offlineModal.style.display = 'flex';
+        };
+        offlineCancel.onclick = () => {
+            offlineModal.style.display = 'none';
+            // If downloader is active, deactivate it
+            if (localStorage.downloader_enabled === "1") {
+                localStorage.downloader_enabled = "0";
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SET_DOWNLOADER',
+                        enabled: false
+                    });
+                }
+                alert('Offline downloader deactivated.');
+            }
+        };
+        offlineModalClose.onclick = () => { offlineModal.style.display = 'none'; };
+        offlineConfirm.onclick = () => {
+            offlineModal.style.display = 'none';
+            // Enable downloader in localStorage and notify service worker
+            localStorage.downloader_enabled = "1";
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'SET_DOWNLOADER',
+                    enabled: true
+                });
+            }
+            alert('Offline mode enabled! Pages you visit will be saved for offline use.');
+        };
+
+        // Register analytics-sw.js and set downloaderEnabled state
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/analytics-sw.js').then(reg => {
+                // Set initial downloader state
+                function updateDownloaderState() {
+                    if (reg.active) {
+                        reg.active.postMessage({
+                            type: 'SET_DOWNLOADER',
+                            enabled: localStorage.downloader_enabled === "1"
+                        });
+                    }
+                }
+                updateDownloaderState();
+                window.addEventListener('storage', updateDownloaderState);
+            });
+        }
+
+        // List of files to hide from offline content view
+        const HIDE_OFFLINE_PATHS = [
+            '/banner.html',
+            '/welcome/style.css',
+            '/welcome/main.js',
+            '/analytics.js',
+            '/newsletter.js',
+            '/backend.json'
+        ];
+
+        // Show offline content modal
+        viewOfflineBtn.onclick = async () => {
+            offlineListContent.innerHTML = "<em>Loading...</em>";
+            offlineListModal.style.display = 'flex';
+            if ('caches' in window) {
+                try {
+                    const cache = await caches.open('site-offline-cache-v1');
+                    const requests = await cache.keys();
+                    const pages = [];
+                    const files = [];
+                    for (const req of requests) {
+                        const url = new URL(req.url, location.origin);
+                        if (url.origin !== location.origin) continue;
+                        if (HIDE_OFFLINE_PATHS.includes(url.pathname)) continue;
+                        // Treat /something and /something/ as index.html if index.html is cached
+                        if (url.pathname.endsWith('/index.html')) {
+                            const dirPath = url.pathname.replace(/\/index\.html$/, '/') || '/';
+                            pages.push({ display: dirPath, href: dirPath, url: url.pathname });
+                            // Also add the non-slash version (e.g. /CODE/games)
+                            if (dirPath.endsWith('/')) {
+                                const noSlash = dirPath.slice(0, -1);
+                                if (noSlash) {
+                                    pages.push({ display: noSlash, href: noSlash, url: url.pathname });
+                                }
+                            }
+                        } else if (url.pathname.endsWith('.html')) {
+                            pages.push({ display: url.pathname, href: url.pathname, url: url.pathname });
+                        } else {
+                            files.push({ display: url.pathname, url: url.pathname });
+                        }
+                    }
+                    // Remove duplicates (by href)
+                    const seen = new Set();
+                    const uniquePages = pages.filter(p => {
+                        if (seen.has(p.href)) return false;
+                        seen.add(p.href);
+                        return true;
+                    });
+                    offlineListContent.innerHTML = `
+                        <b>Pages:</b>
+                        <ul>
+                            ${uniquePages.length ? uniquePages.map(p=>
+                                `<li>
+                                    <a href="${p.href}" target="_blank">${p.display}</a>
+                                    <button class="remove-offline-file blue-btn" data-url="${p.url}" style="background:#e0e7ef;color:#007bff;margin-left:0.5em;padding:0.2em 0.7em;font-size:0.95em;">Remove</button>
+                                </li>`
+                            ).join('') : '<li><em>None</em></li>'}
+                        </ul>
+                        <b>Other Files:</b>
+                        <ul>
+                            ${files.length ? files.map(f=>
+                                `<li>
+                                    <a href="${f.url}" target="_blank">${f.display}</a>
+                                    <button class="remove-offline-file blue-btn" data-url="${f.url}" style="background:#e0e7ef;color:#007bff;margin-left:0.5em;padding:0.2em 0.7em;font-size:0.95em;">Remove</button>
+                                </li>`
+                            ).join('') : '<li><em>None</em></li>'}
+                        </ul>
+                        <div style="margin-bottom:1em;">
+                            <button id="remove-all-offline" class="blue-btn" style="margin-left:0.5em;">Remove All Offline Files</button>
+                        </div>
+                    `;
+                    // Add event listeners for remove buttons
+                    offlineListContent.querySelectorAll('.remove-offline-file').forEach(btn => {
+                        btn.onclick = () => {
+                            const url = btn.getAttribute('data-url');
+                            if (navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage({
+                                    type: 'REMOVE_FILE',
+                                    url
+                                });
+                            }
+                            btn.parentElement.remove();
+                        };
+                    });
+                    // Remove all files
+                    document.getElementById('remove-all-offline').onclick = () => {
+                        if (navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ type: 'REMOVE_ALL' });
+                        }
+                        offlineListContent.querySelectorAll('ul').forEach(ul => ul.innerHTML = '<li><em>None</em></li>');
+                    };
+                } catch (e) {
+                    offlineListContent.innerHTML = "<em>Could not read offline cache.</em>";
+                }
+            } else {
+                offlineListContent.innerHTML = "<em>Offline cache not supported.</em>";
+            }
+        };
+
+        // Add opt-in/out logic for downloader
+        function setDownloaderEnabled(val) {
+            localStorage.downloader_enabled = val ? "1" : "0";
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'SET_DOWNLOADER',
+                    enabled: !!val
+                });
+            }
+        }
+
+        // Add remove file/all logic for offline content modal
+        viewOfflineBtn.onclick = async () => {
+            offlineListContent.innerHTML = "<em>Loading...</em>";
+            offlineListModal.style.display = 'flex';
+            if ('caches' in window) {
+                try {
+                    const cache = await caches.open('site-offline-cache-v1');
+                    const requests = await cache.keys();
+                    const pages = [];
+                    const files = [];
+                    for (const req of requests) {
+                        const url = new URL(req.url, location.origin);
+                        if (url.origin !== location.origin) continue;
+                        if (HIDE_OFFLINE_PATHS.includes(url.pathname)) continue;
+                        if (url.pathname.endsWith('/index.html')) {
+                            if (url.pathname.endsWith('/index.html')) {
+                                const dirPath = url.pathname.replace(/\/index\.html$/, '/') || '/';
+                                pages.push({ display: dirPath, href: dirPath, url: url.pathname });
+                            } else {
+                                pages.push({ display: url.pathname, href: url.pathname, url: url.pathname });
+                            }
+                        } else {
+                            files.push({ display: url.pathname, url: url.pathname });
+                        }
+                    }
+                    offlineListContent.innerHTML = `
+                        <div style="margin-bottom:1em;">
+                            <button id="remove-all-offline" class="blue-btn" style="margin-left:0.5em;">Remove All Offline Files</button>
+                        </div>
+                        <b>Pages:</b>
+                        <ul>
+                            ${pages.length ? pages.map(p=>
+                                `<li>
+                                    <a href="${p.href}" target="_blank">${p.display}</a>
+                                    <button class="remove-offline-file blue-btn" data-url="${p.url}" style="background:#e0e7ef;color:#007bff;margin-left:0.5em;padding:0.2em 0.7em;font-size:0.95em;">Remove</button>
+                                </li>`
+                            ).join('') : '<li><em>None</em></li>'}
+                        </ul>
+                        <b>Other Files:</b>
+                        <ul>
+                            ${files.length ? files.map(f=>
+                                `<li>
+                                    <a href="${f.url}" target="_blank">${f.display}</a>
+                                    <button class="remove-offline-file blue-btn" data-url="${f.url}" style="background:#e0e7ef;color:#007bff;margin-left:0.5em;padding:0.2em 0.7em;font-size:0.95em;">Remove</button>
+                                </li>`
+                            ).join('') : '<li><em>None</em></li>'}
+                        </ul>
+                    `;
+                    // Add event listeners for remove buttons
+                    offlineListContent.querySelectorAll('.remove-offline-file').forEach(btn => {
+                        btn.onclick = () => {
+                            const url = btn.getAttribute('data-url');
+                            if (navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage({
+                                    type: 'REMOVE_FILE',
+                                    url
+                                });
+                            }
+                            btn.parentElement.remove();
+                        };
+                    });
+                    // Remove all files
+                    document.getElementById('remove-all-offline').onclick = () => {
+                        if (navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ type: 'REMOVE_ALL' });
+                        }
+                        offlineListContent.querySelectorAll('ul').forEach(ul => ul.innerHTML = '<li><em>None</em></li>');
+                    };
+                } catch (e) {
+                    offlineListContent.innerHTML = "<em>Could not read offline cache.</em>";
+                }
+            } else {
+                offlineListContent.innerHTML = "<em>Offline cache not supported.</em>";
+            }
+        };
+        offlineListCloseBtn.onclick = () => { offlineListModal.style.display = 'none'; };
     </script>
 
     <div class="container">
@@ -77,5 +374,25 @@
 
     <script src="/analytics.js?5h"></script>
     <script src="/newsletter.js?67herth676"></script>
+    <style>
+    /* ...existing code... */
+    .blue-btn {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5em 1.2em;
+        font-size: 1em;
+        cursor: pointer;
+        margin-bottom: 0.2em;
+        transition: background 0.15s;
+        box-shadow: 0 1px 4px #0001;
+        outline: none;
+        display: inline-block;
+    }
+    .blue-btn:hover, .blue-btn:focus {
+        background: #0056b3;
+    }
+    </style>
 </body>
 </html>

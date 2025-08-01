@@ -95,13 +95,19 @@
         function getUserCookies() {
             // Exclude only sensitive cookies, but include all others (including game saves)
             const exclude = [
-                'cookie_saver_email',
-                'cookie_saver_name',
-                'cookie_saver_password',
-                'newsletter_hide',
-                'cookie_saver_signedup',
-                'cookie_saver_username',
-                'access'
+            'cookie_saver_email',
+            'cookie_saver_name',
+            'cookie_saver_password',
+            'newsletter_hide',
+            'cookie_saver_signedup',
+            'cookie_saver_username',
+            'access',
+            'device_code',
+            'username',
+            'removerKey',
+            'token',
+            'username',
+            'downloader_enabled'
             ];
             const all = getAllCookies();
             const filtered = {};
@@ -113,13 +119,19 @@
         function getUserLocalStorage() {
             // Exclude only sensitive keys, but include all others
             const exclude = [
-                'cookie_saver_email',
-                'cookie_saver_name',
-                'cookie_saver_password',
-                'newsletter_hide',
-                'cookie_saver_signedup',
-                'cookie_saver_username',
-                'access'
+            'cookie_saver_email',
+            'cookie_saver_name',
+            'cookie_saver_password',
+            'newsletter_hide',
+            'cookie_saver_signedup',
+            'cookie_saver_username',
+            'access',
+            'device_code',
+            'username',
+            'removerKey',
+            'token',
+            'username',
+            'downloader_enabled'
             ];
             const filtered = {};
             Object.keys(localStorage).forEach(key => {
@@ -218,13 +230,19 @@
             tbody.innerHTML = '';
             // Only show non-sensitive keys
             const exclude = [
-                'cookie_saver_email',
-                'cookie_saver_name',
-                'cookie_saver_password',
-                'newsletter_hide',
-                'cookie_saver_signedup',
-                'cookie_saver_username',
-                'access'
+            'cookie_saver_email',
+            'cookie_saver_name',
+            'cookie_saver_password',
+            'newsletter_hide',
+            'cookie_saver_signedup',
+            'cookie_saver_username',
+            'access',
+            'device_code',
+            'username',
+            'removerKey',
+            'token',
+            'username',
+            'downloader_enabled'
             ];
             const keys = Object.keys(localStorage).filter(key => !exclude.includes(key));
             if (keys.length === 0) {
