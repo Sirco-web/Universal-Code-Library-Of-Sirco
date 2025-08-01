@@ -70,7 +70,7 @@
         if (document.getElementById('analytics-error-notification')) return;
         const notif = document.createElement('div');
         notif.id = 'analytics-error-notification';
-        notif.textContent = 'error 362 if you see this agen report to owner';
+        notif.textContent = 'error 362 if you see this you maybe offline.';
         notif.style.position = 'fixed';
         notif.style.top = '18px';
         notif.style.right = '18px';
