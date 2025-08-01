@@ -16642,7 +16642,7 @@ Game.Launch=function()
 		if (App && App.logic) App.logic(Game.T);
 		
 		//every hour: get server data (ie. update notification, patreon, steam etc)
-		if (Game.T%(Game.fps*60*60)==0 && Game.T>Game.fps*10/* && Game.prefs.autoupdate*/) {Game.CheckUpdates();Game.GrabData();}
+		if (Game.T%(Game.fps*60*60)==0 && Game.T>Game.fps*10/* && Game.prefs.autoupdate*/) {Game.CheckUpdates();/*Game.GrabData();*/}
 		
 		Game.T++;
 	}
