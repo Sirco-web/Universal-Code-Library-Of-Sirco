@@ -9,6 +9,16 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
     <style></style>
     <title>Flappy Bird</title>
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
     <script src="https://s3-eu-west-1.amazonaws.com/apps.playcanvas.com/bXj5OWCb/playcanvas-stable.min.js"></script>
     <script>
         ASSET_PREFIX = "https://s3-eu-west-1.amazonaws.com/apps.playcanvas.com/bXj5OWCb/";

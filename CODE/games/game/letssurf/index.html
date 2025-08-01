@@ -23,6 +23,16 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="resources/icons/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
     <script src="resources/js/base-error-reporting.js"></script>
     <script src="resources/js/surf-error-reporting.js"></script>
     <script src="resources/js/assert.js"></script>

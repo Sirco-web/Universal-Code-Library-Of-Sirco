@@ -90,6 +90,16 @@ html, body, canvas {
     overflow: hidden;
     clip: rect(1px, 1px, 1px, 1px);
 }</style>
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
 <script src="/js/all.js"></script>
 
 

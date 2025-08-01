@@ -15,6 +15,16 @@
 		// memUrl: "Build/Webgl.mem",
 		};
 	</script>
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
 	<!-- <script src="TemplateData/UnityProgress.js"></script> -->
 	<script src="UnityLoader.js"></script>
 	<script src="jquery-3.5.0.min.js"></script>

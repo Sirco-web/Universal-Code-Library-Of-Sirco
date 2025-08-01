@@ -81,6 +81,16 @@
         </div>
 
         <!-- Run the game code -->
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
         <script type="text/javascript" src="js/main.js"></script>
         <script>window.onload = GameMaker_Init;</script>
     </body>

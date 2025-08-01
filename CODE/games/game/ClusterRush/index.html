@@ -7,6 +7,16 @@
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
 
     <!-- Google Analytics Tracking -->
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
