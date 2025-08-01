@@ -2235,12 +2235,6 @@ Game.Launch=function()
 		Game.bakeryNameL=l('bakeryName');
 		Game.bakeryNameSet=function(what)
 		{
-			if (Game.bakeryName!=what && what=='harley')
-			{//added by request as thanks to the very nice person who kept my twitter handle safe when my account got hacked by crypto scammers
-				var rect=Game.bakeryNameL.getBounds();
-				Game.Popup('Horse complex!',(rect.left+rect.right)/2,(rect.top+rect.bottom)/2-48);
-			}
-			
 			try
 			{
 				var exp=new RegExp('[^\'\\-_0-9 \\p{L}]','gu');
@@ -2500,7 +2494,7 @@ Game.Launch=function()
 		
 		Game.GrabData=function()
 		{
-			if (!App) ajax('/patreon/grab.php',Game.GrabDataResponse);
+			if (!App) ajax('grab.txt',Game.GrabDataResponse);
 			else App.grabData(function(res){
 				Game.heralds=res?(res.playersN||1):1;
 				Game.heralds=Math.max(0,Math.min(100,Math.ceil(Game.heralds/100*100)/100));
@@ -16642,7 +16636,7 @@ Game.Launch=function()
 		if (App && App.logic) App.logic(Game.T);
 		
 		//every hour: get server data (ie. update notification, patreon, steam etc)
-		if (Game.T%(Game.fps*60*60)==0 && Game.T>Game.fps*10/* && Game.prefs.autoupdate*/) {Game.CheckUpdates();/*Game.GrabData();*/}
+		if (Game.T%(Game.fps*60*60)==0 && Game.T>Game.fps*10/* && Game.prefs.autoupdate*/) {Game.CheckUpdates();Game.GrabData();}
 		
 		Game.T++;
 	}

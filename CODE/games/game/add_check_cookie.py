@@ -14,9 +14,12 @@ checkCookie();
 """.strip()
 
 def should_patch(filepath):
+    # Only patch if file is not empty and doesn't already have checkCookie
+    if not os.path.isfile(filepath) or os.path.getsize(filepath) == 0:
+        return False
     with open(filepath, encoding="utf-8") as f:
         content = f.read()
-    if "function checkCookie()" in content:
+    if "function checkCookie()" in content or "checkCookie();" in content:
         return False
     return True
 
@@ -48,9 +51,13 @@ def main():
     for root, dirs, files in os.walk("."):
         for file in files:
             if file.endswith(".html"):
-                html_files.append(os.path.join(root, file))
+                fullpath = os.path.join(root, file)
+                if not os.path.isfile(fullpath) or os.path.getsize(fullpath) == 0:
+                    continue
+                html_files.append(fullpath)
     for filepath in html_files:
         if not should_patch(filepath):
+            print(f"Skipped (empty or already has checkCookie): {filepath}")
             continue
         print(f"Found: {filepath}")
         ans = input("Add checkCookie to this file? (y/n): ").strip().lower()
