@@ -81,7 +81,7 @@
         id="banner-frame"
         title="Banner"
         scrolling="no"
-        style="height:60px;border:2px solid #222;border-radius:10px;" <!-- fallback height -->
+        style="height:60px;border:2px solid #222;border-radius:10px;"
     ></iframe>
     <script>
         // Set the banner iframe src with cache-busting using JS (like fetchVersion)
@@ -340,6 +340,55 @@
             }
         };
         offlineListCloseBtn.onclick = () => { offlineListModal.style.display = 'none'; };
+
+        // Hide navigation buttons if their pages are not cached and user is offline
+        async function hideUnavailableButtons() {
+            if (!navigator.onLine && 'caches' in window) {
+                const cache = await caches.open('site-offline-cache-v1');
+                // Mapping: button id -> page path
+                const btns = [
+                    { id: 'games-btn', path: '/CODE/games/' },
+                    { id: 'storage-btn', path: '/CODE/storage/index.html' },
+                    { id: 'proxys-btn', path: '/CODE/proxys/index.html' },
+                    { id: 'tools-btn', path: '/CODE/tools/index.html' },
+                    { id: 'updates-btn', path: '/updates.txt' }
+                ];
+                for (const {id, path} of btns) {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        const match = await cache.match(path);
+                        if (!match) btn.style.display = 'none';
+                    }
+                }
+            }
+        }
+        window.addEventListener('DOMContentLoaded', hideUnavailableButtons);
+
+        // Banner and version fallback for offline
+        function setOfflineBannerAndVersion() {
+            if (!navigator.onLine) {
+                // Banner fallback
+                const bannerFrame = document.getElementById('banner-frame');
+                if (bannerFrame) {
+                    bannerFrame.style.display = 'none';
+                    // Insert offline banner message
+                    if (!document.getElementById('offline-banner-msg')) {
+                        const msg = document.createElement('div');
+                        msg.id = 'offline-banner-msg';
+                        msg.style = 'height:60px;display:flex;align-items:center;justify-content:center;background:#e0e7ef;color:#007bff;font-size:1.1em;border:2px solid #222;border-radius:10px;margin-bottom:10px;';
+                        msg.textContent = 'Sorry, you are offline. To get the latest banner please go online.';
+                        bannerFrame.parentNode.insertBefore(msg, bannerFrame);
+                    }
+                }
+                // Version fallback
+                const verSpan = document.getElementById('siteVersion');
+                if (verSpan) {
+                    verSpan.textContent = 'Offline';
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', setOfflineBannerAndVersion);
     </script>
 
     <div class="container">
@@ -347,17 +396,17 @@
         <p>Welcome to the brand new Code-Universe lineup.</p>
 
         <!-- Top Buttons -->
-        <div class="button-group">
+        <div class="button-group" id="top-buttons">
             <button onclick="removeAccessKey();">Remove Access Key</button>
-            <button onclick="window.location.href='/updates.txt';">View Updates</button>
+            <button onclick="window.location.href='/updates.txt';" id="updates-btn">View Updates</button>
         </div>
 
         <!-- Main Buttons -->
-        <div class="button-group">
-            <button onclick="window.location.href='/CODE/games';">Games</button>
-            <button onclick="window.location.href='/CODE/storage';">Storage</button>
-            <button onclick="window.location.href='/CODE/proxys';">Proxys</button>
-            <button onclick="window.location.href='/CODE/tools';">Tools</button>
+        <div class="button-group" id="main-buttons">
+            <button onclick="window.location.href='/CODE/games';" id="games-btn">Games</button>
+            <button onclick="window.location.href='/CODE/storage';" id="storage-btn">Storage</button>
+            <button onclick="window.location.href='/CODE/proxys';" id="proxys-btn">Proxys</button>
+            <button onclick="window.location.href='/CODE/tools';" id="tools-btn">Tools</button>
         </div>
     </div>
 
