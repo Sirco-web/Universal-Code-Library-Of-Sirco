@@ -96,48 +96,38 @@
   <div class="button-container">
     <!-- Beyond Rare OG -->
     <div class="game-option" id="game-og">
-      <a href="OG/" class="btn btn-og">Beyond Rare OG</a>
+      <a href="og/" class="btn btn-og">Beyond Rare OG</a>
       <p class="description">
-        This is the original version of Beyond Rare. You click a button and it gives you a rarity. The main function of the game is to test your luck. There is also a shop full of items and custom backgrounds.
+        Click the button and unlock a random rarity—will it be common, epic, or ultra rare? Use points earned from pulls to buy shop items that boost your luck and increase your chances. It’s simple, addictive, and all about the thrill of chasing the rarest pulls.
       </p>
     </div>
     <!-- Beyond Rare X -->
     <div class="game-option" id="game-x">
-      <a href="X/" class="btn btn-x">Beyond Rare X</a>
+      <a href="x/" class="btn btn-x">Beyond Rare X</a>
       <p class="description">
-        This version of Beyond Rare is a watered down version of the classic Beyond Rare. It still maintains the main functions of the classic Beyond Rare, but it is meant for old devices that may not be able to run the classic Beyond Rare.
+        Beyond Rare X takes everything you love about the original and turns it up a notch. Better visuals, smarter shop upgrades, and refined luck mechanics make every click feel even more rewarding. It's the same concept—but sharper, sleeker, and more satisfying.
       </p>
     </div>
     <!-- Beyond Rare Y -->
     <div class="game-option" id="game-y">
-      <a href="Y/" class="btn btn-y">Beyond Rare Y</a>
+      <a href="y/" class="btn btn-y">Beyond Rare Y</a>
       <p class="description">
-        Beyond Rare Y takes the classic experience and cranks it up! With expanded rarities, a bigger shop stocked with new items, and more customization options, this version lets you fine-tune your luck like never before.
+        Beyond Rare Y explodes with an endless list of new rarities, powerful shop items, and dynamic progression systems. Climb through rarity tiers, unlock achievements, and strategize with layered upgrades for long-term growth. It’s the ultimate evolution of the Beyond Rare formula—deeper, bigger, and endlessly replayable.
       </p>
     </div>
     <!-- Beyond Rare Z -->
     <div class="game-option" id="game-z">
-      <a href="Z/" class="btn btn-z">Beyond Rare Z</a>
+      <a href="z/" class="btn btn-z">Beyond Rare Z</a>
       <p class="description">
-        Beyond Rare Z introduces a fresh take on the classic formula, developed by a different creator. With more rarities and unique mechanics, this version brings new challenges and unexpected twists to test your luck in exciting ways.
+        Developed by a new team, Beyond Rare Z reimagines the core experience with fresh mechanics and unique systems. While the heart of rarity-hunting remains, new twists like events, evolving shop items, and interactive boosts set it apart. It’s a bold take on the Beyond Rare legacy—familiar yet entirely new.
       </p>
     </div>
   </div>
 
   <footer>
-    <p id="footer-text">©2025 sirco-team and INNOVEXA</p>
+    <p id="footer-text">©2025 Glitch&Go</p>
   </footer>
 
-<script>
-function checkCookie() {
-    const cookies = document.cookie.split("; ");
-    const accessCookie = cookies.find(row => row.startsWith("access="));
-    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-        window.location.href = "/index.html"; // Redirect if no valid cookie
-    }
-}
-checkCookie();
-</script>
   <script>
     // Function to wrap each character in a span with alternating colors (for header, sub-header & footer)
     function colorizeText(elementId, colors) {
@@ -159,38 +149,6 @@ checkCookie();
     colorizeText("header-text", colors);
     colorizeText("sub-header-text", colors);
     colorizeText("footer-text", colors);
-
-    // Device detection: redirect old devices to Beyond Rare X
-    function isOldDevice() {
-      var ua = navigator.userAgent;
-      var isOld = false;
-      
-      // iOS detection: OS 11 or earlier
-      var iOSMatch = ua.match(/OS (\d+)_?(\d+)?/);
-      if (iOSMatch && parseInt(iOSMatch[1], 10) <= 11) {
-        isOld = true;
-      }
-      
-      // Windows detection: Windows 7 is NT 6.1 or earlier
-      var winMatch = ua.match(/Windows NT (\d+\.\d+)/);
-      if (winMatch) {
-        var version = parseFloat(winMatch[1]);
-        if (version <= 6.1) {
-          isOld = true;
-        }
-      }
-      
-      // Android detection: Android 7 or earlier
-      var androidMatch = ua.match(/Android (\d+)\.?(\d+)?/);
-      if (androidMatch && parseInt(androidMatch[1], 10) <= 7) {
-        isOld = true;
-      }
-      
-      return isOld;
-    }
-    
-    if (isOldDevice()) {
-      window.location.href = "X/";
     }
   </script>
 </body>
