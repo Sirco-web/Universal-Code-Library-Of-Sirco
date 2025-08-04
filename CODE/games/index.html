@@ -103,9 +103,32 @@
       }
     }
 
+    // More reliable offline detection
+    function checkOfflineStatus() {
+      const isOffline = !navigator.onLine;
+      localStorage.setItem('wasOffline', isOffline ? '1' : '0');
+      if (isOffline) {
+        document.getElementById('offline-notice').style.display = '';
+        document.getElementById('offline-games-info').style.display = '';
+      }
+    }
+
+    // Check offline status on load and when it changes
+    window.addEventListener('online', checkOfflineStatus);
+    window.addEventListener('offline', checkOfflineStatus);
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check current status
+      checkOfflineStatus();
+      // Also respect previous offline state
+      if (localStorage.getItem('wasOffline') === '1') {
+        document.getElementById('offline-notice').style.display = '';
+        document.getElementById('offline-games-info').style.display = '';
+      }
+    });
+
     // Utility: check if a game is cached offline
     async function isGameCached(path) {
-      if (!navigator.onLine && 'caches' in window) {
+      if (!navigator.onLine || localStorage.getItem('wasOffline') === '1') {
         const cache = await caches.open('site-offline-cache-v1');
         // Check both with and without trailing slash for game pages
         let match = await cache.match('/CODE/games/' + path);
@@ -313,29 +336,6 @@
   <script src="/analytics.js?5h"></script>
 </body>
 </html>
-          <!-- Games will be injected here -->
-        </ul>
-      </div>
-    </div>
-    <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
-    <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
-  </footer>
-
-  <script src="/analytics.js?5h"></script>
-</body>
-</html>
-    <div id="offline-games-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:1.5em 2em;border-radius:10px;box-shadow:0 4px 24px #0003;max-width:95vw;max-height:90vh;overflow:auto;position:relative;text-align:left;">
-        <button id="offline-games-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#007bff;cursor:pointer;">&times;</button>
-        <h3 style="color:#007bff;margin-top:0;">All Games</h3>
-        <p style="font-size:13px;color:#007bff;">These are all the games. You can select one, but if you have not downloaded it, it will not work. This is just in case the downloader is not working properly.</p>
-        <ul id="offline-games-list" style="margin:1em 0 0 0;padding:0 0 0 1em;">
-          <!-- Games will be injected here -->
-        </ul>
-      </div>
-    </div>
-    <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
-    <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
   </footer>
 
   <script src="/analytics.js?5h"></script>

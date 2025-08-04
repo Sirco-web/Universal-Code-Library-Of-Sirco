@@ -37,9 +37,16 @@ function resizeBannerFrame(height) {
     document.body.style.paddingTop = height + 'px';
 }
 
+// Add offline status checking
+function checkOfflineStatus() {
+    const isOffline = !navigator.onLine;
+    localStorage.setItem('wasOffline', isOffline ? '1' : '0');
+}
+
 window.onload = function () {
     checkCookie(); // Verify cookie before loading the page
     fetchVersion(); // Fetch site version
+    checkOfflineStatus();
     // Set the banner iframe src with cache-busting using JS (like fetchVersion)
     document.getElementById('banner-frame').src = `/banner.html?nocache=${new Date().getTime()}`;
 };
@@ -58,3 +65,7 @@ window.addEventListener('message', function(event) {
         resizeBannerFrame(event.data.height);
     }
 });
+
+window.addEventListener('online', checkOfflineStatus);
+window.addEventListener('offline', checkOfflineStatus);
+window.addEventListener('DOMContentLoaded', checkOfflineStatus);
