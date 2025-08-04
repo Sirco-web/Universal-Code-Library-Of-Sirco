@@ -25,6 +25,31 @@ self.addEventListener('fetch', event => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
 
+    // Special handling for games list JSON
+    if (event.request.url.endsWith('/CODE/games/games-list.json')) {
+        event.respondWith(
+            (async () => {
+                // Try network first
+                try {
+                    const resp = await fetch(event.request);
+                    // Cache if downloader enabled
+                    if (downloaderEnabled && resp && resp.status === 200) {
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(event.request, resp.clone());
+                    }
+                    return resp;
+                } catch (e) {
+                    // Fallback to cache
+                    const cache = await caches.open(CACHE_NAME);
+                    const cached = await cache.match(event.request);
+                    if (cached) return cached;
+                    return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
+                }
+            })()
+        );
+        return;
+    }
+
     // For HTML pages, inject analytics.js if not present
     if (event.request.destination === 'document') {
         event.respondWith(

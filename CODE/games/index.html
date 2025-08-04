@@ -119,6 +119,7 @@
       return true; // If online, always show
     }
 
+    // Main games array (already global)
     const games = [
       { title: "Request games", img: "form.png", link: "https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUQ09GM0RCWUU0RUkzRVcyQVAyU0lVWFhHWS4u&rd574bdb047cc4584af89aba2a24b3684=5", status: 1 },
       { title: "1v1.lol", img: "imgs/1v1lol.png", link: "game/1v1lol/index.html", status: 1 },
@@ -150,6 +151,12 @@
       { title: "Stack", img: "imgs/stack.png", link: "game/stack/index.html", status: 1 },
       { title: "Tiny Fishing", img: "imgs/tinyfishing.png", link: "game/tinyfishing/index.html", status: 1 },
       { title: "Tomb of the Mask", img: "imgs/tombofthemask.png", link: "game/tombofthemask/index.html", status: 1 }
+    ];
+
+    // Originals array (move to global scope)
+    const originalGames = [
+      { title: "Beyond Rare", img: "imgs/beyond-rare.png", link: "game/beyond-rare", status: 1 },
+      { title: "Neon Runner", img: "imgs/neonrunner.png", link: "game/neonrunner/index.html", status: 1 }
     ];
 
     async function loadGames() {
@@ -190,11 +197,6 @@
 
     // --- Originals Area Function ---
     async function loadOriginalGames() {
-      const originalGames = [
-        { title: "Beyond Rare", img: "imgs/beyond-rare.png", link: "game/beyond-rare", status: 1 },
-        { title: "Neon Runner", img: "imgs/neonrunner.png", link: "game/neonrunner/index.html", status: 1 }
-      ];
-
       const originalsContainer = document.getElementById("originalGamesList");
       for (const game of originalGames) {
         let show = true;
@@ -240,10 +242,11 @@
 
     // Modal logic for offline games info
     function showOfflineGamesInfoPopup() {
-      // Use the same games array as the main list, but only show titles and links (ignore img/status)
       const list = document.getElementById('offline-games-list');
       list.innerHTML = '';
-      games.forEach(game => {
+      // Combine main games and original games
+      const allGames = [...games, ...originalGames];
+      allGames.forEach(game => {
         const li = document.createElement('li');
         li.style.marginBottom = '0.3em';
         const a = document.createElement('a');
@@ -310,20 +313,17 @@
   <script src="/analytics.js?5h"></script>
 </body>
 </html>
-  <h2 id="games-heading" style="margin-top:10px;">Games</h2>
-  <!-- Standard Games List Container -->
-  <div class="game-container" id="gamesList"></div>
-
-  <!-- Originals Area -->
-  <h2>Original Games</h2>
-  <div class="game-container" id="originalGamesList"></div>
-
-  <footer>
-    <!-- Blue info text, only visible offline -->
-    <div id="offline-games-info" style="display:none;text-align:center;">
-      <span style="color:#007bff;font-size:13px;cursor:pointer;" onclick="showOfflineGamesInfoPopup()">All games</span>
+          <!-- Games will be injected here -->
+        </ul>
+      </div>
     </div>
-    <!-- Modal for all games list -->
+    <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
+    <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
+  </footer>
+
+  <script src="/analytics.js?5h"></script>
+</body>
+</html>
     <div id="offline-games-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
       <div style="background:#fff;padding:1.5em 2em;border-radius:10px;box-shadow:0 4px 24px #0003;max-width:95vw;max-height:90vh;overflow:auto;position:relative;text-align:left;">
         <button id="offline-games-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#007bff;cursor:pointer;">&times;</button>
