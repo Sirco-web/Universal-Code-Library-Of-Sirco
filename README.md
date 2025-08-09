@@ -1,5 +1,8 @@
 # code-universe
 
+
+    <script src="/newsletter.js?67herth676"></script>
+
 ### /workspaces/code-universe/cookie-saver.js
 
 Refactor the code to remove duplicate event listener assignments and improve code organization.
