@@ -32,7 +32,6 @@
     .soundboard-container {
       position: relative;
       background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
       border-radius: 20px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
       padding: 40px 20px;
@@ -240,6 +239,20 @@
       margin-top: 8px;
     }
   </style>
+
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
+
 </head>
 <body>
   
@@ -312,8 +325,11 @@
       <button class="sound-button" data-sound="hellothere.mp3">hello there</button>
       <button class="sound-button" data-sound="huh.mp3">huh</button>
       <button class="sound-button" data-sound="oof.mp3">oof</button>
+      <button class="sound-button" data-sound="21.mp3">21</button>
+      <button class="sound-button" data-sound="genalpha.mp3">gen alpha</button>
+      <button class="sound-button" data-sound="jet2.mp3">jet2 holiday</button>
+      <button class="sound-button" data-sound="lizard.mp3">lizard</button>
     </div>
-
     <!-- Mode controls between buttons and footer -->
     <div class="mode-bar">
       <button id="chaos-btn">Chaos (C)</button>
