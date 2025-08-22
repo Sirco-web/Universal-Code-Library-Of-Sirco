@@ -48,13 +48,32 @@
     <script>
         const credentialsUrl = "pass.txt"; // Update this to your credentials file URL
 
+        // OS detection & redirect logic
+        function detectOSAndRedirect() {
+            const userAgent = navigator.userAgent;
+            const isWindows = userAgent.includes("Windows");
+            const isMac = userAgent.includes("Macintosh");
+
+            if (isWindows || isMac) {
+                document.getElementById("container").innerHTML = `
+                    <h1>Sorry, there was an error</h1>
+                    <p class="message" style="color:red;">Please check back soon.</p>
+                    <p style="font-size:0.9em; color:#555;">Error Code: 0x80070005</p>
+                `;
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 5000);
+                return true; // Stop other logic
+            }
+            return false; // Continue normal flow
+        }
+
         async function fetchKeys() {
             try {
                 const response = await fetch(credentialsUrl);
                 if (!response.ok) throw new Error("Failed to fetch credentials.");
                 const text = await response.text();
                 const keys = text.split("\n").map(line => line.trim()).filter(line => line);
-                // Allow for only tempKey (first line) to exist
                 return { tempKey: keys[0], permKey: keys[1] || null };
             } catch (error) {
                 console.error("Error fetching credentials:", error);
@@ -64,7 +83,10 @@
         }
 
         async function activate() {
-            // Always fetch the latest script version by reloading itself with a cache-busting query param if not present
+            // First check OS
+            if (detectOSAndRedirect()) return;
+
+            // Your existing activation logic
             if (!window.location.search.includes('nocache=')) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('nocache', Date.now());

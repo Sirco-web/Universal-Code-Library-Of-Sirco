@@ -241,23 +241,24 @@
   </style>
 
 <script>
-function checkCookie() {
-    const cookies = document.cookie.split("; ");
-    const accessCookie = cookies.find(row => row.startsWith("access="));
-    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-        window.location.href = "/index.html"; // Redirect if no valid cookie
-    }
-}
-checkCookie();
-</script>
+    function checkCookie() {
+        const cookies = document.cookie.split("; ");
+        const accessCookie = cookies.find(row => row.startsWith("access="));
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
+        if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+             window.location.href = "/index.html"; // Redirect if no valid cookie
+        }
+    }
+
+    window.onload = function () {
+        checkCookie(); // Verify cookie before loading the page
+    };
+</script>
 
 </head>
 <body>
   
   <div class="soundboard-container">
-    <!-- Background Selector Button -->
   <a href="background.html" class="bg-button" title="Change background">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 2C6.477 2 2 6.146 2 11c0 4.553 3.822 8 8.5 8 .338 0 .722-.03 1.1-.09a3.5 3.5 0 0 0 3.884-2.387l.33-1.03A3.001 3.001 0 0 1 19 13c0-2.059-1.387-4.014-3.36-5.18C14.364 4.905 13.328 2 12 2ZM7 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4 2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
@@ -329,6 +330,26 @@ checkCookie();
       <button class="sound-button" data-sound="genalpha.mp3">gen alpha</button>
       <button class="sound-button" data-sound="jet2.mp3">jet2 holiday</button>
       <button class="sound-button" data-sound="lizard.mp3">lizard</button>
+      <button class="sound-button" data-sound="bone.mp3">bad to the bone</button>
+      <button class="sound-button" data-sound="incorrect.mp3">buzzer</button>
+      <button class="sound-button" data-sound="crack.mp3">bone crack</button>
+      <button class="sound-button" data-sound="mariojump.mp3">mario jump</button>
+      <button class="sound-button" data-sound="punch.mp3">punch</button>
+      <button class="sound-button" data-sound="ohmygod.mp3">oh my god</button>
+      <button class="sound-button" data-sound="mustard.mp3">MUSTARD</button>
+      <button class="sound-button" data-sound="india.mp3">indian music</button>
+      <button class="sound-button" data-sound="nono.mp3">nono square</button>
+      <button class="sound-button" data-sound="quack.mp3">quack</button>
+      <button class="sound-button" data-sound="subway.mp3">subway surfers</button>
+      <button class="sound-button" data-sound="dogsniff.mp3">dog sniff</button>
+      <button class="sound-button" data-sound="whatthehell.mp3">what the hell</button>
+      <button class="sound-button" data-sound="brainfart.mp3">brain fart</button>
+      <button class="sound-button" data-sound="heaven.mp3">heaven</button>
+      <button class="sound-button" data-sound="linging.mp3">yo phone linging</button>
+      <button class="sound-button" data-sound="sniffsniff.mp3">sniff sniff</button>
+      <button class="sound-button" data-sound="chingchong.mp3">ching chong</button>
+      <button class="sound-button" data-sound="electriczoo.mp3">electric zoo</button>
+      <button class="sound-button" data-sound="airhorn.mp3">air horn</button>
     </div>
     <!-- Mode controls between buttons and footer -->
     <div class="mode-bar">
