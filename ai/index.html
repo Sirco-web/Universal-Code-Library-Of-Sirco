@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inkline PDF & AI Workspace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    h3 { margin-top: 1.5em; }
+    #status { margin: 10px 0; font-weight: bold; }
+    img { display: block; border: 1px solid #ccc; }
+    textarea { width: 100%; min-height: 80px; margin-top: 0.5em; }
+    button { margin-top: 0.5em; padding: 0.5em 1em; }
+    input[type="text"], input[type="file"] { margin: 0.5em 0; }
+  </style>
+</head>
+<body>
+
+  <!-- Sign-In Page -->
+  <div id="signInPage">
+    <h2>Sign In</h2>
+    <form id="signInForm">
+      <div>
+        <label for="apiKey">ConvertAPI Key:</label><br>
+        <input type="text" id="apiKey" placeholder="Enter ConvertAPI key">
+      </div>
+      <div>
+        <label for="aiKey">AI API Key:</label><br>
+        <input type="text" id="aiKey" placeholder="Enter AI API key">
+      </div>
+      <button type="submit">Sign In</button>
+    </form>
+    <hr>
+    <button id="guestMode">Use Guest Mode</button>
+  </div>
+
+  <!-- App Page -->
+  <div id="appPage" style="display:none;">
+    <h2>Inkline Workspace</h2>
+
+    <h3>PDF to Image</h3>
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <div id="status"></div>
+    <div id="preview"></div>
+
+    <h3>AI Chat</h3>
+    <textarea id="aiPrompt" placeholder="Type your prompt..."></textarea><br>
+    <button id="sendPrompt">Send to AI</button>
+    <div id="aiResponse" style="margin-top:1em; white-space:pre-wrap;"></div>
+  </div>
+
+  <!-- Link JS -->
+  <script src="app.js"></script>
+</body>
+</html>
