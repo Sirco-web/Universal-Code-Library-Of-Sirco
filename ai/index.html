@@ -1,55 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Inkline PDF & AI Workspace</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    h3 { margin-top: 1.5em; }
-    #status { margin: 10px 0; font-weight: bold; }
-    img { display: block; border: 1px solid #ccc; }
-    textarea { width: 100%; min-height: 80px; margin-top: 0.5em; }
-    button { margin-top: 0.5em; padding: 0.5em 1em; }
-    input[type="text"], input[type="file"] { margin: 0.5em 0; }
-  </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Better Chat</title>
+	<link rel="stylesheet" href="styles.css">
+	<!-- tiny inline favicon to prevent /favicon.ico 404 -->
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23202223'/%3E%3Ctext x='50%' y='50%' fill='%23fff' font-size='9' text-anchor='middle' dominant-baseline='central'%3EG%3C/text%3E%3C/svg%3E">
 </head>
 <body>
-
-  <!-- Sign-In Page -->
-  <div id="signInPage">
-    <h2>Sign In</h2>
-    <form id="signInForm">
-      <div>
-        <label for="apiKey">ConvertAPI Key:</label><br>
-        <input type="text" id="apiKey" placeholder="Enter ConvertAPI key">
-      </div>
-      <div>
-        <label for="aiKey">AI API Key:</label><br>
-        <input type="text" id="aiKey" placeholder="Enter AI API key">
-      </div>
-      <button type="submit">Sign In</button>
-    </form>
-    <hr>
-    <button id="guestMode">Use Guest Mode</button>
-  </div>
-
-  <!-- App Page -->
-  <div id="appPage" style="display:none;">
-    <h2>Inkline Workspace</h2>
-
-    <h3>PDF to Image</h3>
-    <input type="file" id="pdfFile" accept="application/pdf">
-    <div id="status"></div>
-    <div id="preview"></div>
-
-    <h3>AI Chat</h3>
-    <textarea id="aiPrompt" placeholder="Type your prompt..."></textarea><br>
-    <button id="sendPrompt">Send to AI</button>
-    <div id="aiResponse" style="margin-top:1em; white-space:pre-wrap;"></div>
-  </div>
-
-  <!-- Link JS -->
-  <script src="app.js"></script>
+	<!-- Message counter at top center -->
+	<div class="message-counter" style="left:50%;transform:translateX(-50%);top:10px;">
+		Messages today: <span id="message-count">0</span>/25
+	</div>
+	<div class="main-layout">
+		<aside class="sidebar">
+			<div class="sidebar-header">
+				<h2>Better Chat</h2>
+				<button class="new-chat" id="new-chat-btn">+ New Chat</button>
+			</div>
+			<div class="chat-list" id="chat-list"></div>
+			<div class="sidebar-footer">
+				<div class="model-selector">
+					<label for="model-select">Model:</label>
+					<select id="model-select">
+						<option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+						<option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
+						<option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+						<option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+						<option value="deepseek-r1-distill-llama-70b">deepseek-r1-distill-llama-70b</option>
+						<option value="meta-llama/llama-4-maverick-17b-128e-instruct">meta-llama/llama-4-maverick-17b-128e-instruct</option>
+						<option value="meta-llama/llama-4-scout-17b-16e-instruct">meta-llama/llama-4-scout-17b-16e-instruct</option>
+						<option value="moonshotai/kimi-k2-instruct">moonshotai/kimi-k2-instruct</option>
+						<option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
+						<option value="compound-beta">compound-beta</option>
+						<option value="compound-beta-mini">compound-beta-mini</option>
+						<option value="gpt-image-1">gpt-image-1</option>
+						<option value="dall-e-2">dall-e-2</option>
+						<option value="dall-e-3">dall-e-3</option>
+					</select>
+				</div>
+				<div class="api-key-container">
+					<label for="api-key-select">API Key:</label>
+					<select id="api-key-select"></select>
+				</div>
+			</div>
+		</aside>
+		<main class="chat-main">
+			<div class="chat-header">
+				<span id="chat-title"></span>
+				<button id="delete-chat-btn" title="Delete chat">&#128465;</button>
+			</div>
+			<div class="chat-messages" id="chat-messages"></div>
+			<div class="input-area">
+				<textarea id="user-input" placeholder="Send a message..."></textarea>
+				<input type="file" id="file-upload" multiple style="margin-left:1rem;">
+				<button id="send-button">Send</button>
+			</div>
+		</main>
+	</div>
+	<div id="modal" class="modal">
+		<div class="modal-content">
+			<p>Delete this chat?</p>
+			<button id="confirm-delete">Delete</button>
+			<button id="cancel-delete">Cancel</button>
+		</div>
+	</div>
+	<script src="script.js" defer></script>
 </body>
 </html>
