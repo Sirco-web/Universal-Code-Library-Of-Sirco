@@ -7,13 +7,31 @@
 	<link rel="stylesheet" href="styles.css">
 	<!-- tiny inline favicon to prevent /favicon.ico 404 -->
 	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23202223'/%3E%3Ctext x='50%' y='50%' fill='%23fff' font-size='9' text-anchor='middle' dominant-baseline='central'%3EG%3C/text%3E%3C/svg%3E">
+	<!-- Add marked.js for markdown rendering -->
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<!-- Add DOMPurify for sanitizing rendered HTML -->
+	<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
+
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
+
 </head>
 <body>
 	<!-- Message counter at top center -->
 	<div class="message-counter" style="left:50%;transform:translateX(-50%);top:10px;">
 		Messages today: <span id="message-count">0</span>/25
 	</div>
-	<div class="main-layout">
+	<div class="main-layout" style="height:100vh;">
 		<aside class="sidebar">
 			<div class="sidebar-header">
 				<h2>Better Chat</h2>
@@ -24,7 +42,7 @@
 				<div class="model-selector">
 					<label for="model-select">Model:</label>
 					<select id="model-select">
-						<option value="openai/gpt-oss-20b">openai/gpt-oss-20b</option>
+						<option value="openai/gpt-oss-20b" selected>openai/gpt-oss-20b</option>
 						<option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>
 						<option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
 						<option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
@@ -35,9 +53,6 @@
 						<option value="qwen/qwen3-32b">qwen/qwen3-32b</option>
 						<option value="compound-beta">compound-beta</option>
 						<option value="compound-beta-mini">compound-beta-mini</option>
-						<option value="gpt-image-1">gpt-image-1</option>
-						<option value="dall-e-2">dall-e-2</option>
-						<option value="dall-e-3">dall-e-3</option>
 					</select>
 				</div>
 				<div class="api-key-container">
@@ -46,18 +61,38 @@
 				</div>
 			</div>
 		</aside>
-		<main class="chat-main">
-			<div class="chat-header">
-				<span id="chat-title"></span>
-				<button id="delete-chat-btn" title="Delete chat">&#128465;</button>
-			</div>
-			<div class="chat-messages" id="chat-messages"></div>
-			<div class="input-area">
-				<textarea id="user-input" placeholder="Send a message..."></textarea>
-				<input type="file" id="file-upload" multiple style="margin-left:1rem;">
-				<button id="send-button">Send</button>
+		<main class="chat-main" style="flex:1; width:100vw; max-width:100vw; position:relative; overflow:hidden;">
+			<!-- Chat Panel only -->
+			<div id="panel-chat" style="height:100%; display:flex; flex-direction:column;">
+				<div class="chat-header">
+					<!-- editable chat title -->
+					<span id="chat-title" contenteditable="true" spellcheck="false" title="Click to edit chat name"></span>
+ 					<button id="delete-chat-btn" title="Delete chat">&#128465;</button>
+ 				</div>
+				<!-- chat-messages is scrollable; site itself won't scroll -->
+				<div class="chat-messages" id="chat-messages" style="overflow-y:auto; flex:1; width:100%; padding-bottom:6rem; box-sizing:border-box; max-width:100vw; overflow-x:hidden;"></div>
+				<!-- Input area anchored at bottom of chat area -->
+				<div class="input-area" style="position: fixed; bottom:0; left: var(--sidebar-width); right:0; padding: 1.5rem 2rem; background: var(--panel-bg);">
+					<textarea id="user-input" placeholder="Send a message..."></textarea>
+					<button id="send-button">Send</button>
+				</div>
 			</div>
 		</main>
+	</div>
+
+	<!-- modal -->
+	<div id="modal" class="modal">
+		<div class="modal-content">
+			<p>Delete this chat?</p>
+			<button id="confirm-delete">Delete</button>
+			<button id="cancel-delete">Cancel</button>
+		</div>
+	</div>
+	<script src="script.js" defer></script>
+</body>
+</html>
+</body>
+</html>
 	</div>
 	<div id="modal" class="modal">
 		<div class="modal-content">
