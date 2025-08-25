@@ -346,12 +346,22 @@
 
         // Hide navigation buttons if their pages are not cached and user is offline
         async function hideUnavailableButtons() {
+            // If offline, always hide AI, Proxys and Tools buttons
+            if (!navigator.onLine) {
+                ['ai-btn', 'proxys-btn', 'tools-btn'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+            }
+
+            // For other buttons, check cache availability when offline
             if (!navigator.onLine && 'caches' in window) {
                 const cache = await caches.open('site-offline-cache-v1');
-                // Mapping: button id -> page path
+                // Mapping: button id -> page path (exclude ai/proxys/tools which are handled above)
                 const btns = [
                     { id: 'games-btn', path: '/CODE/games/' },
                     { id: 'storage-btn', path: '/CODE/sound/' },
+                    { id: 'updates-btn', path: '/updates.txt' }
                 ];
                 for (const {id, path} of btns) {
                     const btn = document.getElementById(id);
@@ -407,6 +417,7 @@
             <button onclick="window.location.href='/CODE/sound';" id="storage-btn">Sound board</button>
             <button onclick="window.location.href='/ai';" id="ai-btn">Ai</button>
             <button id="proxys-btn" onclick="alert('the school year just started and we just started to fix everything.');">Proxys</button>
+            <button onclick="window.location.href='/ai';" id="ai-btn">AI</button>
             <button onclick="window.location.href='/CODE/tools';" id="tools-btn">Tools</button>
         </div>
     </div>

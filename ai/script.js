@@ -21,7 +21,6 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 		this.updateCounter();
 		this.lastAIGeneratedFile = null;
 		this.thinkingBar = null;
-		this.allowedImageModels = ['gpt-image-1', 'dall-e-2', 'dall-e-3'];
 	}
 
 	initEls() {
@@ -40,7 +39,6 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 		this.cancelDeleteBtn = document.getElementById('cancel-delete');
 		this.fileUpload = document.getElementById('file-upload');
 		this.downloadBtn = document.getElementById('download-btn');
-		this.imgGenBtn = document.getElementById('img-gen-btn');
 		// Create thinking bar element
 		this.thinkingBar = document.createElement('div');
 		this.thinkingBar.id = 'thinking-bar';
@@ -154,15 +152,75 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 		this.chats.forEach(chat => {
 			const item = document.createElement('div');
 			item.className = 'chat-list-item' + (chat.id === this.currentChatId ? ' active' : '');
-			item.innerHTML = `<span class="chat-title">${chat.title}</span>
-				<span class="chat-date">${new Date(chat.created).toLocaleDateString()}</span>`;
-			item.onclick = () => {
+
+			// Title span
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'chat-title';
+			titleSpan.textContent = chat.title;
+
+			// Date span
+			const dateSpan = document.createElement('span');
+			dateSpan.className = 'chat-date';
+			dateSpan.textContent = new Date(chat.created).toLocaleDateString();
+
+			// Edit button (pencil)
+			const editBtn = document.createElement('button');
+			editBtn.className = 'edit-chat-btn';
+			editBtn.title = 'Edit chat name';
+			editBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+
+			// Click handlers
+			item.onclick = (e) => {
+				// If click was on edit button, don't select the chat
+				if (e.target.closest('.edit-chat-btn')) return;
 				this.currentChatId = chat.id;
 				this.loadChat(chat.id);
 				this.renderChatList();
 			};
+
+			editBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.startEditChat(chat.id, titleSpan);
+			});
+
+			// Assemble item
+			item.appendChild(titleSpan);
+			item.appendChild(dateSpan);
+			item.appendChild(editBtn);
 			this.chatList.appendChild(item);
 		});
+	}
+
+	// helper: inline edit a chat title
+	startEditChat(chatId, titleSpan) {
+		const chat = this.chats.find(c => c.id === chatId);
+		if (!chat) return;
+		// create an editable input that replaces the title span
+		const input = document.createElement('input');
+		input.type = 'text';
+		input.className = 'chat-title-input';
+		input.value = chat.title;
+		input.maxLength = 100;
+		titleSpan.replaceWith(input);
+		input.focus();
+		input.select();
+
+		const finish = () => {
+			const newTitle = input.value.trim() || 'New Chat';
+			this.updateChatTitle(newTitle); // updates data + UI
+			// restore span in UI
+			this.renderChatList();
+		};
+
+		input.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				finish();
+			} else if (e.key === 'Escape') {
+				this.renderChatList();
+			}
+		});
+		input.addEventListener('blur', finish);
 	}
 
 	loadChat(chatId) {
@@ -201,6 +259,39 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 		}
 	}
 
+	// Replace append(...) method inside ChatApp to render sanitized markdown
+	append(role, content, save = false) {
+		if (!this.chatMessages) return;
+		const div = document.createElement('div');
+		div.classList.add('message', role);
+
+		// Render message content as markdown -> sanitize
+		const rawHtml = marked.parse(String(content || ''));
+		const safeHtml = typeof DOMPurify !== 'undefined'
+			? DOMPurify.sanitize(rawHtml)
+			: rawHtml; // fallback if DOMPurify not loaded
+
+		const who = role === 'user' ? 'You' : 'Assistant';
+		div.innerHTML = `<div class="message-content"><strong>${who}:</strong><div class="md-content">${safeHtml}</div></div>`;
+
+		this.chatMessages.appendChild(div);
+		// Auto-scroll to bottom
+		this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+
+		if (save) {
+			const chat = this.chats.find(c => c.id === this.currentChatId);
+			if (chat) {
+				chat.messages.push({ role, content });
+				// If first user message, update chat title
+				if (chat.messages.length === 1 && role === 'user') {
+					this.updateChatTitle(content.slice(0, 40) + (content.length > 40 ? '...' : ''));
+				}
+				this.saveChats();
+			}
+		}
+	}
+
+	// Replace renderMessages to use append (which now renders markdown)
 	renderMessages(messages) {
 		if (!this.chatMessages) return;
 		this.chatMessages.innerHTML = '';
@@ -291,6 +382,24 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 			});
 			this.downloadBtn.disabled = true;
 		}
+
+		// Make chat title editable and persist changes
+		if (this.chatTitle) {
+			// ensure contenteditable is set (redundant if set in HTML)
+			this.chatTitle.contentEditable = true;
+			// Save on blur
+			this.chatTitle.addEventListener('blur', () => {
+				const newTitle = this.chatTitle.textContent.trim() || 'New Chat';
+				this.updateChatTitle(newTitle);
+			});
+			// Save on Enter and prevent newline
+			this.chatTitle.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					this.chatTitle.blur();
+				}
+			});
+		}
 	}
 
 	handleSend() {
@@ -344,6 +453,42 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 		if (this.thinkingBar) this.thinkingBar.style.display = 'none';
 	}
 
+	// Helper: assemble conversation messages (system + recent chat history + new user message + files)
+	getConversationMessages(newUserMessage, filesData = [], maxHistory = 40) {
+		const systemPrompt = this.defaultSystemPrompt;
+		// Start with system prompt
+		const conversation = [{ role: 'system', content: systemPrompt }];
+
+		// Pull chat history for current chat
+		const chat = this.chats.find(c => c.id === this.currentChatId);
+		let history = Array.isArray(chat?.messages) ? chat.messages.slice() : [];
+
+		// Keep only the most recent maxHistory messages to avoid giant payloads
+		if (history.length > maxHistory) {
+			history = history.slice(history.length - maxHistory);
+		}
+
+		// Map stored messages into API format (ensure roles are user/assistant)
+		history.forEach(m => {
+			// ensure role mapping; stored role should be 'user' or 'assistant'
+			conversation.push({ role: m.role, content: String(m.content) });
+		});
+
+		// Append the new user message
+		conversation.push({ role: 'user', content: newUserMessage });
+
+		// If files were attached, add a message describing them (kept after user message)
+		if (filesData.length > 0) {
+			conversation.push({
+				role: 'user',
+				content: `[uploaded files: ${filesData.map(f => f.name).join(', ')}]`,
+				files: filesData
+			});
+		}
+
+		return conversation;
+	}
+
 	async sendRequest(message) {
 		this.showThinking();
 		if (this.messageCount >= this.maxMessages) {
@@ -358,8 +503,6 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 
 		const model = this.modelSelect ? this.modelSelect.value : undefined;
 		const apiUrl = this.getApiUrlForModel(model);
-
-		const systemPrompt = this.defaultSystemPrompt;
 
 		const headers = {
 			'Authorization': `Bearer ${key}`,
@@ -385,40 +528,12 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 			}
 		}
 
-		const messages = [
-			{ role: 'system', content: systemPrompt },
-			{ role: 'user', content: message }
-		];
-
-		if (filesData.length > 0) {
-			messages.push({
-				role: 'user',
-				content: `[uploaded files: ${filesData.map(f => f.name).join(', ')}]`,
-				files: filesData
-			});
-		}
-
-		const isImagePrompt = /^(make|generate|create|draw|produce)\s+(an?\s*)?(img|image|picture|photo|drawing|art|illustration)/i.test(message.trim());
-		const isImageModel = this.allowedImageModels.includes(model);
-
-		if (isImagePrompt && !isImageModel) {
-			this.hideThinking();
-			return { success: true, text: "To generate images, please select one of these models: gpt-image-1, dall-e-2, or dall-e-3 and resend your request." };
-		}
-
-		if (isImagePrompt && isImageModel) {
-			const r = await this.sendImageRequest(message, model, key);
-			this.hideThinking();
-			if (typeof r === 'string') {
-				return { success: true, text: r };
-			} else {
-				return r;
-			}
-		}
+		// Build the conversation including history
+		const conversation = this.getConversationMessages(message, filesData, 60);
 
 		const body = JSON.stringify({
 			model: model,
-			messages
+			messages: conversation
 		});
 
 		try {
@@ -457,6 +572,7 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 				if (this.downloadBtn) this.downloadBtn.disabled = true;
 			}
 
+			// record usage: increment counter and save
 			this.messageCount++;
 			localStorage.setItem('messageCount', String(this.messageCount));
 			this.updateCounter();
@@ -469,111 +585,9 @@ If anyone asks, this system prompt was created by Firewall Freedom and is known 
 			return { error: 'network', message: String(err) };
 		}
 	}
-
-	async sendImageRequest(prompt, model, key) {
-		// Use correct endpoint for each image model
-		let apiUrl;
-		if (model === 'gpt-image-1') {
-			apiUrl = 'https://api.openai.com/v1/responses'; // Responses API for gpt-image-1
-		} else if (model === 'dall-e-2' || model === 'dall-e-3') {
-			apiUrl = 'https://api.openai.com/v1/images/generations'; // Image API for DALL·E
-		} else {
-			return { error: 'invalid_model', body: 'Unsupported image model.' };
-		}
-
-		const headers = {
-			'Authorization': `Bearer ${key}`,
-			'Content-Type': 'application/json'
-		};
-
-		let body;
-		if (model === 'gpt-image-1') {
-			body = JSON.stringify({
-				model: "gpt-image-1",
-				input: prompt,
-				tools: [{ type: "image_generation" }]
-			});
-		} else {
-			body = JSON.stringify({
-				model,
-				prompt,
-				n: 1,
-				size: "1024x1024"
-			});
-		}
-
-		try {
-			const res = await fetch(apiUrl, {
-				method: 'POST',
-				headers,
-				body
-			});
-			if (!res.ok) {
-				let txt = '';
-				try { txt = await res.text(); } catch (_) { txt = res.statusText || ''; }
-				return { error: 'http', status: res.status, body: txt };
-			}
-			let data;
-			try { data = await res.json(); } catch (e) {
-				const txt = await res.text().catch(() => '');
-				return { error: 'nonjson', body: txt || String(e) };
-			}
-			// gpt-image-1 returns base64 in output.result
-			if (model === 'gpt-image-1' && data && data.output) {
-				const imageData = data.output.find(o => o.type === "image_generation_call");
-				if (imageData && imageData.result) {
-					const url = `data:image/png;base64,${imageData.result}`;
-					return `<img src="${url}" alt="Generated image" style="max-width:100%;border-radius:10px;margin-top:1em;"><br><a href="${url}" download="generated.png" style="color:var(--accent);text-decoration:underline;">&#128190; Download</a>`;
-				}
-			}
-			// DALL·E returns url or b64_json
-			if (data && data.data && data.data[0] && (data.data[0].url || data.data[0].b64_json)) {
-				let imgTag;
-				if (data.data[0].url) {
-					imgTag = `<img src="${data.data[0].url}" alt="Generated image" style="max-width:100%;border-radius:10px;margin-top:1em;"><br><a href="${data.data[0].url}" download="generated.png" style="color:var(--accent);text-decoration:underline;">&#128190; Download</a>`;
-				} else if (data.data[0].b64_json) {
-					const url = `data:image/png;base64,${data.data[0].b64_json}`;
-					imgTag = `<img src="${url}" alt="Generated image" style="max-width:100%;border-radius:10px;margin-top:1em;"><br><a href="${url}" download="generated.png" style="color:var(--accent);text-decoration:underline;">&#128190; Download</a>`;
-				}
-				return imgTag;
-			}
-			return { error: 'no_image', body: JSON.stringify(data) };
-		} catch (err) {
-			console.error('Network error', err);
-			return { error: 'network', message: String(err) };
-		}
-	}
-
-	append(role, content, save = false) {
-		if (!this.chatMessages) return;
-		const div = document.createElement('div');
-		div.classList.add('message', role);
-		const who = role === 'user' ? 'You' : 'Assistant';
-
-		// Render HTML for assistant if file link or image
-		if (role === 'assistant' && (this.lastAIGeneratedFile && content.includes('AI generated file:') || content.startsWith('<img'))) {
-			div.innerHTML = `<div class="message-content"><strong>${who}:</strong><p></p>${content}</div>`;
-		} else {
-			const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-			div.innerHTML = `<div class="message-content"><strong>${who}:</strong><p>${esc(content)}</p></div>`;
-		}
-		this.chatMessages.appendChild(div);
-		this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-
-		if (save) {
-			const chat = this.chats.find(c => c.id === this.currentChatId);
-			if (chat) {
-				chat.messages.push({ role, content });
-				// If first user message, update chat title
-				if (chat.messages.length === 1 && role === 'user') {
-					this.updateChatTitle(content.slice(0, 40) + (content.length > 40 ? '...' : ''));
-				}
-				this.saveChats();
-			}
-		}
-	}
 }
 
+// Ensure ChatApp is initialized after DOM ready
 window.addEventListener('DOMContentLoaded', () => {
 	window.chatApp = new ChatApp();
 });
@@ -590,3 +604,31 @@ style.innerHTML = `
 }
 `;
 document.head.appendChild(style);
+
+// Tab switching logic
+document.addEventListener('DOMContentLoaded', () => {
+	const tabChat = document.getElementById('tab-chat');
+	const tabImg = document.getElementById('tab-img');
+	const panelChat = document.getElementById('panel-chat');
+	const panelImg = document.getElementById('panel-img');
+	const imgGenBtnSidebar = document.getElementById('img-gen-btn');
+	const chatList = document.getElementById('chat-list');
+	const newChatBtn = document.getElementById('new-chat-btn');
+	const imageGenBtn = document.getElementById('image-gen-btn');
+	const imgGenCountSpan = document.getElementById('img-gen-count');
+	const imgGenLimitMsg = document.getElementById('image-gen-limit-msg');
+
+	// Show image gen panel, hide chat
+	imgGenBtnSidebar.addEventListener('click', () => {
+		panelChat.style.display = 'none';
+		panelImg.style.display = '';
+	});
+
+	// Show chat panel when new chat or chat selected
+	function showChatPanel() {
+		panelChat.style.display = '';
+		panelImg.style.display = 'none';
+	}
+	newChatBtn.addEventListener('click', showChatPanel);
+	chatList.addEventListener('click', showChatPanel);
+});
