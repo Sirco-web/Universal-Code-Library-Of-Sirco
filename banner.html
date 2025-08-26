@@ -13,7 +13,7 @@
             background-color: #f4f4f4; 
         }
         .banner-content {
-            padding: 10px 0; /* Add vertical padding just for the banner content */
+            padding: 10px 0; /* Vertical padding for the banner content */
         }
         h2 {
             font-size: 1.5em;
@@ -23,14 +23,25 @@
             color: #555;
             font-size: 1.2em;
         }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
     <div class="banner-content">
-        <h2>Suggest new games! Fill out the form on the games page. Offline mode now available (top right).</h2>
+        <h2>
+            We are starting a new contest where you can make your own Scratch or HTML5 game and win $30 USD! 
+            The contest will start on 8/27/2025
+        </h2>
     </div>
     <script>
+        //<a href="https://get-better.code-faction.gleeze.com/CODE/contest/game-2025/" target="_blank">Click here for more rules.</a>
         // Send the height of the banner to the parent window
         function sendHeight() {
             window.parent.postMessage({
