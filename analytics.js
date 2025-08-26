@@ -30,8 +30,10 @@
         if (/samsungbrowser/i.test(ua)) return "Samsung Internet";
         if (/ucbrowser/i.test(ua)) return "UC Browser";
         if (/firefox|fxios/i.test(ua)) return "Firefox";
-        if (/chrome|crios/i.test(ua) && !/edg\//i.test(ua) && !/opr\//i.test(ua) && !/vivaldi/i.test(ua) && !/brave/i.test(ua)) return "Chrome";
-        if (/safari/i.test(ua) && !/chrome|crios|edg|opr|vivaldi|brave/i.test(ua)) return "Safari";
+        if (/chrome|crios/i.test(ua) && !/edg\//i.test(ua) && !/opr\//i.test(ua) && !/vivaldi/i.test(ua) && !/brave/i.test(ua))
+            return "Chrome";
+        if (/safari/i.test(ua) && !/chrome|crios|edg|opr|vivaldi|brave/i.test(ua))
+            return "Safari";
         return "Unknown";
     }
 
@@ -57,38 +59,73 @@
             body: JSON.stringify(data)
         })
         .then(res => {
-            // Optional: log for debugging
-            // console.log("Analytics sent", res.status);
+            if (!res.ok) {
+                console.error('Analytics endpoint returned', res.status);
+            }
         })
         .catch((err) => {
-            showAnalyticsErrorNotification();
+            console.error('Failed to send analytics', err);
+            // Only show offline notification if browser is offline (or force if caller wanted)
+            showAnalyticsErrorNotification({ force: false, text: 'Could not send analytics data.' });
         });
     }
 
-    // Show error notification at top right
-    function showAnalyticsErrorNotification() {
+    // Improve error notification — only show when browser is actually offline (or forced)
+    function showAnalyticsErrorNotification(options) {
+        // options: { force: boolean, text: string }
+        const force = options && options.force;
+        const text = (options && options.text) || 'error 3xx you maybe offline';
+        // Only show if the browser is actually offline or caller forces it
+        if (!force && navigator.onLine) return;
         if (document.getElementById('analytics-error-notification')) return;
+
         const notif = document.createElement('div');
         notif.id = 'analytics-error-notification';
-        notif.textContent = 'error 362 if you see this you maybe offline.';
-        notif.style.position = 'fixed';
-        notif.style.top = '18px';
-        notif.style.right = '18px';
-        notif.style.background = '#ff4444';
-        notif.style.color = 'white';
-        notif.style.padding = '12px 22px';
-        notif.style.borderRadius = '8px';
-        notif.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)';
-        notif.style.fontSize = '1em';
-        notif.style.zIndex = 99999;
-        notif.style.fontFamily = 'Arial,sans-serif';
+        notif.style.cssText = [
+            'position:fixed',
+            'top:18px',
+            'right:18px',
+            'background:#ff4444',
+            'color:#fff',
+            'padding:10px 12px',
+            'border-radius:8px',
+            'box-shadow:0 2px 8px rgba(0,0,0,0.18)',
+            'font-size:0.95em',
+            'z-index:99999',
+            'display:flex',
+            'align-items:center',
+            'gap:10px',
+            'max-width:340px',
+            'line-height:1.2'
+        ].join(';');
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        textSpan.style.flex = '1';
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.style.cssText = 'background:none;border:none;color:#fff;font-size:1.1em;cursor:pointer;padding:0 6px;line-height:1';
+
+        let timeoutId = null;
+        const removeNotif = () => {
+            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            if (notif && notif.parentNode) notif.parentNode.removeChild(notif);
+        };
+
+        closeBtn.addEventListener('click', removeNotif);
+
+        notif.appendChild(textSpan);
+        notif.appendChild(closeBtn);
         document.body.appendChild(notif);
-        setTimeout(() => {
-            notif.remove();
-        }, 5000);
+
+        // Auto-hide after 2.5 seconds
+        timeoutId = setTimeout(removeNotif, 2500);
     }
 
-    // Main
+    // Main analytics flow
     fetchGeoInfo().then(geo => {
         const payload = {
             ip: geo.ip || "Unavailable",
@@ -98,7 +135,7 @@
             timestamp: new Date().toISOString(),
             page: window.location.href,
             country: geo.country || geo.country_code || "Unavailable",
-            city: geo.city || "Unavailable", // Not available in Lite, will be "Unavailable"
+            city: geo.city || "Unavailable",
             hostname: geo.as_domain || "Unavailable",
             isp: geo.as_name || geo.asn || "Unavailable",
             asn: geo.asn || "Unavailable",
@@ -108,16 +145,16 @@
         fetch('/backend.json')
             .then(res => res.json())
             .then(cfg => {
-                const BACKEND_URL = cfg.url.replace(/\/$/, '');
-                sendAnalytics(payload, BACKEND_URL);
+                const BACKEND_URL = (cfg && cfg.url) ? cfg.url.replace(/\/$/, '') : '';
+                if (BACKEND_URL) sendAnalytics(payload, BACKEND_URL);
             })
-            .catch(() => {
-                console.error('Failed to load backend.json');
-                showAnalyticsErrorNotification();
+            .catch((err) => {
+                console.error('Failed to load backend.json', err);
+                // Only show offline notification if browser is offline
+                showAnalyticsErrorNotification({ force: false, text: 'Failed to load backend configuration.' });
             });
 
         // --- Device Code Logic & Service Worker ---
-        // --- Device Code Logic ---
         function random4() {
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
@@ -137,16 +174,11 @@
         let onlineStatus = 'online';
         let pingInterval = null;
 
-        function resetTimer() {
-            pageStart = Date.now();
-        }
-
-        function getTimeOnPage() {
-            return Math.floor((Date.now() - pageStart) / 1000);
-        }
+        function resetTimer() { pageStart = Date.now(); }
+        function getTimeOnPage() { return Math.floor((Date.now() - pageStart) / 1000); }
 
         function sendDevicePing(deviceCode, geo, status, BACKEND_URL) {
-            const payload = {
+            const payload2 = {
                 device_code: deviceCode,
                 status: status,
                 ip: geo.ip || "Unavailable",
@@ -159,11 +191,11 @@
                 city: geo.city || "Unavailable",
                 time_on_page: getTimeOnPage()
             };
+            if (!BACKEND_URL) return;
             fetch(BACKEND_URL + "/device-ping", {
                 method: "POST",
-                headers: { "Content-Type": "application/json",
-                "ngrok-skip-browser-warning": "true" },
-                body: JSON.stringify(payload)
+                headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
+                body: JSON.stringify(payload2)
             }).catch(()=>{});
         }
 
@@ -192,12 +224,10 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ device_code: deviceCode })
-                })
-                .catch(() => {
-                    // Do nothing, just a ping
-                });
+                }).catch(() => {});
             }
 
+            if (!BACKEND_URL) return;
             fetch(BACKEND_URL + "/device-check", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -205,7 +235,6 @@
             })
             .then(res => {
                 if (!res.ok) {
-                    console.error("Device check failed:", res.status);
                     return Promise.reject("Device check failed");
                 }
                 return res.json();
@@ -224,7 +253,7 @@
                             timestamp: new Date().toISOString(),
                             country: geo.country || geo.country_code || "Unavailable"
                         })
-                    });
+                    }).catch(()=>{});
                 }
                 sendDevicePing(deviceCode, geo, onlineStatus, BACKEND_URL);
                 if (!pingInterval) {
@@ -236,21 +265,18 @@
                 setupVisibility(deviceCode, geo, BACKEND_URL);
                 pingAvailable();
             })
-            .catch(error => {
-                console.error("Error in registerAndPing:", error);
-            });
+            .catch(() => {});
         }
+
         fetch('/backend.json')
             .then(res => res.json())
             .then(cfg => {
-                const BACKEND_URL = cfg.url.replace(/\/$/, '');
+                const BACKEND_URL = (cfg && cfg.url) ? cfg.url.replace(/\/$/, '') : '';
                 if (!deviceCode) {
                     deviceCode = getDeviceCode(geo.ip);
                     setStoredDeviceCode(deviceCode);
-                    registerAndPing(BACKEND_URL);
-                } else {
-                    registerAndPing(BACKEND_URL);
                 }
+                registerAndPing(BACKEND_URL);
             })
             .catch(() => {
                 console.error('Failed to load backend.json');
@@ -262,4 +288,161 @@
             navigator.serviceWorker.register('/analytics-sw.js').catch(()=>{});
         }
     });
+})();
+
+// Shortcut detection and action performer module
+(function () {
+    // Default config: shortcut to remove access and navigate to "/"
+    const DEFAULT_CONFIG = {
+        modifiers: { ctrl: true, alt: true, shift: false, meta: false },
+        key: 'z',
+        action: 'goto',
+        customURL: '/'
+    };
+
+    // Save default config if none exists
+    try {
+        if (!localStorage.getItem('shortcut_config')) {
+            localStorage.setItem('shortcut_config', JSON.stringify(DEFAULT_CONFIG));
+        }
+    } catch (e) { /* ignore */ }
+
+    // Handle the shortcut key
+    window.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.altKey && !e.shiftKey && !e.metaKey && e.key.toLowerCase() === 'z') {
+            // Remove access immediately
+            try {
+                document.cookie = 'access=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                document.cookie = 'access_key=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                localStorage.removeItem('access_key');
+                localStorage.removeItem('access');
+            } catch (err) { /* ignore */ }
+            // Navigate to "/" (default)
+            window.location.href = '/';
+        }
+    });
+})();
+
+// --- Begin shortcut config and service worker communication module ---
+(function () {
+    // Helper to get config from localStorage
+    const DEFAULT = {
+        modifiers: { ctrl: true, alt: true, shift: false, meta: false },
+        key: 'z',
+        action: 'goto',
+        customURL: '/'
+    };
+
+    function getConfig() {
+        try {
+            return JSON.parse(localStorage.getItem('shortcut_config'));
+        } catch (e) { return DEFAULT; }
+    }
+    function setConfig(cfg) {
+        try {
+            localStorage.setItem('shortcut_config', JSON.stringify(cfg));
+        } catch (e) {}
+    }
+
+    // Post message to service worker
+    async function postToServiceWorker(msg) {
+        try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+                const reg = await navigator.serviceWorker.getRegistration();
+                if (reg && reg.active) {
+                    reg.active.postMessage(msg);
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // Notify service worker of current config
+    postToServiceWorker({ type: 'SET_SHORTCUT_CONFIG', config: getConfig() });
+
+    // Provide a safe removeAccessKey if not defined elsewhere.
+    if (typeof window.removeAccessKey !== 'function') {
+        window.removeAccessKey = function () {
+            try {
+                // remove cookies by common names
+                document.cookie = 'access=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                document.cookie = 'access_key=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                // remove localStorage variants
+                localStorage.removeItem('access_key');
+                localStorage.removeItem('access');
+            } catch (e) {}
+        };
+    }
+
+    function normalizeURL(u) {
+        if (!u) return '';
+        if (u.startsWith('/') || u.startsWith('http://') || u.startsWith('https://')) return u;
+        return '/' + u;
+    }
+
+    function performShortcutAction(action, customURL) {
+        try { window.removeAccessKey(); } catch (e) {}
+        try {
+            let href = '';
+            if (action === 'google') href = 'https://www.google.com';
+            else if (action === 'custom') href = customURL || '';
+            else if (action === 'goto') href = customURL || '/';
+            // If action requires navigation, use same-tab navigation so user's current tab goes to target
+            if (href) {
+                // normalize simple inputs like 'example.com' to include protocol
+                if (!href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('/')) {
+                    href = 'https://' + href;
+                }
+                window.location.assign(href);
+            }
+        } catch (e) {}
+    }
+
+    // Listen for SW broadcasts to perform the action
+    if (navigator.serviceWorker && navigator.serviceWorker.addEventListener) {
+        navigator.serviceWorker.addEventListener('message', ev => {
+            const data = ev.data || {};
+            if (data.type === 'PERFORM_SHORTCUT_ACTION') {
+                performShortcutAction(data.action || 'none', data.customURL || '');
+            }
+        });
+    }
+
+    // Shortcut detection
+    let lastTriggered = 0;
+    window.addEventListener('keydown', async (e) => {
+        try {
+            const cfgLocal = getConfig() || DEFAULT;
+            const now = Date.now();
+            if (now - lastTriggered < 800) return; // debounce
+
+            // ensure required modifiers are pressed
+            if (cfgLocal.modifiers.ctrl && !e.ctrlKey) return;
+            if (cfgLocal.modifiers.alt && !e.altKey) return;
+            if (cfgLocal.modifiers.shift && !e.shiftKey) return;
+            if (cfgLocal.modifiers.meta && !e.metaKey) return;
+
+            if (e.key && e.key.toLowerCase() === (cfgLocal.key || '').toLowerCase()) {
+                lastTriggered = now;
+                // perform locally immediately (remove key + navigate)
+                performShortcutAction(cfgLocal.action, cfgLocal.customURL);
+                // Notify service worker with timestamp so other tabs do the same
+                await postToServiceWorker({
+                    type: 'SHORTCUT_TRIGGERED',
+                    action: cfgLocal.action || 'none',
+                    customURL: cfgLocal.customURL || '',
+                    timestamp: Date.now()
+                });
+            }
+        } catch (err) { /* ignore */ }
+    });
+
+    // Expose config helpers for settings page
+    window.__shortcutConfig = {
+        get: () => getConfig() || DEFAULT,
+        save: async (c) => {
+            const merged = Object.assign({}, DEFAULT, c || {});
+            setConfig(merged);
+            await postToServiceWorker({ type: 'SET_SHORTCUT_CONFIG', config: merged });
+        }
+    };
 })();

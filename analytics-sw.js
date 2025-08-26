@@ -1,16 +1,48 @@
 const CACHE_NAME = 'site-offline-cache-v1';
 let downloaderEnabled = false;
+// Store last-known shortcut config (sent from clients)
+let shortcutConfig = null;
 
 // Listen for messages from the page to control downloader
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SET_DOWNLOADER') {
         downloaderEnabled = !!event.data.enabled;
     }
+    if (event.data && event.data.type === 'SET_SHORTCUT_CONFIG' && event.data.config) {
+        try { shortcutConfig = event.data.config; } catch (e) { shortcutConfig = null; }
+    }
     if (event.data && event.data.type === 'REMOVE_FILE' && event.data.url) {
         caches.open(CACHE_NAME).then(cache => cache.delete(event.data.url));
     }
     if (event.data && event.data.type === 'REMOVE_ALL') {
         caches.delete(CACHE_NAME);
+    }
+
+    // Broadcast shortcut action to all clients when triggered by one page.
+    // Only act if the trigger includes a recent timestamp (to avoid stale triggers on navigation),
+    // or if the sender explicitly sets force=true.
+    if (event.data && event.data.type === 'SHORTCUT_TRIGGERED') {
+        try {
+            const now = Date.now();
+            const ts = typeof event.data.timestamp === 'number' ? event.data.timestamp : 0;
+            const force = !!event.data.force;
+            // Accept triggers only if forced or not older than 3000ms
+            if (!force && (ts === 0 || Math.abs(now - ts) > 3000)) {
+                // ignore stale/untimestamped triggers
+                return;
+            }
+            const action = (event.data.action !== undefined && event.data.action !== null)
+                ? event.data.action
+                : (shortcutConfig && shortcutConfig.action) || 'none';
+            const customURL = event.data.customURL || (shortcutConfig && shortcutConfig.customURL) || '';
+            self.clients.matchAll().then(clients => {
+                for (const c of clients) {
+                    c.postMessage({ type: 'PERFORM_SHORTCUT_ACTION', action, customURL });
+                }
+            });
+        } catch (e) {
+            // fail silently
+        }
     }
 });
 
@@ -50,7 +82,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // For HTML pages, inject analytics.js if not present
+    // For HTML pages, always inject analytics.js
     if (event.request.destination === 'document') {
         event.respondWith(
             fetch(event.request)
@@ -59,27 +91,24 @@ self.addEventListener('fetch', event => {
                     let respToReturn = response;
                     if (ct.includes('text/html')) {
                         let text = await response.text();
-                        if (!text.includes('analytics.js')) {
-                            text = text.replace(
-                                /<body[^>]*>/i,
-                                `$&<script src="/analytics.js"></script>`
-                            );
-                        }
-                        respToReturn = new Response(text, { headers: response.headers });
+                        text = text.replace(
+                            /<body[^>]*>/i,
+                            `$&<script src="/analytics.js?v=${Date.now()}"></script>`
+                        );
+                        respToReturn = new Response(text, {
+                            headers: new Headers(response.headers)
+                        });
                     }
-                    // Cache for offline if enabled
-                    if (downloaderEnabled) {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(event.request, respToReturn.clone());
-                    }
+                    // Cache for offline
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(event.request, respToReturn.clone());
                     return respToReturn;
                 })
                 .catch(async () => {
-                    // If offline, try cache
                     const cache = await caches.open(CACHE_NAME);
                     const cached = await cache.match(event.request);
                     if (cached) return cached;
-                    return Response.error();
+                    return new Response('Offline', {status: 503});
                 })
         );
     } else if (downloaderEnabled) {
