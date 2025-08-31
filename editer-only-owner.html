@@ -68,6 +68,25 @@ pre { background: #f7f7f7; padding: .5rem; border-radius: .25rem; overflow-x: au
 <div id="log" class="log"></div>
 </fieldset>
 
+<fieldset>
+<legend>File Editor</legend>
+<div style="display:flex; gap:1rem; align-items:flex-start;">
+  <div style="min-width:220px; max-width:320px;">
+    <label>Files in Workspace</label>
+    <ul id="fileList" style="list-style:none; padding:0; border:1px solid #ccc; min-height:200px; max-height:400px; overflow:auto;"></ul>
+    <button id="downloadAll" style="margin-top:1rem;">Download Everything (ZIP, includes all files & settings)</button>
+  </div>
+  <div style="flex:1;">
+    <label>File Content</label>
+    <textarea id="fileContent" style="width:100%; height:320px; font-family:monospace; font-size:1rem; margin-bottom:.5rem;"></textarea>
+    <div>
+      <button id="saveFile">Save</button>
+      <span id="fileStatus"></span>
+    </div>
+  </div>
+</div>
+</fieldset>
+
 <script>
 const el=id=>document.getElementById(id);
 const log=(msg,cls='')=>{
@@ -136,6 +155,64 @@ el('setDomain').onclick=()=>{const [o,r]=parseRepo(el('repo').value);gh('PUT',`/
 el('disablePages').onclick=()=>{const [o,r]=parseRepo(el('repo').value);gh('DELETE',`/repos/${o}/${r}/pages`).then(res=>log(JSON.stringify(res.data),res.ok?'ok':'err'));};
 el('rename').onclick=()=>{const [o,r]=parseRepo(el('repo').value);gh('PATCH',`/repos/${o}/${r}`,{name:el('newName').value.trim()}).then(res=>log(JSON.stringify(res.data),res.ok?'ok':'err'));};
 el('transfer').onclick=()=>{const [o,r]=parseRepo(el('repo').value);gh('POST',`/repos/${o}/${r}/transfer`,{new_owner:el('transferTo').value.trim()}).then(res=>log(JSON.stringify(res.data),res.ok?'ok':'err'));};
+
+// File Editor logic
+async function listFiles() {
+  const res = await fetch('/api/list-files');
+  const files = await res.json();
+  const ul = el('fileList');
+  ul.innerHTML = '';
+  files.forEach(f => {
+    const li = document.createElement('li');
+    li.textContent = f;
+    li.style.cursor = 'pointer';
+    li.onclick = () => loadFile(f);
+    ul.appendChild(li);
+  });
+}
+async function loadFile(path) {
+  el('fileStatus').textContent = '';
+  const res = await fetch('/api/file?path=' + encodeURIComponent(path));
+  if (res.ok) {
+    el('fileContent').value = await res.text();
+    el('fileContent').dataset.path = path;
+  } else {
+    el('fileContent').value = '';
+    el('fileContent').dataset.path = '';
+    el('fileStatus').textContent = 'Failed to load file.';
+  }
+}
+el('saveFile').onclick = async () => {
+  const path = el('fileContent').dataset.path;
+  if (!path) return;
+  const body = el('fileContent').value;
+  const res = await fetch('/api/file?path=' + encodeURIComponent(path), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'text/plain' },
+    body
+  });
+  el('fileStatus').textContent = res.ok ? 'Saved!' : 'Save failed.';
+  if (res.ok) log('Saved ' + path, 'ok');
+  else log('Failed to save ' + path, 'err');
+};
+el('downloadAll').onclick = async () => {
+  log('Preparing ZIP of everything (all files & settings)...');
+  const res = await fetch('/api/download-everything');
+  if (res.ok) {
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'workspace.zip';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();}, 2000);
+    log('Download started! ZIP includes all files and settings.', 'ok');
+  } else {
+    log('Failed to download ZIP', 'err');
+  }
+};
+listFiles();
 </script>
 </body>
 </html>
