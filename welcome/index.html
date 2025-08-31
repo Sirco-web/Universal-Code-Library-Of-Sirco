@@ -29,7 +29,7 @@
         text-decoration:none;
         border:1px solid #eee;
         transition:box-shadow 0.2s;
-    " title="Account">
+    " title="Game Data Saver">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block;" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="8" r="4" stroke="#007bff" stroke-width="2" fill="none"/>
             <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="#007bff" stroke-width="2" fill="none"/>
@@ -408,7 +408,7 @@
         <!-- Top Buttons -->
         <div class="button-group" id="top-buttons">
             <button onclick="removeAccessKey();">Remove Access Key</button>
-            <button id="shortcut-settings-btn" onclick="window.location.href='/welcome/shortcut.html';" title="Configure shortcut">Shortcut Settings</button>
+            <button id="shortcut-settings-btn" title="Configure shortcut">Shortcut Settings</button>
             <button onclick="window.location.href='/updates.txt';" id="updates-btn">View Updates</button>
         </div>
 
@@ -456,5 +456,308 @@
         background: #0056b3;
     }
     </style>
+
+    <!-- Guided tour overlay (shown when localStorage.welcome_tour_shown is not set) -->
+    <div id="tour-overlay" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:20005;pointer-events:auto;">
+      <div id="tour-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);"></div>
+      <div id="tour-tooltip" role="dialog" aria-live="polite" style="position:absolute;max-width:320px;background:#fff;color:#111;padding:14px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:20007;">
+        <div id="tour-title" style="font-weight:600;margin-bottom:6px;font-size:1.02em"></div>
+        <div id="tour-desc" style="font-size:0.95em;margin-bottom:10px"></div>
+        <div style="text-align:right">
+          <button id="tour-skip" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:8px">Skip</button>
+          <button id="tour-prev" class="blue-btn" style="display:none;margin-right:8px;">Prev</button>
+          <button id="tour-next" class="blue-btn">Next</button>
+        </div>
+      </div>
+      <div id="tour-arrow" style="position:absolute;width:18px;height:18px;transform:rotate(45deg);background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.18);z-index:20006;"></div>
+    </div>
+
+    <style>
+    /* Tour styles */
+    .tour-highlight {
+        position:relative;
+        z-index:20008 !important;
+        box-shadow: 0 0 0 6px rgba(0,123,255,0.12), 0 6px 18px rgba(0,0,0,0.08) !important;
+        border-radius:8px !important;
+        transition:box-shadow 0.18s ease;
+    }
+    </style>
+
+    <script>
+    // Tour logic: runs only if localStorage.welcome_tour_shown !== '1'
+    (function(){
+      const SEEN_KEY = 'welcome_tour_shown';
+      if (localStorage.getItem(SEEN_KEY) === '1') return;
+
+      const steps = [
+        { selector: '#banner-frame', title: 'Site Banner', desc: 'This banner shows announcements and quick links. It updates when online.', placement: 'bottom' },
+        { selector: '#download-offline-btn', title: 'Offline Mode', desc: 'Enable offline mode to save pages you visit for offline access.', placement: 'left' },
+        { selector: '#games-btn', title: 'Games', desc: 'Open the Games section. Some pages require being online unless saved for offline.', placement: 'top' },
+        { selector: '#storage-btn', title: 'Sound Board', desc: 'Open the Sound Board to play and save sounds.', placement: 'top' },
+        { selector: '#ai-btn', title: 'AI Platform', desc: 'Our AI platform where you can experiment with models we built.', placement: 'top' },
+        { selector: '#shortcut-settings-btn', title: 'Shortcut Settings', desc: 'Record a keyboard shortcut to remove access or redirect you to another site.', placement: 'left' },
+        { selector: '#account-icon-link', title: 'Game Data Saver', desc: 'This saves your game progress and settings so you can keep playing across devices.', placement: 'left' }
+      ];
+
+      let index = 0;
+      const overlay = document.getElementById('tour-overlay');
+      const tooltip = document.getElementById('tour-tooltip');
+      const arrow = document.getElementById('tour-arrow');
+      const titleEl = document.getElementById('tour-title');
+      const descEl = document.getElementById('tour-desc');
+      const btnNext = document.getElementById('tour-next');
+      const btnPrev = document.getElementById('tour-prev');
+      const btnSkip = document.getElementById('tour-skip');
+      const btnSkipAll = document.getElementById('tour-skip-all');
+
+      function show() {
+        overlay.style.display = 'block';
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        // show floating skip-all button
+        if (btnSkipAll) btnSkipAll.style.display = 'block';
+        showStep(index);
+        window.addEventListener('resize', reposition);
+        window.addEventListener('scroll', reposition, true);
+        document.addEventListener('keydown', onKey);
+      }
+
+      function hideAndMarkSeen() {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        clearHighlights();
+        localStorage.setItem(SEEN_KEY, '1');
+        // hide floating skip-all button
+        if (btnSkipAll) btnSkipAll.style.display = 'none';
+        window.removeEventListener('resize', reposition);
+        window.removeEventListener('scroll', reposition, true);
+        document.removeEventListener('keydown', onKey);
+      }
+
+      // Skip all button handler
+      if (btnSkipAll) btnSkipAll.addEventListener('click', hideAndMarkSeen);
+
+      function onKey(e){
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'Escape') { hideAndMarkSeen(); }
+      }
+
+      function next(){
+        if (index < steps.length - 1) { index++; showStep(index); }
+        else { hideAndMarkSeen(); }
+      }
+      function prev(){ if (index > 0) { index--; showStep(index); } }
+
+      btnNext.addEventListener('click', next);
+      btnPrev.addEventListener('click', prev);
+      btnSkip.addEventListener('click', hideAndMarkSeen);
+
+      function clearHighlights(){
+        document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+      }
+
+      function showStep(i){
+        clearHighlights();
+        const step = steps[i];
+        const target = document.querySelector(step.selector);
+        titleEl.textContent = step.title || '';
+        descEl.textContent = step.desc || '';
+        btnPrev.style.display = i === 0 ? 'none' : 'inline-block';
+        btnNext.textContent = i === steps.length - 1 ? 'Finish' : 'Next';
+
+        if (!target) {
+          // If target missing, center tooltip and continue
+          tooltip.style.left = '50%';
+          tooltip.style.top = '20%';
+          tooltip.style.transform = 'translateX(-50%)';
+          arrow.style.display = 'none';
+        } else {
+          arrow.style.display = 'block';
+          // highlight
+          target.classList.add('tour-highlight');
+
+          // compute positions
+          const rect = target.getBoundingClientRect();
+          const padding = 12; // space between element and tooltip
+          let top, left;
+          tooltip.style.transform = '';
+
+          // Default placement
+          if (step.placement === 'bottom') {
+            top = rect.bottom + padding + window.scrollY;
+            left = rect.left + window.scrollX + (rect.width/2) - 160; // center tooltip (320/2)
+            arrow.style.left = (rect.left + window.scrollX + rect.width/2 - 9) + 'px';
+            arrow.style.top = (rect.bottom + window.scrollY + padding - 9) + 'px';
+          } else if (step.placement === 'top') {
+            top = rect.top + window.scrollY - padding - tooltip.offsetHeight;
+            left = rect.left + window.scrollX + (rect.width/2) - 160;
+            arrow.style.left = (rect.left + window.scrollX + rect.width/2 - 9) + 'px';
+            arrow.style.top = (rect.top + window.scrollY - padding - 9 - tooltip.offsetHeight) + 'px';
+          } else if (step.placement === 'left') {
+            top = rect.top + window.scrollY + (rect.height/2) - 36;
+            left = rect.left + window.scrollX - padding - tooltip.offsetWidth;
+            arrow.style.top = (rect.top + window.scrollY + rect.height/2 - 9) + 'px';
+            arrow.style.left = (rect.left + window.scrollX - padding - 9 - tooltip.offsetWidth) + 'px';
+          } else { // right
+            top = rect.top + window.scrollY + (rect.height/2) - 36;
+            left = rect.right + window.scrollX + padding;
+            arrow.style.top = (rect.top + window.scrollY + rect.height/2 - 9) + 'px';
+            arrow.style.left = (rect.right + window.scrollX + padding - 9) + 'px';
+          }
+
+          // clamp to viewport
+          const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+          const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+          left = Math.min(Math.max(8 + window.scrollX, left), vw - tooltip.offsetWidth - 8 + window.scrollX);
+          top = Math.min(Math.max(8 + window.scrollY, top), (window.scrollY + vh) - tooltip.offsetHeight - 8);
+
+          tooltip.style.left = left + 'px';
+          tooltip.style.top = top + 'px';
+
+          // position arrow near target (arrow is a rotated square)
+          arrow.style.width = '18px';
+          arrow.style.height = '18px';
+        }
+      }
+
+      function reposition(){ showStep(index); }
+
+      // Wait until layout settles so we can measure tooltip size
+      setTimeout(show, 400);
+    })();
+    </script>
+
+    <!-- Shortcut Settings modal -->
+    <div id="shortcut-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20002;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
+      <div style="background:#fff;padding:1.5em;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.2);max-width:420px;width:94%;">
+        <h3 style="margin-top:0">Shortcut Settings</h3>
+        <p style="margin:0 0 0.6em 0;">Record a keyboard shortcut to quickly run an action.</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:0.6em;">
+          <input id="shortcut-display" type="text" readonly placeholder="Press Record then press keys" style="flex:1;padding:0.5em;border:1px solid #ddd;border-radius:6px;" />
+          <button id="shortcut-record" class="blue-btn" style="padding:0.45em 0.7em;">Record</button>
+        </div>
+        <label style="display:block;margin-bottom:0.4em;">Action</label>
+        <select id="shortcut-action" style="width:100%;padding:0.45em;border:1px solid #ddd;border-radius:6px;margin-bottom:0.6em;">
+          <option value="remove_access">Remove Access Key</option>
+          <option value="redirect">Redirect to URL</option>
+        </select>
+        <input id="shortcut-redirect" type="url" placeholder="https://example.com" style="width:100%;padding:0.45em;border:1px solid #ddd;border-radius:6px;margin-bottom:0.8em;display:none;" />
+        <div style="text-align:right">
+          <button id="shortcut-close" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:8px;">Close</button>
+          <button id="shortcut-save" class="blue-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // Simple removeAccessKey implementation (used elsewhere)
+    function removeAccessKey(){
+      try {
+        localStorage.removeItem('access_key');
+      } catch(e){ }
+      alert('Access key removed.');
+    }
+
+    // Shortcut settings logic
+    (function(){
+      const btn = document.getElementById('shortcut-settings-btn');
+      const modal = document.getElementById('shortcut-modal');
+      const display = document.getElementById('shortcut-display');
+      const recordBtn = document.getElementById('shortcut-record');
+      const actionSelect = document.getElementById('shortcut-action');
+      const redirectInput = document.getElementById('shortcut-redirect');
+      const saveBtn = document.getElementById('shortcut-save');
+      const closeBtn = document.getElementById('shortcut-close');
+
+      // Open modal
+      btn.addEventListener('click', () => {
+        // load existing
+        display.value = localStorage.shortcut_combo || '';
+        actionSelect.value = localStorage.shortcut_action || 'remove_access';
+        redirectInput.value = localStorage.shortcut_redirect || '';
+        redirectInput.style.display = actionSelect.value === 'redirect' ? 'block' : 'none';
+        modal.style.display = 'flex';
+      });
+
+      // toggle redirect input
+      actionSelect.addEventListener('change', () => {
+        redirectInput.style.display = actionSelect.value === 'redirect' ? 'block' : 'none';
+      });
+
+      // record combo
+      let recording = false;
+      recordBtn.addEventListener('click', () => {
+        recording = !recording;
+        recordBtn.textContent = recording ? 'Stop' : 'Record';
+        if (recording) {
+          display.value = '';
+          // capture next keydown events
+          const onKey = (e) => {
+            // ignore when typing into inputs
+            const tag = (e.target && e.target.tagName) || '';
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            e.preventDefault();
+            const parts = [];
+            if (e.ctrlKey) parts.push('Ctrl');
+            if (e.metaKey) parts.push('Meta');
+            if (e.altKey) parts.push('Alt');
+            if (e.shiftKey) parts.push('Shift');
+            const key = e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || '').replace(/ /g, '');
+            if (key && !['CONTROL','SHIFT','ALT','META'].includes(key.toUpperCase())) parts.push(key);
+            const combo = parts.join('+');
+            display.value = combo;
+            // stop recording after a combo
+            recording = false;
+            recordBtn.textContent = 'Record';
+            document.removeEventListener('keydown', onKey, true);
+          };
+          document.addEventListener('keydown', onKey, true);
+        } else {
+          // stop - removal handled by the onKey when pressed
+        }
+      });
+
+      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+
+      saveBtn.addEventListener('click', () => {
+        const combo = display.value.trim();
+        if (!combo) { alert('Please set a shortcut combo.'); return; }
+        localStorage.shortcut_combo = combo;
+        localStorage.shortcut_action = actionSelect.value;
+        localStorage.shortcut_redirect = redirectInput.value || '';
+        modal.style.display = 'none';
+        alert('Shortcut saved: ' + combo);
+      });
+
+      // Global handler: listen for the shortcut and perform action
+      document.addEventListener('keydown', (e) => {
+        // avoid triggering when typing
+        const tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        const stored = localStorage.shortcut_combo;
+        if (!stored) return;
+        const parts = [];
+        if (e.ctrlKey) parts.push('Ctrl');
+        if (e.metaKey) parts.push('Meta');
+        if (e.altKey) parts.push('Alt');
+        if (e.shiftKey) parts.push('Shift');
+        const key = e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || '').replace(/ /g, '');
+        if (key && !['CONTROL','SHIFT','ALT','META'].includes(key.toUpperCase())) parts.push(key);
+        const combo = parts.join('+');
+        if (combo === stored) {
+          // matched
+          const act = localStorage.shortcut_action || 'remove_access';
+          if (act === 'remove_access') {
+            try { removeAccessKey(); } catch (ignore){}
+          } else if (act === 'redirect') {
+            const url = localStorage.shortcut_redirect || '';
+            if (url) window.location.href = url;
+          }
+        }
+      });
+    })();
+    </script>
 </body>
 </html>
