@@ -1,74 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cluster RUSH</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-
-    <!-- Google Analytics Tracking -->
-<script>
-function checkCookie() {
-    const cookies = document.cookie.split("; ");
-    const accessCookie = cookies.find(row => row.startsWith("access="));
-    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-        window.location.href = "/index.html"; // Redirect if no valid cookie
-    }
-}
-checkCookie();
-</script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-RYY2PDT1RB');
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Cluster Rush</title>
+    <link href="TemplateData/style.css" rel="stylesheet">
+	<script src="TemplateData/UnityProgress.js" type="text/javascript"></script>
+  </head>
+  <body class="template">
+    <div class="template-wrap clear">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" style="width: 100vw; height: 100.1vh" ></canvas>
+    </div>
+    <script type="text/javascript">
+  var Module = {
+    TOTAL_MEMORY: 268435456,
+    errorhandler: null,			// arguments: err, url, line. This function must return 'true' if the error is handled, otherwise 'false'
+    compatibilitycheck: null,
+    backgroundColor: "#222C36",
+    splashStyle: "Dark",
+    dataUrl: "Release/NG.data",
+    codeUrl: "Release/NG.js",
+    asmUrl: "Release/NG.asm.js",
+    memUrl: "Release/NG.mem",
+  };
     </script>
-
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        iframe {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-        }
-    </style>
-
-    <script>
-        function checkAccess() {
-            const cookies = document.cookie.split("; ");
-            const accessCookie = cookies.find(row => row.startsWith("access="));
-
-            if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-                console.log("No access cookie found. Redirecting...");
-                window.location.href = "/index.html"; // Redirect users without access
-            } else {
-                console.log("Access granted.");
-                document.body.style.display = "block"; // Show content only when access is valid
-            }
-        }
-
-        window.onload = function() {
-            document.body.style.display = "none"; // Hide content until access is verified
-            checkAccess();
-        };
-    </script>
-</head>
-<body>
-
-    <!-- Embedded Game -->
-    <iframe src="https://us4-z.global.ssl.fastly.net/clusterrush/" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe>
-
-    <!-- Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
-
-</body>
+    <script src="Release/UnityLoader.js"></script>
+  </body>
 </html>
