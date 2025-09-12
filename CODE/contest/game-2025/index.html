@@ -1,163 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Game Challenge 2025</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Community Game Challenge 2025 — Code Universe</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
     <style>
-        body {
-            margin: 0;
-            font-family: Georgia, serif;
-            background-color: #fafafa;
-            color: #222;
-            line-height: 1.6;
+        :root{
+            --brand-1: #3a7bd5;
+            --brand-2: #3a6073;
+            --accent: #007bff;
+            --muted: #6b7280;
+            --bg: #ffffff;
+            --panel: #f8fafc;
+            --radius: 10px;
+            --container: 980px;
+            --maxwidth: 980px;
+            --text: #111827;
         }
-        header {
-            background: linear-gradient(to right, #3a7bd5, #3a6073);
-            color: #fff;
-            text-align: center;
-            padding: 50px 20px;
+        html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; color:var(--text);background:linear-gradient(180deg,#fbfdff 0%, #f6f9fc 100%);}
+        .site-header{
+            background: linear-gradient(90deg,var(--brand-1),var(--brand-2));
+            color:#fff;padding:48px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);
         }
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 0.2em;
-        }
-        header p {
-            font-size: 1.2em;
-            max-width: 800px;
-            margin: auto;
-            opacity: 0.9;
-        }
-        main {
-            max-width: 900px;
-            margin: auto;
-            padding: 40px 20px;
-        }
-        section {
-            margin-bottom: 50px;
-        }
-        h2 {
-            margin-top: 0;
-            font-size: 1.8em;
-            color: #333;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        table th, table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        table th {
-            background-color: #f0f0f0;
-        }
-        .cta {
-            text-align: center;
-            margin-top: 40px;
-        }
-        .cta a {
-            display: inline-block;
-            background: #3a7bd5;
-            color: #fff;
-            text-decoration: none;
-            padding: 14px 28px;
-            font-size: 1.2em;
-            border-radius: 6px;
-            transition: background 0.3s ease;
-        }
-        .cta a:hover {
-            background: #305a91;
-        }
-        .note {
-            background-color: #f9f9e8;
-            padding: 10px;
-            margin: 15px 0;
-            font-style: italic;
-            border-left: 4px solid #ccc;
-        }
+        .site-header h1{margin:0;font-size:2rem;letter-spacing:-0.02em}
+        .site-header p{margin:10px auto 0;max-width:820px;opacity:0.95}
+        .site-content{max-width:var(--container);margin:28px auto;padding:28px;background:var(--bg);border-radius:12px;box-shadow:0 8px 30px rgba(20,30,40,0.06)}
+        h2{font-size:1.25rem;margin:0 0 10px 0;color:#17202a}
+        section{margin-bottom:22px}
+        p{margin:0 0 12px 0;line-height:1.55;color:#24303a}
+        .note{background:#fff7e6;border-left:4px solid #ffd280;padding:12px;border-radius:6px;color:#5b4636}
+        table{width:100%;border-collapse:collapse;margin-top:12px;background:transparent}
+        table th, table td{padding:12px 14px;border:1px solid #e6eef6;text-align:left;background:#fbfdff}
+        table th{background:#f3f8ff;color:#0b3a66;font-weight:600}
+        a.button, .blue-btn{display:inline-block;background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 6px 20px rgba(11,59,122,0.08)}
+        a.button:hover, .blue-btn:hover{opacity:0.95}
+        .cta{ text-align:center;margin-top:26px }
+        ul, ol{margin:8px 0 12px 22px}
+        .meta-table td{vertical-align:middle}
+        footer{max-width:var(--container);margin:18px auto 36px;color:var(--muted);font-size:0.9rem}
+        @media (max-width:720px){ .site-content{padding:16px;margin:16px} .site-header{padding:28px} }
     </style>
 </head>
 <body>
+    <header class="site-header" role="banner">
+        <h1>Community Game Challenge 2025</h1>
+        <p>A celebration of ingenuity, technical skill, and playful imagination — unite creators from across the globe to build interactive magic.</p>
+    </header>
 
-<header>
-    <h1>Community Game Challenge 2025</h1>
-    <p>A celebration of ingenuity, technical skill, and playful imagination, uniting creators from across the globe in the pursuit of interactive magic.</p>
-</header>
+    <main class="site-content" role="main">
+        <section aria-labelledby="invitation">
+            <h2 id="invitation">An Invitation to Visionaries</h2>
+            <p>
+                To every dreamer, builder, and pixel‑level perfectionist: we extend a warm invitation to join a spirited and serious undertaking. This is more than a competition — it is an opportunity to craft an experience that will outlive its own code. Whether your medium is the vibrant stage of <strong>Scratch</strong> or the infinite canvas of <strong>HTML5</strong>, make your mark with something replayed, remembered, and revered.
+            </p>
+        </section>
 
-<main>
-    <section>
-        <h2>An Invitation to Visionaries</h2>
-        <p>
-            To every dreamer, builder, and pixel‑level perfectionist:  
-            We hereby extend a most heartfelt summons to join an undertaking both spirited and serious.  
-            This is more than a competition — it is a call to craft an experience that will outlive its own code, to build something replayed, remembered, and revered. Whether your medium is the vibrant stage of <strong>Scratch</strong> or the infinite canvas of <strong>HTML5</strong>, you are invited to make your mark.
-        </p>
-    </section>
+        <section aria-labelledby="details">
+            <h2 id="details">Competition Details</h2>
+            <table class="meta-table" aria-describedby="details">
+                <tr>
+                    <th scope="row">Theme</th>
+                    <td>Original interactive games in Scratch or HTML5</td>
+                </tr>
+                <tr>
+                    <th scope="row">Prize</th>
+                    <td><strong>$30 USD</strong> for the top selection, plus recognition and a community spotlight</td>
+                </tr>
+                <tr>
+                    <th scope="row">Entry Period</th>
+                    <td>September 1, 2025 – September 25, 2025</td>
+                </tr>
+                <tr>
+                    <th scope="row">Judging Criteria</th>
+                    <td>Creativity, usability, replay value, and overall execution</td>
+                </tr>
+                <tr>
+                    <th scope="row">Submission Link</th>
+                    <td><a href="https://get-better.code-faction.gleeze.com/CODE/contest/game-2025/" target="_blank" rel="noopener noreferrer">Submit Your Entry Here</a></td>
+                </tr>
+            </table>
+        </section>
 
-    <section>
-        <h2>Competition Details</h2>
-        <table>
-            <tr>
-                <th>Theme</th>
-                <td>Original interactive games in Scratch or HTML5</td>
-            </tr>
-            <tr>
-                <th>Prize</th>
-                <td><strong>$30 USD</strong> for the top selection, along with recognition and community spotlight</td>
-            </tr>
-            <tr>
-                <th>Entry Period</th>
-                <td>[Start Date] – [End Date]</td>
-            </tr>
-            <tr>
-                <th>Judging Criteria</th>
-                <td>Creativity, usability, replay value, and overall execution</td>
-            </tr>
-            <tr>
-                <th>Submission Link</th>
-                <td><a href="https://get-better.code-faction.gleeze.com/CODE/contest/game-2025/" target="_blank">Submit Your Entry Here</a></td>
-            </tr>
-        </table>
-    </section>
+        <section aria-labelledby="guidance">
+            <h2 id="guidance">Design Guidance</h2>
+            <p class="note">Not a checklist, but a constellation of prompts to guide and inspire.</p>
+            <ul>
+                <li>Surprise your player with an unexpected mechanic or narrative twist.</li>
+                <li>Design for replay: what makes someone return a second, third, or tenth time?</li>
+                <li>Balance simplicity and depth — the best games are easy to start, hard to master.</li>
+                <li>Infuse personality through art, sound, dialogue, or all three.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h2>Design Guidance</h2>
-        <p class="note">Not a checklist, but a constellation of prompts to guide and inspire.</p>
-        <ul>
-            <li>Surprise your player — with an unexpected mechanic or narrative twist.</li>
-            <li>Design for replay: what makes someone come back a second, third, or tenth time?</li>
-            <li>Balance simplicity and depth — the best games are easy to start, hard to master.</li>
-            <li>Infuse personality: through art, sound, dialogue, or all three.</li>
-        </ul>
-    </section>
+        <section aria-labelledby="rules">
+            <h2 id="rules">Rules &amp; Eligibility</h2>
+            <ol>
+                <li>Entries must be original and created during the contest period.</li>
+                <li>Only projects built in Scratch or HTML5 will be accepted.</li>
+                <li>Any borrowed assets must have appropriate permissions and credits.</li>
+                <li>One entry per participant — make it count.</li>
+            </ol>
+        </section>
 
-    <section>
-        <h2>Rules & Eligibility</h2>
-        <ol>
-            <li>Entries must be original and created during the contest period.</li>
-            <li>Only projects built in Scratch or HTML5 will be accepted.</li>
-            <li>Any borrowed assets must have appropriate permissions and credits.</li>
-            <li>One entry per participant — make it count.</li>
-            <li>Read the full set of rules on the <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUNk9NVkI5QUhLM01ONFQ1SFY3ODExWVhPTy4u" target="_blank">official page</a>.</li>
-        </ol>
-    </section>
+        <section class="cta" aria-label="call to action">
+            <h2>Your Turn</h2>
+            <p>Whether you are a seasoned architect of virtual worlds or a newcomer with one bold idea, your work belongs here — and we are ready to see it.</p>
+            <a class="button" href="https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUNk9NVkI5QUhLM01ONFQ1SFY3ODExWVhPTy4u" target="_blank" rel="noopener noreferrer">Enter the Challenge</a>
+        </section>
+    </main>
 
-    <section class="cta">
-        <h2>Your Turn</h2>
-        <p>
-            The stage is set, the challenge awaits.  
-            Whether you are a seasoned architect of virtual worlds or a newcomer with one bold idea,  
-            your work belongs here — and we are ready to see it.
-        </p>
-        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__VD4IRRUNk9NVkI5QUhLM01ONFQ1SFY3ODExWVhPTy4u" target="_blank">Enter the Challenge</a>
-    </section>
-</main>
-
+    <footer>
+        <div style="max-width:var(--maxwidth);margin:0 auto;padding:0 20px;text-align:left;">
+            <p style="margin:0;color:var(--muted);font-size:0.95rem;">Disclaimer: This website and its contents are provided for entertainment purposes only. We are not responsible for any misuse of the services offered, including violations of rules, policies, or laws in your location or institution. Accessing this site using unauthorized devices or networks is prohibited. By using this site, you accept full responsibility for compliance.</p>
+        </div>
+    </footer>
 </body>
 </html>

@@ -408,7 +408,7 @@
         <!-- Top Buttons -->
         <div class="button-group" id="top-buttons">
             <button onclick="removeAccessKey();">Remove Access Key</button>
-            <button id="shortcut-settings-btn" title="Configure shortcut">Shortcut Settings</button>
+            <button id="shortcut-settings-btn" title="Configure shortcut" onclick="location.href='/welcome/shortcut.html'">Shortcut Settings</button>
             <button onclick="window.location.href='/updates.txt';" id="updates-btn">View Updates</button>
         </div>
 
@@ -629,28 +629,6 @@
     })();
     </script>
 
-    <!-- Shortcut Settings modal -->
-    <div id="shortcut-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20002;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:1.5em;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.2);max-width:420px;width:94%;">
-        <h3 style="margin-top:0">Shortcut Settings</h3>
-        <p style="margin:0 0 0.6em 0;">Record a keyboard shortcut to quickly run an action.</p>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:0.6em;">
-          <input id="shortcut-display" type="text" readonly placeholder="Press Record then press keys" style="flex:1;padding:0.5em;border:1px solid #ddd;border-radius:6px;" />
-          <button id="shortcut-record" class="blue-btn" style="padding:0.45em 0.7em;">Record</button>
-        </div>
-        <label style="display:block;margin-bottom:0.4em;">Action</label>
-        <select id="shortcut-action" style="width:100%;padding:0.45em;border:1px solid #ddd;border-radius:6px;margin-bottom:0.6em;">
-          <option value="remove_access">Remove Access Key</option>
-          <option value="redirect">Redirect to URL</option>
-        </select>
-        <input id="shortcut-redirect" type="url" placeholder="https://example.com" style="width:100%;padding:0.45em;border:1px solid #ddd;border-radius:6px;margin-bottom:0.8em;display:none;" />
-        <div style="text-align:right">
-          <button id="shortcut-close" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:8px;">Close</button>
-          <button id="shortcut-save" class="blue-btn">Save</button>
-        </div>
-      </div>
-    </div>
-
     <script>
     // Simple removeAccessKey implementation (used elsewhere)
     function removeAccessKey(){
@@ -660,104 +638,71 @@
       alert('Access key removed.');
     }
 
-    // Shortcut settings logic
-    (function(){
-      const btn = document.getElementById('shortcut-settings-btn');
-      const modal = document.getElementById('shortcut-modal');
-      const display = document.getElementById('shortcut-display');
-      const recordBtn = document.getElementById('shortcut-record');
-      const actionSelect = document.getElementById('shortcut-action');
-      const redirectInput = document.getElementById('shortcut-redirect');
-      const saveBtn = document.getElementById('shortcut-save');
-      const closeBtn = document.getElementById('shortcut-close');
+    // Track currently pressed keys so we can detect multi-key combos like Alt+G+5
+    const __pressedKeys = new Set();
+    window.addEventListener('keydown', (ev) => { __pressedKeys.add((ev.key || '').toLowerCase()); }, { passive: true });
+    window.addEventListener('keyup', (ev) => { __pressedKeys.delete((ev.key || '').toLowerCase()); }, { passive: true });
 
-      // Open modal
-      btn.addEventListener('click', () => {
-        // load existing
-        display.value = localStorage.shortcut_combo || '';
-        actionSelect.value = localStorage.shortcut_action || 'remove_access';
-        redirectInput.value = localStorage.shortcut_redirect || '';
-        redirectInput.style.display = actionSelect.value === 'redirect' ? 'block' : 'none';
-        modal.style.display = 'flex';
-      });
-
-      // toggle redirect input
-      actionSelect.addEventListener('change', () => {
-        redirectInput.style.display = actionSelect.value === 'redirect' ? 'block' : 'none';
-      });
-
-      // record combo
-      let recording = false;
-      recordBtn.addEventListener('click', () => {
-        recording = !recording;
-        recordBtn.textContent = recording ? 'Stop' : 'Record';
-        if (recording) {
-          display.value = '';
-          // capture next keydown events
-          const onKey = (e) => {
-            // ignore when typing into inputs
-            const tag = (e.target && e.target.tagName) || '';
-            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-            e.preventDefault();
-            const parts = [];
-            if (e.ctrlKey) parts.push('Ctrl');
-            if (e.metaKey) parts.push('Meta');
-            if (e.altKey) parts.push('Alt');
-            if (e.shiftKey) parts.push('Shift');
-            const key = e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || '').replace(/ /g, '');
-            if (key && !['CONTROL','SHIFT','ALT','META'].includes(key.toUpperCase())) parts.push(key);
-            const combo = parts.join('+');
-            display.value = combo;
-            // stop recording after a combo
-            recording = false;
-            recordBtn.textContent = 'Record';
-            document.removeEventListener('keydown', onKey, true);
-          };
-          document.addEventListener('keydown', onKey, true);
-        } else {
-          // stop - removal handled by the onKey when pressed
+    // Helper to post to service worker
+    function postToSW(msg) {
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage(msg);
+        } else if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(reg => { if (reg && reg.active) reg.active.postMessage(msg); }).catch(()=>{});
         }
-      });
+      } catch (e) {}
+    }
 
-      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    // Helper: reliably detect Alt+G+5 using tracked keys plus current event key.
+    function isAltG5Pressed(e) {
+      try {
+        const keyNow = (e.key || '').toLowerCase();
+        // '5' may be '%' when shifted, so accept both
+        const has5 = __pressedKeys.has('5') || __pressedKeys.has('%') || keyNow === '5' || keyNow === '%';
+        const hasG = __pressedKeys.has('g') || keyNow === 'g';
+        return !!(e.altKey && hasG && has5);
+      } catch (ex) { return false; }
+    }
 
-      saveBtn.addEventListener('click', () => {
-        const combo = display.value.trim();
-        if (!combo) { alert('Please set a shortcut combo.'); return; }
-        localStorage.shortcut_combo = combo;
-        localStorage.shortcut_action = actionSelect.value;
-        localStorage.shortcut_redirect = redirectInput.value || '';
-        modal.style.display = 'none';
-        alert('Shortcut saved: ' + combo);
-      });
+    // Global handler: listen for the saved shortcut combo and perform action
+    document.addEventListener('keydown', (e) => {
+      // avoid triggering when typing
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
-      // Global handler: listen for the shortcut and perform action
-      document.addEventListener('keydown', (e) => {
-        // avoid triggering when typing
-        const tag = (e.target && e.target.tagName) || '';
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-        const stored = localStorage.shortcut_combo;
-        if (!stored) return;
-        const parts = [];
-        if (e.ctrlKey) parts.push('Ctrl');
-        if (e.metaKey) parts.push('Meta');
-        if (e.altKey) parts.push('Alt');
-        if (e.shiftKey) parts.push('Shift');
-        const key = e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || '').replace(/ /g, '');
-        if (key && !['CONTROL','SHIFT','ALT','META'].includes(key.toUpperCase())) parts.push(key);
-        const combo = parts.join('+');
-        if (combo === stored) {
-          // matched
-          const act = localStorage.shortcut_action || 'remove_access';
-          if (act === 'remove_access') {
-            try { removeAccessKey(); } catch (ignore){}
-          } else if (act === 'redirect') {
-            const url = localStorage.shortcut_redirect || '';
-            if (url) window.location.href = url;
-          }
+      // Special debug combo: Alt + G + 5 -> show menu only, do not perform saved action
+      try {
+        if (isAltG5Pressed(e)) {
+          // send a timestamped trigger to SW; force to bypass timing checks
+          postToSW({ type: 'SHORTCUT_TRIGGERED', timestamp: Date.now(), force: true });
+          // prevent the default page shortcut action and stop other handlers
+          try { e.preventDefault(); e.stopPropagation(); } catch (ignore) {}
+          return;
         }
-      });
-    })();
+      } catch (ignore) {}
+
+      const stored = localStorage.shortcut_combo;
+      if (!stored) return;
+      const parts = [];
+      if (e.ctrlKey) parts.push('Ctrl');
+      if (e.metaKey) parts.push('Meta');
+      if (e.altKey) parts.push('Alt');
+      if (e.shiftKey) parts.push('Shift');
+      const keyChar = e.key && e.key.length === 1 ? e.key.toUpperCase() : (e.key || '').replace(/ /g, '');
+      if (keyChar && !['CONTROL','SHIFT','ALT','META'].includes(keyChar.toUpperCase())) parts.push(keyChar);
+      const combo = parts.join('+');
+      if (combo === stored) {
+        const act = localStorage.shortcut_action || 'remove_access';
+        if (act === 'remove_access') {
+          try { removeAccessKey(); } catch (ignore){}
+        } else if (act === 'redirect') {
+          const url = localStorage.shortcut_redirect || '';
+          if (url) window.location.href = url;
+        }
+      }
+    });
     </script>
-</body>
-</html>
+
+    </body>
+    </html>

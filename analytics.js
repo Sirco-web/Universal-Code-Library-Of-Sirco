@@ -446,3 +446,162 @@
         }
     };
 })();
+
+// --- Begin client-side analytics.js code ---
+(function(){
+    // Minimal client helper for version menu and SW updates
+    if (!('serviceWorker' in navigator)) return;
+
+    // Register analytics service worker (best-effort)
+    navigator.serviceWorker.register('/analytics-sw.js').catch(() => {});
+
+    // Ensure pages reload when a new controller takes over
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        try { location.reload(); } catch (e) {}
+    });
+
+    // Post a message to the active service worker or to the ready registration
+    function postToSW(msg) {
+        try {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage(msg);
+            } else {
+                navigator.serviceWorker.ready.then(reg => {
+                    if (reg && reg.active) reg.active.postMessage(msg);
+                }).catch(() => {});
+            }
+        } catch (e) {}
+    }
+
+    // Listen for messages from the service worker
+    navigator.serviceWorker.addEventListener('message', (ev) => {
+        const data = ev && ev.data;
+        if (!data || !data.type) return;
+        if (data.type === 'VERSION_MENU') {
+            showVersionMenu(data);
+        }
+        if (data.type === 'DO_REGISTER_SW' && data.url) {
+            // SW asked the client to register a given URL
+            registerAndActivateSW(data.url);
+        }
+        // Legacy compatibility: PERFORM_SHORTCUT_ACTION - ignored here
+    });
+
+    function createOverlay() {
+        let o = document.getElementById('__version_menu_overlay');
+        if (o) return o;
+        o = document.createElement('div');
+        o.id = '__version_menu_overlay';
+        o.style.position = 'fixed';
+        o.style.left = '10px';
+        o.style.top = '10px';
+        o.style.zIndex = '2147483647';
+        o.style.minWidth = '320px';
+        o.style.maxWidth = 'calc(100% - 20px)';
+        o.style.padding = '12px';
+        o.style.borderRadius = '8px';
+        o.style.boxShadow = '0 6px 18px rgba(0,0,0,0.3)';
+        o.style.background = 'rgba(30,30,30,0.95)';
+        o.style.color = '#fff';
+        o.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+        o.style.fontSize = '14px';
+        o.style.lineHeight = '1.3';
+
+        document.body.appendChild(o);
+        return o;
+    }
+
+    function showVersionMenu(info) {
+        const o = createOverlay();
+        o.innerHTML = '';
+
+        const title = document.createElement('div');
+        title.textContent = 'Version / Network';
+        title.style.fontWeight = '600';
+        title.style.marginBottom = '8px';
+        o.appendChild(title);
+
+        const versionRow = document.createElement('div');
+        versionRow.textContent = 'Current version: ' + (info.currentVersion || 'unknown');
+        o.appendChild(versionRow);
+
+        const netRow = document.createElement('div');
+        netRow.textContent = 'Version fetch network: ' + (info.verNetworkOk ? 'online' : 'offline');
+        o.appendChild(netRow);
+
+        const swRow = document.createElement('div');
+        swRow.textContent = 'analytics-sw fetch: ' + (info.swNetworkOk ? 'online' : 'offline');
+        o.appendChild(swRow);
+
+        const spacer = document.createElement('div');
+        spacer.style.height = '8px';
+        o.appendChild(spacer);
+
+        if (info.newAnalyticsSW && info.newAnalyticsSW.available) {
+            const newRow = document.createElement('div');
+            newRow.textContent = 'New analytics-sw available';
+            newRow.style.color = '#ffd479';
+            o.appendChild(newRow);
+
+            const btn = document.createElement('button');
+            btn.textContent = 'Install analytics-sw';
+            btn.style.marginTop = '8px';
+            btn.style.padding = '6px 10px';
+            btn.style.border = 'none';
+            btn.style.borderRadius = '5px';
+            btn.style.cursor = 'pointer';
+            btn.style.background = '#3aa76d';
+            btn.style.color = '#fff';
+            btn.onclick = () => {
+                // Prefer client-side registration to ensure it becomes controlled here
+                registerAndActivateSW(info.newAnalyticsSW.url || '/analytics-sw.js').catch(() => {});
+            };
+            o.appendChild(btn);
+        } else {
+            const infoRow = document.createElement('div');
+            infoRow.textContent = 'No new analytics-sw detected.';
+            o.appendChild(infoRow);
+        }
+
+        const close = document.createElement('button');
+        close.textContent = 'Close';
+        close.style.marginLeft = '8px';
+        close.style.padding = '6px 10px';
+        close.style.border = 'none';
+        close.style.borderRadius = '5px';
+        close.style.cursor = 'pointer';
+        close.style.background = '#666';
+        close.style.color = '#fff';
+        close.onclick = () => { try { o.remove(); } catch (e) {} };
+        o.appendChild(close);
+
+        // Auto-close after 30s
+        setTimeout(() => { try { o.remove(); } catch (e) {} }, 30000);
+    }
+
+    async function registerAndActivateSW(url) {
+        try {
+            // Attempt to register the provided URL
+            const reg = await navigator.serviceWorker.register(url, { scope: '/' });
+            // If there's a waiting worker, ask it to skipWaiting
+            if (reg && reg.waiting) {
+                try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+                return;
+            }
+            // If installing, wait for it to become waiting
+            if (reg && reg.installing) {
+                reg.installing.addEventListener('statechange', () => {
+                    if (reg.waiting) {
+                        try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+                    }
+                });
+            }
+            // Fallback: request service worker global to ask all clients to register this url
+            postToSW({ type: 'REQUEST_CLIENT_REGISTER_SW', url });
+        } catch (e) {
+            // If registration fails, fallback to asking SW to instruct clients
+            postToSW({ type: 'REQUEST_CLIENT_REGISTER_SW', url });
+        }
+    }
+
+})();

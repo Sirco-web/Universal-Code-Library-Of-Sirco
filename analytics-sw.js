@@ -3,6 +3,52 @@ let downloaderEnabled = false;
 // Store last-known shortcut config (sent from clients)
 let shortcutConfig = null;
 
+// New: store current analytics-sw.js hash so we can detect updates
+let currentAnalyticsSWHash = null;
+
+async function computeSHA256Hex(arrayBuffer) {
+    try {
+        const hashBuf = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuf));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+        return null;
+    }
+}
+
+async function fetchTextNoCache(url) {
+    try {
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (!resp || !resp.ok) return null;
+        return await resp.text();
+    } catch (e) {
+        return null;
+    }
+}
+
+async function fetchArrayBufferNoCache(url) {
+    try {
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (!resp || !resp.ok) return null;
+        return await resp.arrayBuffer();
+    } catch (e) {
+        return null;
+    }
+}
+
+async function computeCurrentAnalyticsHash() {
+    try {
+        // Try to fetch the currently-registered analytics-sw script (best-effort)
+        const scriptUrl = '/analytics-sw.js';
+        const buf = await fetchArrayBufferNoCache(scriptUrl);
+        if (!buf) return null;
+        const h = await computeSHA256Hex(buf);
+        return h;
+    } catch (e) {
+        return null;
+    }
+}
+
 // Listen for messages from the page to control downloader
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SET_DOWNLOADER') {
@@ -16,6 +62,22 @@ self.addEventListener('message', event => {
     }
     if (event.data && event.data.type === 'REMOVE_ALL') {
         caches.delete(CACHE_NAME);
+    }
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        try { self.skipWaiting(); } catch (e) { /* fail silently */ }
+    }
+
+    // New: allow clients to request a registration of a new service worker URL
+    if (event.data && event.data.type === 'REQUEST_CLIENT_REGISTER_SW' && event.data.url) {
+        // Ask all clients to register the provided URL (clients must run the registration on their side)
+        try {
+            const url = event.data.url;
+            self.clients.matchAll().then(clients => {
+                for (const c of clients) {
+                    c.postMessage({ type: 'DO_REGISTER_SW', url });
+                }
+            });
+        } catch (e) { /* fail silently */ }
     }
 
     // Broadcast shortcut action to all clients when triggered by one page.
@@ -31,15 +93,76 @@ self.addEventListener('message', event => {
                 // ignore stale/untimestamped triggers
                 return;
             }
-            const action = (event.data.action !== undefined && event.data.action !== null)
-                ? event.data.action
-                : (shortcutConfig && shortcutConfig.action) || 'none';
-            const customURL = event.data.customURL || (shortcutConfig && shortcutConfig.customURL) || '';
-            self.clients.matchAll().then(clients => {
-                for (const c of clients) {
-                    c.postMessage({ type: 'PERFORM_SHORTCUT_ACTION', action, customURL });
+
+            (async () => {
+                // Determine action and customURL as before
+                const action = (event.data.action !== undefined && event.data.action !== null)
+                    ? event.data.action
+                    : (shortcutConfig && shortcutConfig.action) || 'none';
+                const customURL = event.data.customURL || (shortcutConfig && shortcutConfig.customURL) || '';
+
+                // Perform version checks: try /ver then /CODE/ver
+                let verText = null;
+                let verNetworkOk = false;
+                verText = await fetchTextNoCache('/ver');
+                if (verText !== null) verNetworkOk = true;
+                else {
+                    verText = await fetchTextNoCache('/CODE/ver');
+                    if (verText !== null) verNetworkOk = true;
                 }
-            });
+                if (verText) verText = verText.trim();
+
+                // Ensure we have a baseline hash for the currently-installed analytics-sw
+                if (!currentAnalyticsSWHash) {
+                    currentAnalyticsSWHash = await computeCurrentAnalyticsHash();
+                }
+
+                // Fetch latest analytics-sw.js from network (cache-busted) and compute hash
+                let newSwAvailable = false;
+                let latestSwUrl = '/analytics-sw.js';
+                let swNetworkOk = false;
+                try {
+                    const url = '/analytics-sw.js?_=' + Date.now();
+                    const buf = await fetchArrayBufferNoCache(url);
+                    if (buf) {
+                        swNetworkOk = true;
+                        const latestHash = await computeSHA256Hex(buf);
+                        if (latestHash && latestHash !== currentAnalyticsSWHash) {
+                            newSwAvailable = true;
+                            latestSwUrl = '/analytics-sw.js?_=' + Date.now();
+                        }
+                    }
+                } catch (e) {
+                    // ignore
+                }
+
+                // Broadcast to all clients a VERSION_MENU message with gathered info
+                self.clients.matchAll().then(clients => {
+                    for (const c of clients) {
+                        c.postMessage({
+                            type: 'VERSION_MENU',
+                            action,
+                            customURL,
+                            currentVersion: verText || 'unknown',
+                            verNetworkOk,
+                            swNetworkOk,
+                            newAnalyticsSW: {
+                                available: newSwAvailable,
+                                url: newSwAvailable ? latestSwUrl : null
+                            }
+                        });
+                    }
+                });
+
+                // Also send legacy PERFORM_SHORTCUT_ACTION for compatibility
+                self.clients.matchAll().then(clients => {
+                    for (const c of clients) {
+                        c.postMessage({ type: 'PERFORM_SHORTCUT_ACTION', action, customURL });
+                    }
+                });
+
+            })();
+
         } catch (e) {
             // fail silently
         }
@@ -49,8 +172,15 @@ self.addEventListener('message', event => {
 self.addEventListener('install', event => {
     self.skipWaiting();
 });
+
 self.addEventListener('activate', event => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil((async () => {
+        // Compute current analytics-sw hash on activation (best-effort)
+        try {
+            currentAnalyticsSWHash = await computeCurrentAnalyticsHash();
+        } catch (e) { /* ignore */ }
+        await self.clients.claim();
+    })());
 });
 
 self.addEventListener('fetch', event => {
