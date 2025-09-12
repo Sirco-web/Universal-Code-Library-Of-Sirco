@@ -6,45 +6,55 @@
     <title>Banner</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
     <style>
+        /* Make the page transparent so parent background shows through */
+        html, body {
+            background: transparent !important;
+        }
         body { 
             text-align: center; 
-            padding: 0; /* Remove extra padding */
+            padding: 0;
             margin: 0; 
-            background-color: #f4f4f4; 
+            color: #fff; /* Visible on black parent background */
         }
+
         .banner-content {
-            padding: 10px 0; /* Vertical padding for the banner content */
+            padding: 10px 0;
+            background: transparent !important; /* no panel background */
         }
+
         h2 {
             font-size: 1.5em;
-            color: #333;
+            color: #fff; /* white text */
         }
+
         p {
-            color: #555;
+            color: #ddd; 
             font-size: 1.2em;
         }
+
         a {
-            color: #007bff;
+            color: #4da3ff;
             text-decoration: none;
         }
         a:hover {
             text-decoration: underline;
         }
-        /* Classic mode overrides */
+
+        /* Classic mode: keep transparency, only control text colors */
         html.classic-mode, html.classic-mode body {
-            background-color: #eaeaea !important;
-            color: #222 !important;
+            background: transparent !important;
+            color: #fff !important;
         }
         html.classic-mode .banner-content {
-            background: #fff !important;
-            color: #222 !important;
+            background: transparent !important;
+            color: #fff !important;
             border-radius: 0 !important;
         }
         html.classic-mode h2 {
-            color: #007bff !important;
+            color: #4da3ff !important;
         }
         html.classic-mode a {
-            color: #007bff !important;
+            color: #4da3ff !important;
         }
     </style>
     <script>
@@ -57,7 +67,6 @@
             } catch(e){}
         })();
     </script>
-    <script src="/newlook.js"></script>
 </head>
 <body>
 
@@ -67,6 +76,7 @@
             <a href="https://get-better.code-faction.gleeze.com/CODE/contest/game-2025/" target="_blank">Click here for more rules.</a>
         </h2>
     </div>
+
     <script>
         // Send the height of the banner to the parent window
         function sendHeight() {
