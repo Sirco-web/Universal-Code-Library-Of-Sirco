@@ -12,6 +12,16 @@
 
 </head>
 <body>
+<canvas id="canvas"></canvas>
+    <!-- Dark mode toggle button -->
+    <button id="dark-mode-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <span id="dark-mode-icon">🌙</span>
+    </button>
+    <!-- Classic mode toggle button 
+    <button id="classic-mode-toggle" title="Switch to classic look" aria-label="Switch to classic look" style="position:fixed;top:18px;left:74px;z-index:10002;background:#fff;color:#23272f;border-radius:50%;border:1px solid #eee;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.3em;box-shadow:0 2px 8px #0002;cursor:pointer;transition:background 0.2s,color 0.2s;">
+        <span id="classic-mode-icon">🕹️</span>
+    </button>
+-->
     <!-- Account icon in top right -->
     <a href="/CODE/user/" id="account-icon-link" style="
         position:fixed;
@@ -402,8 +412,13 @@
     </script>
 
     <div class="container">
-        <h1>Welcome to Code-Universe</h1>
-        <p>Welcome to the brand new Code-Universe lineup.</p>
+        <header class="main-header">
+            <h1>Welcome to <span class="brand">Code-Universe</span></h1>
+            <p class="subtitle">The brand new Code-Universe lineup. Explore, play, and create.</p>
+            <div class="mode-note" style="margin-top:1em;font-size:0.98em;color:#888;">
+                <span id="mode-note-text">You are using the new look. You can switch to classic mode here.</span>
+            </div>
+        </header>
 
         <!-- Top Buttons -->
         <div class="button-group" id="top-buttons">
@@ -411,29 +426,28 @@
             <button id="shortcut-settings-btn" title="Configure shortcut" onclick="location.href='/welcome/shortcut.html'">Shortcut Settings</button>
             <button onclick="window.location.href='/updates.txt';" id="updates-btn">View Updates</button>
         </div>
-
-        <!-- Main Buttons -->
+        <nav class="main-nav">
         <div class="button-group" id="main-buttons">
             <button onclick="window.location.href='/CODE/games';" id="games-btn">Games</button>
             <button onclick="window.location.href='/CODE/sound';" id="storage-btn">Sound board</button>
             <button onclick="window.location.href='/ai';" id="ai-btn">Ai</button>
             <button id="proxys-btn" onclick="alert('the school year just started and we just started to fix everything.');">Proxys</button>
-            <button onclick="window.location.href='/CODE/tools';" id="tools-btn">Tools</button>
+            <button onclick="window.location.href='/CODE/tools';" id="tools-btn" style="display:none;">Tools</button>
         </div>
+    </nav>
     </div>
     
 <!-- window.location.href='/CODE/proxys'; -->
 
-    <div class="version-footer">
+    <footer class="version-footer">
         <p>Site Version: <span id="siteVersion">Loading...</span></p>
-
-        <p>
+        <p class="disclaimer">
         Disclaimer: This website and its contents are provided for entertainment purposes only. 
         We are not responsible for any misuse of the services offered, including violations of 
         rules, policies, or laws in your location or institution. Accessing this site using unauthorized 
         devices or networks is prohibited. By using this site, you accept full responsibility for compliance.
         </p>
-    </div>
+    </footer>
 
     <script src="/analytics.js?5h"></script>
     <style>
@@ -704,5 +718,46 @@
     });
     </script>
 
-    </body>
-    </html>
+    <script>
+    // Dark mode toggle logic
+    (function() {
+        const toggle = document.getElementById('dark-mode-toggle');
+        const icon = document.getElementById('dark-mode-icon');
+        function setDarkMode(on) {
+            document.documentElement.classList.toggle('dark-mode', on);
+            icon.textContent = on ? '☀️' : '🌙';
+            localStorage.setItem('dark_mode', on ? '1' : '0');
+        }
+        toggle.addEventListener('click', () => {
+            setDarkMode(!document.documentElement.classList.contains('dark-mode'));
+        });
+        // On load, set dark mode if preferred or previously set
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = localStorage.getItem('dark_mode');
+        setDarkMode(saved === '1' || (saved === null && prefersDark));
+    })();
+
+    // Classic mode toggle logic
+    (function() {
+        const toggle = document.getElementById('classic-mode-toggle');
+        const icon = document.getElementById('classic-mode-icon');
+        const note = document.getElementById('mode-note-text');
+        function setClassicMode(on) {
+            document.documentElement.classList.toggle('classic-mode', on);
+            icon.textContent = on ? '✨' : '🕹️';
+            localStorage.setItem('classic_mode', on ? '1' : '0');
+            if (note) note.textContent = on
+                ? "You are using the classic look. You can switch back to the new look here."
+                : "You are using the new look. You can switch to classic mode here.";
+        }
+        toggle.addEventListener('click', () => {
+            setClassicMode(!document.documentElement.classList.contains('classic-mode'));
+        });
+        // On load, set classic mode if previously set
+        const saved = localStorage.getItem('classic_mode');
+        setClassicMode(saved === '1');
+    })();
+    </script>
+</body>
+<script src="stars.js"></script>
+</html>

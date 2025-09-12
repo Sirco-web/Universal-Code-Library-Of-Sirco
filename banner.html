@@ -30,7 +30,34 @@
         a:hover {
             text-decoration: underline;
         }
+        /* Classic mode overrides */
+        html.classic-mode, html.classic-mode body {
+            background-color: #eaeaea !important;
+            color: #222 !important;
+        }
+        html.classic-mode .banner-content {
+            background: #fff !important;
+            color: #222 !important;
+            border-radius: 0 !important;
+        }
+        html.classic-mode h2 {
+            color: #007bff !important;
+        }
+        html.classic-mode a {
+            color: #007bff !important;
+        }
     </style>
+    <script>
+        // Apply classic mode if set in localStorage
+        (function() {
+            try {
+                if (window.localStorage && localStorage.classic_mode === '1') {
+                    document.documentElement.classList.add('classic-mode');
+                }
+            } catch(e){}
+        })();
+    </script>
+    <script src="/newlook.js"></script>
 </head>
 <body>
 
