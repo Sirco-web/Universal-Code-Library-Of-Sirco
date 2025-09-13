@@ -81,7 +81,7 @@
 
     <!-- Modal for offline confirmation -->
     <div id="offline-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20000;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px #0003;text-align:center;max-width:90vw;position:relative;">
+      <div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:center;max-width:90vw;position:relative;border:1px solid var(--modal-border);">
         <button id="offline-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#888;cursor:pointer;">&times;</button>
         <p style="font-size:1.1em;">Download the whole site for offline use?<br><small>Pages you visit will be saved for offline access.</small></p>
         <button id="offline-confirm-btn" class="blue-btn" style="margin:0 1em 0 0;">Yes</button>
@@ -91,12 +91,27 @@
     </div>
     <!-- Modal for viewing offline content -->
     <div id="offline-list-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20001;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px #0003;text-align:left;max-width:95vw;max-height:90vh;overflow:auto;">
+      <div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:left;max-width:95vw;max-height:90vh;overflow:auto;border:1px solid var(--modal-border);">
         <h3>Offline Content</h3>
         <div id="offline-list-content">
           <em>Loading...</em>
         </div>
         <button id="offline-list-close-btn" class="blue-btn" style="margin-top:1em;">Close</button>
+      </div>
+    </div>
+    <!-- Mobile warning modal: shown only on phones / mobile devices -->
+    <div id="mobile-warning-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:21000;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);">
+      <div class="mw-box" style="position:relative;background:#fff;color:#111;padding:1.1em 1.2em;border-radius:10px;max-width:92vw;width:min(520px,92%);box-shadow:0 8px 30px rgba(0,0,0,0.32);text-align:left;">
+        <button id="mobile-warning-close" aria-label="Close" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.25em;line-height:1;color:#666;cursor:pointer;">&times;</button>
+        <h3 style="margin:0 0 8px 0;font-size:1.05em;">Mobile warning</h3>
+        <p style="margin:0 0 10px 0;font-size:0.98em;color:#333;">
+          This site is not made for phones or mobile devices. Many parts may not work well on mobile.
+          For the best experience, please use a desktop or tablet.
+        </p>
+        <div style="text-align:right;">
+          <button id="mobile-warning-close-2" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:0.5em;">Close</button>
+          <button id="mobile-warning-dismiss" class="blue-btn">Don't show again</button>
+        </div>
       </div>
     </div>
 
@@ -106,7 +121,7 @@
     title="Banner"
     scrolling="no"
     allowtransparency="true"
-    style="height:60px;border:2px solid #222;border-radius:10px;background:transparent;"
+    style="height:60px;background:transparent;"
 ></iframe>
 
     <script>
@@ -427,9 +442,8 @@
     <div class="container">
         <header class="main-header">
             <h1>Welcome to <span class="brand">Code-Universe</span></h1>
-            <p class="subtitle">The brand new Code-Universe lineup. Explore, play, and create.</p>
+            <p class="subtitle">The brand new Code-Universe lineup.</p>
             <div class="mode-note" style="margin-top:1em;font-size:0.98em;color:#888;">
-                <span id="mode-note-text">You are using the new look. You can switch to classic mode here.</span>
             </div>
         </header>
 
@@ -465,6 +479,58 @@
     <script src="/analytics.js?5h"></script>
     <style>
     /* ...existing code... */
+
+    /* Modal color variables and dark-mode aware styles */
+    :root {
+        --modal-bg: #fff;
+        --modal-text: #111;
+        --modal-border: rgba(0,0,0,0.08);
+        --modal-btn-bg: #007bff;
+        --modal-btn-color: #fff;
+        --modal-alt-btn-bg: #e0e7ef;
+        --modal-alt-btn-color: #007bff;
+    }
+    .dark-mode, .dark-mode body {
+        /* dark mode vars */
+        --modal-bg: #111;
+        --modal-text: #eaeaea;
+        --modal-border: rgba(255,255,255,0.06);
+        --modal-btn-bg: #0a84ff;
+        --modal-btn-color: #fff;
+        --modal-alt-btn-bg: #222;
+        --modal-alt-btn-color: #9fc7ff;
+    }
+
+    /* Apply to our offline modals */
+    #offline-modal > div,
+    #offline-list-modal > div {
+        background: var(--modal-bg);
+        color: var(--modal-text);
+        border: 1px solid var(--modal-border);
+        box-shadow: 0 6px 30px rgba(0,0,0,0.12);
+    }
+
+    /* Standard blue buttons inside modals */
+    #offline-modal .blue-btn,
+    #offline-list-modal .blue-btn {
+        background: var(--modal-btn-bg);
+        color: var(--modal-btn-color);
+        border-radius: 6px;
+    }
+
+    /* The "alt" cancel button (overrides inline styles) */
+    #offline-modal #offline-cancel-btn {
+        background: var(--modal-alt-btn-bg) !important;
+        color: var(--modal-alt-btn-color) !important;
+    }
+
+    /* Make sure small inline color uses are readable in dark mode */
+    #offline-modal button[aria-label="Close"],
+    #offline-list-modal button[aria-label="Close"] {
+        color: var(--modal-text);
+        opacity: 0.8;
+    }
+
     .blue-btn {
         background: #007bff;
         color: #fff;
@@ -481,6 +547,13 @@
     }
     .blue-btn:hover, .blue-btn:focus {
         background: #0056b3;
+    }
+
+    /* Mobile warning modal tweaks (dark-mode aware) */
+    #mobile-warning-modal .mw-box { transition: background 0.12s, color 0.12s; }
+    @media (prefers-color-scheme: dark) {
+      #mobile-warning-modal .mw-box { background:#111;color:#eee;box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+      #mobile-warning-modal .mw-box .blue-btn { box-shadow:none; }
     }
     </style>
 
@@ -769,6 +842,37 @@
         // On load, set classic mode if previously set
         const saved = localStorage.getItem('classic_mode');
         setClassicMode(saved === '1');
+    })();
+
+    (function(){
+      const KEY = 'mobile_warning_dismissed_v1';
+      function isMobileDevice() {
+        // coarse pointer or known mobile UA or small width + touch
+        try {
+          if (window.matchMedia && window.matchMedia('(any-pointer:coarse)').matches) return true;
+          if (/Mobi|Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry/i.test(navigator.userAgent)) return true;
+          if (window.innerWidth <= 720 && (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)) return true;
+        } catch (e) {}
+        return false;
+      }
+      if (!localStorage.getItem(KEY) && isMobileDevice()) {
+        const modal = document.getElementById('mobile-warning-modal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden','false');
+        // close handlers
+        const close = () => { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); };
+        document.getElementById('mobile-warning-close').onclick = close;
+        document.getElementById('mobile-warning-close-2').onclick = close;
+        document.getElementById('mobile-warning-dismiss').onclick = () => {
+          try { localStorage.setItem(KEY, '1'); } catch(e){}
+          close();
+        };
+        // allow dismiss by tapping backdrop (but not the box)
+        modal.addEventListener('click', (ev) => {
+          if (ev.target === modal) close();
+        });
+      }
     })();
     </script>
 </body>

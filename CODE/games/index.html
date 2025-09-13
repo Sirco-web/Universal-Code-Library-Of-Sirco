@@ -71,23 +71,54 @@
     }
     .back-button {
       margin: 20px;
-      padding: 10px 20px;
-      font-size: 1em;
-      color: #fff;
-      background-color: #007bff;
-      border: none;
-      border-radius: 5px;
+      padding: 0;
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid #eee;
+      box-shadow: 0 2px 8px #0002;
       cursor: pointer;
+      color: #007bff;
+      font-size: 16px;
     }
-    .back-button:hover {
-      background-color: #0056b3;
+    .back-button:hover { box-shadow: 0 6px 18px #0003; }
+    .blue-btn {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5em 1.2em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 1px 4px #0001;
+      outline: none;
+      display: inline-block;
     }
-    footer {
-      margin-top: 20px;
-      padding: 10px;
-      background: #f1f1f1;
-      font-size: 0.9em;
-      color: #555;
+    .dark-mode body, .dark-mode #games-heading, .dark-mode h1, .dark-mode footer {
+      background: #0b1220;
+      color: #d7e6ff;
+    }
+    .dark-mode .game {
+      background: #0f1724;
+      border-color: #1f2937;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      color: #e6f0ff;
+    }
+    .dark-mode .back-button {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #9fc9ff;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+
+    /* Keep content readable on small screens */
+    @media (max-width:600px) {
+      .game { width: calc(50% - 20px); }
     }
   </style>
 
@@ -288,12 +319,29 @@
         document.getElementById('offline-games-modal').style.display = 'none';
       };
     });
+
+    (function(){
+      // Only mirror dark_mode from the welcome page. No local UI for changing mode here.
+      function applyDarkModeFromStorage() {
+        try {
+          const saved = localStorage.getItem('dark_mode');
+          const enabled = (saved === '1' || saved === null);
+          document.documentElement.classList.toggle('dark-mode', !!enabled);
+        } catch (e) {}
+      }
+      applyDarkModeFromStorage();
+      window.addEventListener('storage', (ev) => {
+        if (ev.key === 'dark_mode') applyDarkModeFromStorage();
+      });
+    })();
   </script>
 
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
 
 </head>
 <body>
+  <!-- top-right controls and banner removed (mode is mirrored from welcome page only) -->
+
   <h1>Welcome to the Games Page</h1>
 
   <!-- Offline notice -->
@@ -301,8 +349,10 @@
     You are offline. These are the games you have downloaded.
   </div>
 
-  <!-- Back Button -->
-  <button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
+  <!-- Back Button (styled like welcome's round button) -->
+  <button class="back-button" title="Back to Welcome" onclick="window.location.href='/welcome/index.html';">
+    ←
+  </button>
 
   <!-- Games heading -->
   <h2 id="games-heading" style="margin-top:10px;">Games</h2>

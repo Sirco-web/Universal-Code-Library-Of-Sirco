@@ -93,7 +93,7 @@
             }, {});
         }
         function getUserCookies() {
-            // Exclude only sensitive cookies, but include all others (including game saves)
+            // Exclude only sensitive keys and internal metadata, but include all others (including game saves)
             const exclude = [
             'cookie_saver_email',
             'cookie_saver_name',
@@ -106,8 +106,16 @@
             'username',
             'removerKey',
             'token',
-            'username',
-            'downloader_enabled'
+            'downloader_enabled',
+            'shortcut_config',
+            // internal/meta keys — keep them out of user-visible lists/exports
+            'messageCount',
+            'messageCountDate',
+            'welcome_tour_shown',
+            'wasOffline',
+            'classic_mode',
+            'dark_mode',
+            'chat_history'
             ];
             const all = getAllCookies();
             const filtered = {};
@@ -130,8 +138,16 @@
             'username',
             'removerKey',
             'token',
-            'username',
-            'downloader_enabled'
+            'downloader_enabled',
+            'shortcut_config',
+            // internal/meta keys — keep them out of user-visible lists/exports
+            'messageCount',
+            'messageCountDate',
+            'welcome_tour_shown',
+            'wasOffline',
+            'classic_mode',
+            'dark_mode',
+            'chat_history'
             ];
             const filtered = {};
             Object.keys(localStorage).forEach(key => {
@@ -241,8 +257,16 @@
             'username',
             'removerKey',
             'token',
-            'username',
-            'downloader_enabled'
+            'downloader_enabled',
+            'shortcut_config',
+            // internal/meta keys — keep them out of user-visible lists/exports
+            'messageCount',
+            'messageCountDate',
+            'welcome_tour_shown',
+            'wasOffline',
+            'classic_mode',
+            'dark_mode',
+            'chat_history'
             ];
             const keys = Object.keys(localStorage).filter(key => !exclude.includes(key));
             if (keys.length === 0) {

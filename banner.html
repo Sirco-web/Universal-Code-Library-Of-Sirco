@@ -6,55 +6,97 @@
     <title>Banner</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
     <style>
+        /* Use CSS variables and prefers-color-scheme so text is readable on light or dark parent backgrounds */
+        :root {
+            --banner-bg: transparent !important;
+            --banner-text: #fff;        /* force white text */
+            --banner-muted: #ddd;       /* secondary text */
+            --banner-accent: #4da3ff;   /* link accent */
+            --highlight-bg: rgba(0,0,0,0.85); /* black highlight behind text */
+            --text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* keep white text and black highlight in dark mode too */
+                --banner-text: #fff;
+                --banner-muted: #ddd;
+                --banner-accent: #4da3ff;
+                --highlight-bg: rgba(0,0,0,0.85);
+                --text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+            }
+        }
+
         /* Make the page transparent so parent background shows through */
         html, body {
-            background: transparent !important;
+            background: var(--banner-bg);
         }
-        body { 
-            text-align: center; 
+        body {
+            text-align: center;
             padding: 0;
-            margin: 0; 
-            color: #fff; /* Visible on black parent background */
+            margin: 0;
+            color: var(--banner-text);
+            text-shadow: var(--text-shadow);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .banner-content {
             padding: 10px 0;
-            background: transparent !important; /* no panel background */
+            background: var(--banner-bg); /* no panel background */
         }
 
         h2 {
             font-size: 1.5em;
-            color: #fff; /* white text */
+            color: var(--banner-text);
+            margin: 0;
+        }
+
+        /* New: highlight the banner text with a black rounded background */
+        .highlight {
+            display: inline; /* tight to the text instead of creating a big box */
+            background: var(--highlight-bg);
+            color: var(--banner-text);
+            padding: 0 0.28em; /* minimal horizontal padding, no extra vertical space */
+            border-radius: 0.35em; /* subtle rounding that follows the words */
+            line-height: 1;
+            vertical-align: middle;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone; /* keep highlight tight on wrapped lines */
+        }
+        .highlight a {
+            color: inherit;
+            text-decoration: underline;
         }
 
         p {
-            color: #ddd; 
+            color: var(--banner-muted);
             font-size: 1.2em;
         }
 
         a {
-            color: #4da3ff;
+            color: var(--banner-accent);
             text-decoration: none;
         }
         a:hover {
             text-decoration: underline;
         }
 
-        /* Classic mode: keep transparency, only control text colors */
+        /* Classic mode: keep transparency, only control text colors using the same variables */
         html.classic-mode, html.classic-mode body {
-            background: transparent !important;
-            color: #fff !important;
+            background: var(--banner-bg);
+            color: var(--banner-text);
         }
         html.classic-mode .banner-content {
-            background: transparent !important;
-            color: #fff !important;
+            background: var(--banner-bg);
+            color: var(--banner-text);
             border-radius: 0 !important;
         }
         html.classic-mode h2 {
-            color: #4da3ff !important;
+            color: var(--banner-accent);
         }
         html.classic-mode a {
-            color: #4da3ff !important;
+            color: var(--banner-accent);
         }
     </style>
     <script>
@@ -72,8 +114,10 @@
 
     <div class="banner-content">
         <h2>
-            We are starting a new contest where you can make your own Scratch or HTML5 game and win $30 USD! 
-            <a href="/CODE/contest/game-2025/" target="_blank">Click here for more rules.</a>
+            <span class="highlight">
+                We are starting a new contest where you can make your own Scratch or HTML5 game and win $30 USD!
+                <a href="/CODE/contest/game-2025/" target="_blank">Click here for more rules.</a>
+            </span>
         </h2>
     </div>
 
