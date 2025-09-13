@@ -33,7 +33,7 @@
 		</div>
 
 		<h2>Shortcut Settings</h2>
-		<p class="small">Press the shortcut anywhere to remove the access key and optionally open a site. Default: Ctrl + Alt + Z</p>
+		<p class="small">Press the shortcut anywhere to remove the access key and optionally open a site. Default: Alt + P</p>
 
 		<fieldset>
 			<legend style="font-weight:600;color:#23527c;">Modifiers & Key</legend>
@@ -89,7 +89,7 @@
 		const mainKey = document.getElementById('mainKey');
 		const customURL = document.getElementById('customURL');
 
-		const DEFAULT = { modifiers:{ctrl:true,alt:true,shift:false,meta:false}, key:'z', action:'goto', customURL:'/' };
+		const DEFAULT = { modifiers:{ctrl:false,alt:true,shift:false,meta:false}, key:'p', action:'goto', customURL:'/' };
 
 		function populate() {
 			const cfg = getConfig() || DEFAULT;
@@ -139,7 +139,7 @@
 		};
 
 		document.getElementById('resetBtn').onclick = () => {
-			if (confirm('Reset shortcut to default (Ctrl+Alt+Z, go to /)?')) {
+			if (confirm('Reset shortcut to default (Alt+P, go to /)?')) {
 				saveConfig(DEFAULT);
 				populate();
 				alert('Reset to default.');
