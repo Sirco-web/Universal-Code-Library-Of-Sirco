@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Aurora-Gateway</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora-GATEWAY</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+    }
+    iframe {
+      border: none;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
 <body>
-    <iframe src="prox.html" allowfullscreen></iframe>
+  <iframe 
+    src="prox.html" 
+    allowfullscreen
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+  ></iframe>
 </body>
 </html>
