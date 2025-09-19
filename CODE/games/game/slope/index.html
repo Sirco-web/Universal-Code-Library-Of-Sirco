@@ -54,6 +54,54 @@ checkCookie();
           color: black;
         }
     </style>
+
+<script>
+(function() {
+  // Create the toggle button
+  const btn = document.createElement('button');
+  btn.textContent = 'Start Enter Spam';
+  Object.assign(btn.style, {
+    position: 'fixed',
+    top: '10px',
+    right: '10px',
+    zIndex: 9999,
+    padding: '10px 15px',
+    background: 'crimson',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    fontWeight: 'bold',
+    cursor: 'pointer'
+  });
+  document.body.appendChild(btn);
+
+  let blasting = false;
+  let intervalId = null;
+
+  btn.addEventListener('click', () => {
+    blasting = !blasting;
+    btn.textContent = blasting ? 'Stop Enter Spam' : 'Start Enter Spam';
+    btn.style.background = blasting ? 'darkred' : 'crimson';
+
+    if (blasting) {
+      intervalId = setInterval(() => {
+        const evt = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          code: 'Enter',
+          keyCode: 13,
+          which: 13,
+          bubbles: true
+        });
+        document.dispatchEvent(evt);
+      }, 50); // speed in ms
+    } else {
+      clearInterval(intervalId);
+    }
+  });
+})();
+</script>
+
+    
 </head>
 
 <!--- 
