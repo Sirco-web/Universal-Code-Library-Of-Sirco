@@ -83,6 +83,15 @@ checkCookie();
     btn.textContent = blasting ? 'Stop Enter Spam' : 'Start Enter Spam';
     btn.style.background = blasting ? 'darkred' : 'crimson';
 
+    const canvas = document.querySelector('#gameContainer canvas');
+    if (!canvas) {
+      console.warn('No Unity canvas found yet.');
+      return;
+    }
+
+    // Make sure the game canvas has focus so it receives the events
+    canvas.focus();
+
     if (blasting) {
       intervalId = setInterval(() => {
         const evt = new KeyboardEvent('keydown', {
@@ -92,8 +101,8 @@ checkCookie();
           which: 13,
           bubbles: true
         });
-        document.dispatchEvent(evt);
-      }, 50); // speed in ms
+        canvas.dispatchEvent(evt);
+      }, 50); // adjust speed here
     } else {
       clearInterval(intervalId);
     }
@@ -101,7 +110,6 @@ checkCookie();
 })();
 </script>
 
-    
 </head>
 
 <!--- 
