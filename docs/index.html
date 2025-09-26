@@ -77,7 +77,7 @@
     </div>
   </div>
 
-  <script>
+<script>
   // -------- Elements --------
   const editor = document.getElementById('editor');
   const docTitle = document.getElementById('docTitle');
@@ -262,11 +262,15 @@
         registerFont(fontName, fontData).then(()=>{
           fontSelect.value = fontName;
           applyFont(fontName);
+          saveDoc();
         });
       }
       if (textEnc) {
-        const decoded = fromHex(atob(textEnc));
-        editor.innerText = decoded;
+        try {
+          const decoded = fromHex(atob(textEnc));
+          editor.innerText = decoded;
+          saveDoc();
+        } catch(e){ console.warn("Decode failed", e); }
       }
     }
   }
@@ -278,6 +282,37 @@
       editor.focus();
       saveDoc();
     });
+  });
+
+  // -------- nocopy.js inline --------
+  const siteClipboardTag = '__custom_docs_clipboard__';
+  document.addEventListener('copy', (e) => {
+    const selection = document.getSelection();
+    if (!selection || selection.isCollapsed) return;
+    const text = selection.toString();
+    const tagged = `${siteClipboardTag}${text}`;
+    e.clipboardData.setData('text/plain', tagged);
+    e.preventDefault();
+  });
+  document.addEventListener('cut', (e) => {
+    const selection = document.getSelection();
+    if (!selection || selection.isCollapsed) return;
+    const text = selection.toString();
+    const tagged = `${siteClipboardTag}${text}`;
+    e.clipboardData.setData('text/plain', tagged);
+    e.preventDefault();
+  });
+    document.addEventListener('paste', (e) => {
+    const pasted = e.clipboardData.getData('text/plain');
+    if (!pasted.startsWith(siteClipboardTag)) {
+      alert("Copy/paste is restricted to this site only.");
+      e.preventDefault();
+      return;
+    }
+    const clean = pasted.replace(siteClipboardTag, '');
+    document.execCommand('insertText', false, clean);
+    e.preventDefault();
+    saveDoc();
   });
 
   // -------- Events --------
@@ -300,5 +335,6 @@
     }
   })();
 </script>
+
 </body>
 </html>
