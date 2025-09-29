@@ -4,63 +4,13 @@
 <meta charset="utf-8" />
 <title>SuperTube</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  :root {
-    --bg: #0f0f0f;
-    --card: #181818;
-    --text: #fff;
-    --muted: #aaa;
-    --red: #ff0000;
-    --border: #2a2a2a;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: Roboto, Arial, sans-serif; }
-
-  header {
-    display: flex; align-items: center; gap: 12px;
-    padding: 8px 16px; background: var(--bg); border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 10;
-  }
-  .logo { width: 30px; height: 22px; background: var(--red); border-radius: 4px; position: relative; }
-  .logo::after {
-    content: ""; position: absolute; left: 10px; top: 6px;
-    border-left: 12px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent;
-  }
-  .searchbar { flex: 1; display: flex; }
-  .searchbar input { flex: 1; padding: 8px; background: #121212; border: 1px solid #303030; border-right: none; color: var(--text); border-radius: 20px 0 0 20px; }
-  .searchbar button { padding: 8px 12px; background: #222; border: 1px solid #303030; border-radius: 0 20px 20px 0; color: var(--text); cursor: pointer; }
-  select, .btn { background: #1a1a1a; color: var(--text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-
-  main { padding: 16px; display: grid; gap: 24px; }
-
-  .player iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 8px; background: #000; }
-  .player .meta { margin-top: 8px; }
-  .player .title { font-size: 16px; font-weight: 600; }
-  .player .channel { font-size: 13px; color: var(--muted); }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; }
-  .thumb { position: relative; aspect-ratio: 16/9; background: #000; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .duration { position: absolute; right: 6px; bottom: 6px; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 2px 5px; border-radius: 4px; }
-  .info { padding: 8px; }
-  .info .title { font-size: 14px; font-weight: 600; }
-  .info .channel { font-size: 12px; color: var(--muted); }
-  .info .stats { font-size: 12px; color: var(--muted); }
-
-  .pagination { display: flex; gap: 8px; justify-content: center; }
-  .shorts { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
-  .shorts h3 { margin: 0 0 8px; font-size: 15px; }
-  .shorts-row { display: flex; gap: 8px; overflow-x: auto; }
-  .short-card { flex: 0 0 150px; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; }
-  .short-card img { width: 100%; height: 100%; object-fit: cover; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header>
-  <div class="logo"></div>
+  <div id="logo" class="logo"></div>
   <div class="searchbar">
-    <input id="q" type="search" placeholder="Search">
+    <input id="q" type="search" placeholder="Search or paste YouTube URL / ID">
     <button id="btnSearch">🔍</button>
   </div>
   <select id="region">
@@ -88,127 +38,6 @@
   </section>
 </main>
 
-<script>
-const API_HOST = "youtube-search-and-download.p.rapidapi.com";
-const API_KEY = "9ec66b72c3msh613b7170aa0f367p16f361jsnb2d50755d6fc";
-const PAGE_SIZE = 5;
-
-let currentItems = [];
-let pageIndex = 0;
-
-// Format helpers
-function fmtInt(n){const num=Number(n||0);if(num>=1e6)return(num/1e6).toFixed(1)+"M";if(num>=1e3)return(num/1e3).toFixed(1)+"K";return num;}
-function fmtDur(s){if(s==null)return"";s=Number(s);const m=Math.floor(s/60),sec=s%60;return `${m}:${String(sec).padStart(2,'0')}`;}
-
-// Play video and reveal player
-function playVideo(id,title,channel){
-  const playerBox = document.querySelector(".player");
-  playerBox.style.display = "block";
-  player.src=`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
-  nowTitle.textContent=title;
-  nowChannel.textContent=channel;
-  playerBox.scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-// Normalize API data
-function normalize(data){
-  const out=[];
-  if(Array.isArray(data?.contents)){
-    for(const c of data.contents){
-      const v=c.video||c;
-      if(!v)continue;
-      out.push({id:v.videoId,title:v.title,channel:v.channelName,thumb:v.thumbnails?.[0]?.url,views:v.viewCount,duration:v.lengthSeconds});
-    }
-  } else if(Array.isArray(data?.videos)){
-    for(const v of data.videos){
-      out.push({id:v.videoId||v.id,title:v.title,channel:v.uploaderName,thumb:v.thumbnail,views:v.views,duration:v.duration});
-    }
-  }
-  return out.filter(x=>x.id);
-}
-
-// Render current page
-function renderPage(){
-  grid.innerHTML="";
-  const start=pageIndex*PAGE_SIZE;
-  const slice=currentItems.slice(start,start+PAGE_SIZE);
-  slice.forEach(item=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <div class="thumb">
-        <img src="${item.thumb}" alt="">
-        <div class="duration">${fmtDur(item.duration)}</div>
-      </div>
-      <div class="info">
-        <div class="title">${item.title}</div>
-        <div class="channel">${item.channel}</div>
-        <div class="stats">${fmtInt(item.views)} views</div>
-      </div>`;
-    card.onclick=()=>playVideo(item.id,item.title,item.channel);
-    grid.appendChild(card);
-  });
-  prev.disabled=pageIndex===0;
-  next.disabled=(start+PAGE_SIZE)>=currentItems.length;
-}
-
-// Fetch helper
-async function fetchAPI(path){
-  const res=await fetch(`https://${API_HOST}${path}`,{
-    headers: {
-      "X-RapidAPI-Key": API_KEY,
-      "X-RapidAPI-Host": API_HOST
-    }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-// Load trending
-async function loadTrending(){
-  try {
-    const geo = region.value || "US";
-    const data = await fetchAPI(`/trending?geo=${encodeURIComponent(geo)}`);
-    currentItems = normalize(data);
-    pageIndex = 0;
-    renderPage();
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// Search
-async function searchVideos(){
-  const query = q.value.trim();
-  if (!query) return;
-  try {
-    const data = await fetchAPI(`/search?query=${encodeURIComponent(query)}`);
-    currentItems = normalize(data);
-    pageIndex = 0;
-    renderPage();
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// Pagination
-function doPrev(){if(pageIndex>0){pageIndex--;renderPage();}}
-function doNext(){if((pageIndex+1)*PAGE_SIZE<currentItems.length){pageIndex++;renderPage();}}
-
-// Event bindings
-btnTrending.addEventListener("click", loadTrending);
-btnSearch.addEventListener("click", searchVideos);
-q.addEventListener("keydown", e => { if (e.key === "Enter") searchVideos(); });
-prev.addEventListener("click", doPrev);
-next.addEventListener("click", doNext);
-region.addEventListener("change", loadTrending);
-
-// Initial load
-loadTrending();
-
-// Hide player initially
-document.querySelector(".player").style.display = "none";
-</script>
-
+<script src="script.js" defer></script>
 </body>
 </html>
