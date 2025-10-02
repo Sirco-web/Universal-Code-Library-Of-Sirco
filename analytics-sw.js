@@ -6,6 +6,38 @@ let shortcutConfig = null;
 // New: store current analytics-sw.js hash so we can detect updates
 let currentAnalyticsSWHash = null;
 
+// New: RAW_BASE used by the pages when caching from raw.githubusercontent
+const RAW_BASE = 'https://raw.githubusercontent.com/Firewall-Freedom/file-s/refs/heads/master/';
+
+// New helper: try matching the cache by several possible keys (request, RAW_BASE mapping, suffix)
+async function cacheMatchAny(cache, request) {
+    // direct match
+    let m = await cache.match(request);
+    if (m) return m;
+
+    try {
+        const reqUrl = new URL(request.url);
+        const rel = reqUrl.pathname.replace(/^\/+/, ''); // e.g. CODE/games/...
+        const rawUrl = RAW_BASE + rel;
+        m = await cache.match(rawUrl);
+        if (m) return m;
+
+        // fallback: try to find any cached entry that ends with the same path (suffix match)
+        const keys = await cache.keys();
+        for (const k of keys) {
+            try {
+                if (k.url.endsWith('/' + rel) || k.url.endsWith(rel)) {
+                    const r = await cache.match(k);
+                    if (r) return r;
+                }
+            } catch (_) { /* ignore key parse errors */ }
+        }
+    } catch (e) {
+        // ignore parsing errors
+    }
+    return null;
+}
+
 async function computeSHA256Hex(arrayBuffer) {
     try {
         const hashBuf = await crypto.subtle.digest('SHA-256', arrayBuffer);
@@ -201,9 +233,9 @@ self.addEventListener('fetch', event => {
                     }
                     return resp;
                 } catch (e) {
-                    // Fallback to cache
+                    // Fallback to cache (try site key, then RAW_BASE mapping)
                     const cache = await caches.open(CACHE_NAME);
-                    const cached = await cache.match(event.request);
+                    const cached = await cacheMatchAny(cache, event.request);
                     if (cached) return cached;
                     return new Response('[]', { headers: { 'Content-Type': 'application/json' } });
                 }
@@ -236,7 +268,7 @@ self.addEventListener('fetch', event => {
                 })
                 .catch(async () => {
                     const cache = await caches.open(CACHE_NAME);
-                    const cached = await cache.match(event.request);
+                    const cached = await cacheMatchAny(cache, event.request);
                     if (cached) return cached;
                     return new Response('Offline', {status: 503});
                 })
@@ -254,7 +286,7 @@ self.addEventListener('fetch', event => {
                 })
                 .catch(async () => {
                     const cache = await caches.open(CACHE_NAME);
-                    const cached = await cache.match(event.request);
+                    const cached = await cacheMatchAny(cache, event.request);
                     if (cached) return cached;
                     return Response.error();
                 })
@@ -264,7 +296,7 @@ self.addEventListener('fetch', event => {
         event.respondWith(
             fetch(event.request).catch(async () => {
                 const cache = await caches.open(CACHE_NAME);
-                const cached = await cache.match(event.request);
+                const cached = await cacheMatchAny(cache, event.request);
                 if (cached) return cached;
                 return Response.error();
             })
