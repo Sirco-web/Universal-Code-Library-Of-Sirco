@@ -59,6 +59,10 @@
     .btn.ghost{background:transparent;color:var(--brand);border:1px solid rgba(0,123,255,0.12)}
     .btn.small{padding:6px 10px;font-size:13px;border-radius:6px}
     .center{display:flex;gap:8px;align-items:center}
+
+    /* search input */
+    .search { width:100%; max-width:420px; padding:8px 10px; border-radius:8px; border:1px solid rgba(2,6,23,0.08); background:transparent; font-size:14px; color:inherit }
+    .search:focus { outline:2px solid rgba(0,123,255,0.12); box-shadow:0 4px 12px rgba(2,6,23,0.04); }
   </style>
   <!-- fonts & visual/theme logic (copied-in behavior instead of shallow welcome includes) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -137,6 +141,9 @@
       <div class="info">
         <div id="status" class="muted">Loading index...</div>
         <div class="muted" id="hint">Game Dictionary is a beta feature and may contain bugs. Some games may not work, and some games may take time to load.</div>
+       <div style="margin-top:10px">
+         <input id="search" class="search" placeholder="Search games by name or title…" aria-label="Search games">
+       </div>
       </div>
       <div class="center">
         <button id="refresh" class="btn small">Refresh</button>
@@ -359,6 +366,26 @@
       return wrapper;
     }
 
+    // search state and helpers
+    let searchTerm = '';
+    function matchesSearch(game) {
+      if (!searchTerm) return true;
+      const n = (game.name || '').toLowerCase();
+      const t = (game.title || '').toLowerCase();
+      return n.includes(searchTerm) || t.includes(searchTerm);
+    }
+    function debounce(fn, wait=200){
+      let t;
+      return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), wait); };
+    }
+    const searchEl = document.getElementById('search');
+    if (searchEl) {
+      searchEl.addEventListener('input', debounce((e)=>{
+        searchTerm = (e.target.value || '').trim().toLowerCase();
+        render();
+      }, 180));
+    }
+
     async function render() {
       const status = document.getElementById('status');
       status.textContent = 'Loading index...';
@@ -388,7 +415,7 @@
         starWrap.appendChild(starTitle);
         for (const name of starred) {
           const g = games.find(x => x.name === name);
-          if (g) {
+          if (g && matchesSearch(g)) {
             const cached = await isGameCached(g);
             // create fresh card instance (clone behavior by re-creating)
             starWrap.appendChild(createGameCard(g, cached, starred));
@@ -404,7 +431,7 @@
         recentWrap.appendChild(recentTitle);
         for (const name of recent) {
           const g = games.find(x => x.name === name);
-          if (g) {
+          if (g && matchesSearch(g)) {
             const cached = await isGameCached(g);
             // pass option to show "Forget" control for this clone
             recentWrap.appendChild(createGameCard(g, cached, starred, {unrecent: true}));
@@ -418,6 +445,7 @@
       const allTitle = el('div', {style:'font-weight:600;font-size:16px;margin-bottom:8px;'}, 'All Games');
       allWrap.appendChild(allTitle);
       for (const g of games) {
+        if (!matchesSearch(g)) continue;
         const cached = await isGameCached(g);
         allWrap.appendChild(createGameCard(g, cached, starred));
       }
