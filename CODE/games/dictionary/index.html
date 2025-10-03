@@ -173,14 +173,19 @@
 
     async function fetchIndexXML() {
       try {
-        const r = await fetch(INDEX_XML_URL, {cache: 'no-store'});
-        if (!r.ok) throw new Error('Failed to fetch index.xml');
+        // Append a unique timestamp query so the request is different each time
+        const ts = encodeURIComponent(new Date().toISOString());
+        const sep = INDEX_XML_URL.includes('?') ? '&' : '?';
+        const url = INDEX_XML_URL + sep + 't=' + ts;
+        const r = await fetch(url, {cache: 'no-store'});
+        if (!r.ok) throw new Error('Failed to fetch index.xml (' + r.status + ')');
         const txt = await r.text();
         const parser = new DOMParser();
         const xml = parser.parseFromString(txt, 'application/xml');
         return xml;
       } catch (e) {
-        console.error(e);
+        console.error('fetchIndexXML error:', e);
+        // Returning null is the signal used elsewhere to treat the app as offline
         return null;
       }
     }
@@ -393,31 +398,70 @@
       gamesDiv.innerHTML = '';
 
       const xml = await fetchIndexXML();
-      if (!xml) {
-        status.textContent = 'Unable to fetch index.xml from repository.';
-        return;
-      }
-      const games = parseGamesFromXML(xml);
-      if (games.length === 0) {
-        status.textContent = 'No games found in index.xml.';
-        return;
-      }
-      status.textContent = '';
-
-      // Starred and recent lists
+      const savedManifest = getSavedManifest();
       const starred = getStarred();
       const recent = getRecent();
 
-      // Starred section (shows clones of game cards)
+      // Parse games from XML if available
+      let gamesFromXML = [];
+      if (xml) {
+        gamesFromXML = parseGamesFromXML(xml);
+      }
+
+      // Build an initial games list and a lookup by name
+      const games = [];
+      const gamesByName = {};
+      for (const g of gamesFromXML) {
+        games.push(g);
+        gamesByName[g.name] = g;
+      }
+
+      // Helper to create a fallback game object from local data
+      function makeFallbackGame(name) {
+        const files = (savedManifest[name] && savedManifest[name].length)
+          ? savedManifest[name].slice()
+          : [name + '/index.html'];
+        return { name, title: name, files };
+      }
+
+      // Ensure that starred, recent, and any saved-manifest keys appear so we can render their cards
+      const localNames = new Set([ ...starred, ...recent, ...Object.keys(savedManifest) ]);
+      for (const n of localNames) {
+        if (!n) continue;
+        if (!gamesByName[n]) {
+          const g = makeFallbackGame(n);
+          games.push(g);
+          gamesByName[n] = g;
+        }
+      }
+
+      // Reliable offline detection: consider offline if fetch failed OR browser reports offline.
+      const offline = (!xml) || (typeof navigator !== 'undefined' && navigator.onLine === false);
+
+      // If offline and there are no local entries to show, bail out with a message
+      if (offline && games.length === 0) {
+        status.textContent = 'Unable to fetch index.xml and no local games saved.';
+        return;
+      }
+
+      // Update status based on availability
+      if (offline) {
+        status.textContent = 'Offline: showing local Starred/Recently Played games';
+      } else if (xml && gamesFromXML.length === 0) {
+        status.textContent = 'No games found in index.xml. Showing local saved games (if any).';
+      } else {
+        status.textContent = '';
+      }
+
+      // Starred section (show clones of game cards)
       if (starred.length > 0) {
         const starWrap = el('div', {style:'margin-bottom:18px;'});
         const starTitle = el('div', {style:'font-weight:600;font-size:16px;margin-bottom:8px;'}, '★ Starred');
         starWrap.appendChild(starTitle);
         for (const name of starred) {
-          const g = games.find(x => x.name === name);
+          const g = gamesByName[name];
           if (g && matchesSearch(g)) {
             const cached = await isGameCached(g);
-            // create fresh card instance (clone behavior by re-creating)
             starWrap.appendChild(createGameCard(g, cached, starred));
           }
         }
@@ -430,7 +474,7 @@
         const recentTitle = el('div', {style:'font-weight:600;font-size:16px;margin-bottom:8px;'}, '⏱ Recently Played');
         recentWrap.appendChild(recentTitle);
         for (const name of recent) {
-          const g = games.find(x => x.name === name);
+          const g = gamesByName[name];
           if (g && matchesSearch(g)) {
             const cached = await isGameCached(g);
             // pass option to show "Forget" control for this clone
@@ -440,16 +484,18 @@
         gamesDiv.appendChild(recentWrap);
       }
 
-      // All games section - show every game (do NOT remove or skip starred/recent)
-      const allWrap = el('div', {style:'margin-bottom:18px;'});
-      const allTitle = el('div', {style:'font-weight:600;font-size:16px;margin-bottom:8px;'}, 'All Games');
-      allWrap.appendChild(allTitle);
-      for (const g of games) {
-        if (!matchesSearch(g)) continue;
-        const cached = await isGameCached(g);
-        allWrap.appendChild(createGameCard(g, cached, starred));
+      // Only show "All Games" when we are online (index.xml fetched successfully AND browser reports online)
+      if (!offline) {
+        const allWrap = el('div', {style:'margin-bottom:18px;'});
+        const allTitle = el('div', {style:'font-weight:600;font-size:16px;margin-bottom:8px;'}, 'All Games');
+        allWrap.appendChild(allTitle);
+        for (const g of games) {
+          if (!matchesSearch(g)) continue;
+          const cached = await isGameCached(g);
+          allWrap.appendChild(createGameCard(g, cached, starred));
+        }
+        gamesDiv.appendChild(allWrap);
       }
-      gamesDiv.appendChild(allWrap);
 
       // update recent-toggle UI
       const toggleBtn = document.getElementById('toggleRecent');
