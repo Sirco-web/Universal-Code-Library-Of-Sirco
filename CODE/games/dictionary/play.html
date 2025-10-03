@@ -8,14 +8,39 @@
     /* minimal UI - top bar removed */
     html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
     #frame{width:100%;height:100%;border:0;display:block}
-    .error{position:fixed;left:12px;right:12px;top:12px;padding:12px;background:#fff0f0;color:#b00;border:1px solid #f3c2c2;border-radius:6px;display:none;z-index:9999;font-family:Inter,Arial,sans-serif}
+    .error{position:fixed;left:12px;right:12px;top:12px;padding:12px;background:#fff0f0;color:#b00;border:1px solid #f3c2c2;border-radius:6px;display:none;z-index:9999;font-family:Inter,Arial,sans-serif;opacity:0;transition:opacity 0.6s ease;}
+    /* immersive controls */
+    /* tiny corner control (top-right, much smaller) */
+    .immersive-controls{position:fixed;right:8px;top:8px;display:flex;gap:6px;z-index:10001}
+    .immersive-controls .btn{opacity:0.95;min-width:18px;min-height:18px;padding:4px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center}
+    /* fullscreen-corners icon style (reduced by ~2x) */
+    .fs-icon{width:9px;height:9px;display:block}
   </style>
 </head>
 <body>
   <!-- top bar removed per request -->
 
-  <iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+  <!-- sandbox tokens and allow attributes enable fullscreen & pointer-lock where permitted -->
+  <iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock" allow="fullscreen; pointer-lock" allowfullscreen></iframe>
   <div id="msg" class="error" role="alert"></div>
+
+  <div class="immersive-controls" aria-hidden="false">
+    <!-- tiny corner-style fullscreen icon (box corners) -->
+    <button id="enterImmersive" class="btn" title="Enter immersive mode" aria-label="Enter immersive">
+      <svg class="fs-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 9V3h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 15v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 9V3h-6" stroke="currentColor" stroke-width="0" opacity="0"/>
+        <path d="M3 15v6h6" stroke="currentColor" stroke-width="0" opacity="0"/>
+        <!-- corners only -->
+        <path d="M3 7V3h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M17 3h4v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 17v4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 21H3v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button id="exitImmersive" class="btn ghost" style="display:none" title="Exit immersive" aria-label="Exit immersive">✕</button>
+  </div>
 
 <script>
 const RAW_BASE = 'https://raw.githubusercontent.com/Firewall-Freedom/file-s/refs/heads/master/';
@@ -26,8 +51,8 @@ function registerBlobUrl(u){ createdBlobUrls.add(u); return u; }
 window.addEventListener('unload', () => { for (const u of createdBlobUrls) try { URL.revokeObjectURL(u); } catch(e){} createdBlobUrls.clear(); });
 
 function q(name){ return new URLSearchParams(location.search).get(name) || ''; }
-function showMsg(text){ const m=document.getElementById('msg'); m.textContent=text; m.style.display='block'; }
-function hideMsg(){ const m=document.getElementById('msg'); m.style.display='none'; }
+function showMsg(text){ const m=document.getElementById('msg'); m.textContent=text; m.style.display='block'; m.style.opacity='1'; }
+function hideMsg(){ const m=document.getElementById('msg'); m.style.opacity='0'; setTimeout(()=>{ m.style.display='none'; m.textContent=''; }, 600); }
 
 async function fetchNoCache(url, as='text'){
   try{
@@ -356,6 +381,79 @@ if(!gameId){ showMsg('No game specified.'); }
 else loadGame(gameId);
 
 // reload now is handled by reloading the full page (no top bar button)
+
+// Immersive (fullscreen + pointer lock) helpers
+const iframeEl = document.getElementById('frame');
+const enterBtn = document.getElementById('enterImmersive');
+const exitBtn = document.getElementById('exitImmersive');
+function updateImmersiveUI() {
+  const locked = (document.pointerLockElement === iframeEl);
+  const fs = (document.fullscreenElement === iframeEl);
+  if (fs) enterBtn.style.display = 'none';
+  else enterBtn.style.display = '';
+  exitBtn.style.display = (fs || locked) ? '' : 'none';
+}
+
+async function enterImmersive() {
+  // Must be called in user gesture. Request fullscreen first.
+  try {
+    if (iframeEl.requestFullscreen) {
+      await iframeEl.requestFullscreen({ navigationUI: 'hide' });
+    }
+  } catch (e) {
+    showMsg('Fullscreen request failed: ' + (e && e.message || e));
+    return;
+  }
+  // Then request pointer lock on the iframe element (best-effort)
+  try {
+    if (iframeEl.requestPointerLock) {
+      iframeEl.requestPointerLock();
+    }
+  } catch (e) {
+    // ignore — pointer lock may fail (browser policies)
+  }
+  updateImmersiveUI();
+}
+
+function exitImmersive() {
+  try { if (document.exitPointerLock) document.exitPointerLock(); } catch (e) {}
+  try { if (document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
+  updateImmersiveUI();
+}
+
+enterBtn.addEventListener('click', (ev) => { ev.preventDefault(); enterImmersive(); });
+exitBtn.addEventListener('click', (ev) => { ev.preventDefault(); exitImmersive(); });
+
+// Clicking the iframe is a user gesture — attempt to enter immersive mode
+iframeEl.addEventListener('click', (ev) => {
+  // do not auto-enter if already fullscreen or locked
+  if (document.fullscreenElement === iframeEl || document.pointerLockElement === iframeEl) return;
+  // user-intent: try immersive
+  enterImmersive();
+});
+
+// Track pointer lock / fullscreen changes
+document.addEventListener('fullscreenchange', () => {
+  updateImmersiveUI();
+  if (document.fullscreenElement !== iframeEl) {
+    // only show transient exited message (fade out) when truly exited
+    if (document.pointerLockElement !== iframeEl) showTransientMessage('Exited fullscreen.', 3500);
+  }
+});
+document.addEventListener('pointerlockchange', () => {
+  updateImmersiveUI();
+  if (document.pointerLockElement !== iframeEl) {
+    showTransientMessage('Pointer unlocked. Press immersive icon to relock and fullscreen.', 3500);
+  } else {
+    hideMsg();
+  }
+});
+document.addEventListener('pointerlockerror', () => {
+  showTransientMessage('Pointer lock failed or was blocked by the browser.', 3500);
+});
+
+// Initialize UI state
+updateImmersiveUI();
 </script>
 </body>
 </html>

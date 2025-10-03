@@ -60,13 +60,75 @@
     .btn.small{padding:6px 10px;font-size:13px;border-radius:6px}
     .center{display:flex;gap:8px;align-items:center}
   </style>
+  <!-- fonts & visual/theme logic (copied-in behavior instead of shallow welcome includes) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Theme overrides for dark mode (applies when .dark on html) -->
+  <style id="theme-overrides">
+    /* default light vars (kept by existing CSS). dark-mode overrides below */
+    html.dark {
+      --page-bg: #0b1020;
+      --card-bg: #0f1724;
+      --brand: #2b8aff;
+      --muted: #94a3b8;
+      color-scheme: dark;
+    }
+    /* quick visible defaults when dark applied */
+    html.dark body { background: var(--page-bg); color: #e6eef8; }
+    html.dark .card { background: var(--card-bg); border-color: rgba(255,255,255,0.03); }
+    html.dark .muted { color: var(--muted); }
+  </style>
+
+  <script>
+    // theme detection & persistence (cookie + localStorage fallback)
+    (function(){
+      function getCookie(name){
+        const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      function setCookie(name, value, days){
+        const max = days ? ';max-age=' + (60*60*24*days) : '';
+        document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + ';path=/' + max;
+      }
+
+      // Determine saved preference: cookie first, then localStorage, then system preference
+      var saved = getCookie('theme') || localStorage.getItem('theme');
+      if (!saved) {
+        try {
+          saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+        } catch (_) { saved = 'light'; }
+      }
+
+      if (saved === 'dark') document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+
+      // Expose a helper to toggle/set theme programmatically
+      window.setTheme = function(theme){
+        try {
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            setCookie('theme','dark', 365);
+            localStorage.setItem('theme','dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            setCookie('theme','light', 365);
+            localStorage.setItem('theme','light');
+          }
+        } catch(e){ /* ignore */ }
+      };
+    })();
+  </script>
+  <script src="/welcome/stars.js" defer></script>
 </head>
 <body>
+
+  <canvas id="canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+
   <div class="wrap">
     <header class="site-header">
       <div class="logo">GD</div>
       <div>
-        <h1>Game Dictionary</h1>
+        <h1>Game Dictionary #1</h1>
         <div class="muted">Discover and cache playable game bundles for offline use</div>
       </div>
     </header>
