@@ -461,7 +461,7 @@
             <button onclick="window.location.href='/ai';" id="ai-btn">Ai</button>
             <button onclick="window.location.href='/CODE/chat';" id="chat-btn">Chat</button>
             <button onclick="window.location.href='/CODE/Supertube';" id="tube-btn">SuperTube (Youtube)</button>
-            <button id="proxys-btn" onclick="alert('the school year just started and we just started to fix everything.');">Proxys</button>
+            <button id="proxys-btn">Proxys</button>
             <button onclick="window.location.href='/CODE/tools';" id="tools-btn" style="display:none;">Tools</button>
         </div>
     </nav>
@@ -878,6 +878,42 @@
       }
     })();
     </script>
+
+    <!-- Add beta modal for Proxys button -->
+<script>
+  (function() {
+    const proxysBtn = document.getElementById('proxys-btn');
+    if (!proxysBtn) return;
+    proxysBtn.onclick = function() {
+      // If modal already exists, show it
+      let modal = document.getElementById('proxys-beta-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'proxys-beta-modal';
+        modal.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `
+          <div style="background:#fff;color:#222;padding:2em 2.5em;border-radius:12px;box-shadow:0 8px 32px #0003;max-width:95vw;text-align:center;position:relative;">
+            <button id="proxys-beta-close" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.5em;line-height:1;color:#888;cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0;">Proxys Beta Feature</h2>
+            <p style="font-size:1.1em;margin-bottom:1em;">
+              <b>This is a beta feature.</b> Some sites may not work yet.<br>
+              Please be patient as we improve it.<br>
+              For more details and known issues, visit:<br>
+              <a href="/Pro/work" style="color:#007bff;text-decoration:underline;">/Pro/work</a>
+            </p>
+            <button onclick="window.location.href='/Pro';" class="blue-btn" style="margin-top:1em;">Continue to Proxys</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('proxys-beta-close').onclick = function() {
+          modal.style.display = 'none';
+        };
+      } else {
+        modal.style.display = 'flex';
+      }
+    };
+  })();
+</script>
 </body>
 <script src="stars.js"></script>
 </html>

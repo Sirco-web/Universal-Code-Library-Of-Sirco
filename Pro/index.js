@@ -5,8 +5,11 @@ const proxyMapping = {
   "1": "https://corsproxy.io/?url=",
   "2": "https://cors-anywhere.herokuapp.com/",
   "3": "https://thingproxy.freeboard.io/fetch/",
-  // Option 4: AllOrigins returns JSON with HTML in "contents"
-  "4": "https://api.allorigins.hexocode.repl.co/get?disableCache=true&url="
+  "4": "https://api.allorigins.hexocode.repl.co/get?disableCache=true&url=",
+  "5": "https://proxy.cors.sh/",
+  "6": "https://api.codetabs.com/v1/proxy/?quest=",
+  "7": "https://api.scraperlink.com/cors?url=",
+  "8": "https://api.corsproxy.org/?url="
 };
 
 function getQueryParam(key) {
@@ -51,10 +54,14 @@ function rewriteResourceUrls(html, baseUrl, proxyBase) {
         const val = el.getAttribute(attr);
         if (
           val &&
-          !val.startsWith("data:") &&
           !/^mailto:/.test(val) &&
           !/^javascript:/.test(val)
         ) {
+          // If the value is a data: URL, do NOT proxy it
+          if (/^data:/i.test(val)) {
+            // leave as is
+            return;
+          }
           // If the value is relative (does not start with a full "http(s)://" or "//")
           if (!/^https?:\/\//i.test(val) && !/^\/\//.test(val)) {
             try {
@@ -202,20 +209,168 @@ function injectInterceptor(html, originalUrl, proxyBase, proxyId) {
 }
 
 // /////////////////////////////
-// Fetch & Replace Content
+// Helper: check if a URL is a proxy endpoint
+function isProxyUrl(url) {
+  return (
+    url.startsWith(proxyMapping["1"]) ||
+    url.startsWith(proxyMapping["2"]) ||
+    url.startsWith(proxyMapping["3"]) ||
+    url.startsWith(proxyMapping["4"]) ||
+    url.startsWith(proxyMapping["5"]) ||
+    url.startsWith(proxyMapping["6"]) ||
+    url.startsWith(proxyMapping["7"]) ||
+    url.startsWith(proxyMapping["8"])
+  );
+}
+
 // /////////////////////////////
-async function fetchAndReplace(proxyBase, targetUrl, proxyId, settings) {
+// Tab manager
+// /////////////////////////////
+const Tabs = {
+  nextId: 1,
+  activeId: null,
+  create(url, proxyVal, settings) {
+    // Always create a blank tab if no URL is provided
+    if (!url) url = "";
+
+    // Prevent double-proxy: if url is already a proxy endpoint, extract the real target
+    if (isProxyUrl(url)) {
+      // Try to extract the real target URL from the proxy endpoint
+      try {
+        if (proxyVal === "4") {
+          // AllOrigins: url param is after ...url=
+          const match = url.match(/url=([^&]+)/);
+          if (match && match[1]) url = decodeURIComponent(match[1]);
+        } else {
+          // Other proxies: after ?url= or /fetch/
+          const match = url.match(/url=([^&]+)/);
+          if (match && match[1]) url = decodeURIComponent(match[1]);
+          else if (url.includes("/fetch/")) {
+            url = url.split("/fetch/")[1];
+          }
+        }
+      } catch (e) { /* fallback: leave url as-is */ }
+    }
+
+    const id = "t" + (this.nextId++);
+    const tabsEl = document.getElementById("tabs");
+    const contents = document.getElementById("tabContents");
+
+    // Tab button
+    const tabBtn = document.createElement("button");
+    tabBtn.className = "tab";
+    tabBtn.id = "tab-" + id;
+    tabBtn.innerText = url ? url.replace(/^https?:\/\//,'').slice(0,30) : "New Tab";
+    tabBtn.addEventListener("click", () => this.activate(id));
+    tabsEl.appendChild(tabBtn);
+
+    // iframe container
+    const iframe = document.createElement("iframe");
+    iframe.id = "frame-" + id;
+    iframe.className = "tabFrame";
+    // sandbox: allow-scripts and allow-forms and allow-same-origin so proxied content can run,
+    // but keep parent safe by not allowing top-level navigation.
+    iframe.setAttribute("sandbox", "allow-scripts allow-forms allow-same-origin");
+    contents.appendChild(iframe);
+
+    // store meta
+    tabBtn.dataset.proxy = proxyVal;
+    tabBtn.dataset.url = url || "";
+    tabBtn.dataset.settings = settings || "";
+
+    this.activate(id);
+
+    if (url) {
+      // load into this tab
+      const proxyBase = proxyMapping[proxyVal] || proxyMapping["1"];
+      fetchAndReplace(proxyBase, url, proxyVal, settings, id);
+    } else {
+      // Blank tab: clear iframe
+      iframe.srcdoc = "<!DOCTYPE html><html><head><title>New Tab</title></head><body style='font-family:sans-serif;color:#888;text-align:center;padding-top:3em;'>New Tab</body></html>";
+      Tabs.updateTabTitle(id, "New Tab");
+    }
+
+    return id;
+  },
+
+  activate(id) {
+    // deactivate old
+    if (this.activeId) {
+      const oldBtn = document.getElementById("tab-" + this.activeId);
+      const oldFrame = document.getElementById("frame-" + this.activeId);
+      if (oldBtn) oldBtn.classList.remove("active");
+      if (oldFrame) oldFrame.classList.remove("visible");
+    }
+    // activate new
+    this.activeId = id;
+    const btn = document.getElementById("tab-" + id);
+    const frame = document.getElementById("frame-" + id);
+    if (btn) btn.classList.add("active");
+    if (frame) frame.classList.add("visible");
+  },
+
+  close(id) {
+    const btn = document.getElementById("tab-" + id);
+    const frame = document.getElementById("frame-" + id);
+    if (btn) btn.remove();
+    if (frame) frame.remove();
+    // activate neighbor
+    const tabsEl = document.getElementById("tabs");
+    const remaining = tabsEl.querySelectorAll(".tab");
+    if (remaining.length) {
+      const last = remaining[remaining.length - 1];
+      const nid = last.id.replace(/^tab-/, "");
+      this.activate(nid);
+    } else {
+      this.activeId = null;
+    }
+  },
+
+  getActiveFrame() {
+    if (!this.activeId) return null;
+    return document.getElementById("frame-" + this.activeId);
+  },
+
+  updateTabTitle(id, titleText) {
+    const btn = document.getElementById("tab-" + id);
+    if (btn) btn.innerText = titleText.slice(0, 30);
+  }
+};
+
+// /////////////////////////////
+// Fetch & Replace Content (update to never iframe a proxy endpoint)
+// /////////////////////////////
+async function fetchAndReplace(proxyBase, targetUrl, proxyId, settings, tabId) {
+  // Prevent double-proxy: if targetUrl is a proxy endpoint, extract the real target
+  if (isProxyUrl(targetUrl)) {
+    try {
+      if (proxyId === "4") {
+        const match = targetUrl.match(/url=([^&]+)/);
+        if (match && match[1]) targetUrl = decodeURIComponent(match[1]);
+      } else {
+        const match = targetUrl.match(/url=([^&]+)/);
+        if (match && match[1]) targetUrl = decodeURIComponent(match[1]);
+        else if (targetUrl.includes("/fetch/")) {
+          targetUrl = targetUrl.split("/fetch/")[1];
+        }
+      }
+    } catch (e) { /* fallback: leave as-is */ }
+  }
+
   let data;
   if (proxyId === "4") {
-    // For AllOrigins, call the API and extract "contents".
-    const fetchUrl = proxyBase + targetUrl;
+    // AllOrigins returns JSON with "contents"
+    const fetchUrl = proxyBase + encodeURIComponent(targetUrl);
     try {
       let response = await fetch(fetchUrl);
       if (!response.ok) throw new Error("HTTP error " + response.status);
       let json = await response.json();
       data = json.contents;
     } catch (error) {
-      document.body.innerHTML = "Error loading site (AllOrigins): " + error;
+      const frame = document.getElementById("frame-" + tabId);
+      if (frame && frame.contentDocument) {
+        frame.contentDocument.body.innerHTML = "Error loading site (AllOrigins): " + error;
+      }
       return;
     }
   } else {
@@ -232,57 +387,60 @@ async function fetchAndReplace(proxyBase, targetUrl, proxyId, settings) {
           response = await fetch(fetchUrl);
           if (!response.ok) throw new Error("Fallback HTTP error " + response.status);
         } catch (err) {
-          document.body.innerHTML = "Error loading site (fallback): " + err;
+          const frame = document.getElementById("frame-" + tabId);
+          if (frame && frame.contentDocument) {
+            frame.contentDocument.body.innerHTML = "Error loading site (fallback): " + err;
+          }
           return;
         }
       } else {
-        document.body.innerHTML = "Error loading site: " + error;
+        const frame = document.getElementById("frame-" + tabId);
+        if (frame && frame.contentDocument) {
+          frame.contentDocument.body.innerHTML = "Error loading site: " + error;
+        }
         return;
       }
     }
     data = await response.text();
   }
-  
+
   data = forceBaseTag(data, targetUrl);
   data = rewriteResourceUrls(data, targetUrl, proxyBase);
+
+  // Inject interceptor script so navigation inside the iframe uses the proxy.
   data = injectInterceptor(data, targetUrl, proxyBase, proxyId);
-  
-  // Force the title to always be "Aurora Gateway".
+
+  // Ensure proxied <title> does not affect parent — keep it for iframe only
   if (/<title>/i.test(data)) {
-    data = data.replace(/<title>.*<\/title>/i, "<title>Aurora Gateway</title>");
+    data = data.replace(/<title>.*<\/title>/i, `<title>${new URL(targetUrl).hostname} — Aurora Preview</title>`);
   } else if (/<head>/i.test(data)) {
-    data = data.replace(/<head>/i, "<head><title>Aurora Gateway</title>");
-  } else {
-    data = "<title>Aurora Gateway</title>" + data;
+    data = data.replace(/<head>/i, `<head><title>${new URL(targetUrl).hostname} — Aurora Preview</title>`);
   }
-  
-  document.open();
-  document.write(data);
-  document.close();
+
+  // Write into iframe
+  const frame = document.getElementById("frame-" + tabId);
+  if (!frame) return;
+  try {
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(data);
+    doc.close();
+    // update tab button title
+    Tabs.updateTabTitle(tabId, (doc.title || targetUrl));
+  } catch (e) {
+    // Some browsers may restrict writing to sandboxed frames; fallback to srcdoc
+    try {
+      frame.srcdoc = data;
+    } catch (err) {
+      console.error("Failed to write proxied content into iframe:", err);
+    }
+  }
 }
 
 // /////////////////////////////
-// UI & Settings Modal Logic
+// Proxy status & UI wiring
 // /////////////////////////////
-function loadSite() {
-  const proxyVal = document.getElementById("proxySelect").value;
-  const proxyBase = proxyMapping[proxyVal] || proxyMapping["1"];
-  let url = document.getElementById("urlInput").value.trim();
-  if (!url) {
-    alert("Please enter a URL!");
-    return;
-  }
-  if (!/^https?:\/\//i.test(url)) { url = "https://" + url; }
-  
-  let settings = "";
-  const saved = getSavedSettings();
-  if (saved) { settings = JSON.stringify(saved); }
-  let newSearch = `?proxy=${proxyVal}&url=${encodeURIComponent(url)}`;
-  if (settings) { newSearch += `&settings=${encodeURIComponent(settings)}`; }
-  window.location.search = newSearch;
-}
-
-function checkProxyStatus(proxyKey, proxyBase) {
+async function checkProxyStatus(proxyKey, proxyBase) {
   return new Promise((resolve) => {
     const testUrl = proxyBase + "https://example.com";
     let responded = false;
@@ -307,9 +465,11 @@ async function updateProxyStatus() {
     if (online) {
       opt.text = opt.text.split(" (")[0] + " (Online)";
       opt.className = "online";
+      opt.disabled = false;
     } else {
       opt.text = opt.text.split(" (")[0] + " (Offline)";
       opt.className = "offline";
+      opt.disabled = true;
     }
   }
 }
@@ -317,15 +477,15 @@ async function updateProxyStatus() {
 if (!window.location.search) { updateProxyStatus(); }
 
 // /////////////////////////////
-// Settings Modal Logic
+// UI & Settings Modal Logic (unchanged, but ensure buttons for new/open/close exist)
 // /////////////////////////////
-const settingsIcon = document.getElementById("settingsIcon");
+const settingsBtn = document.getElementById("settingsBtn");
 const settingsModal = document.getElementById("settingsModal");
 const settingsModalClose = document.getElementById("settingsModalClose");
 const saveSettingsBtn = document.getElementById("saveSettingsBtn");
 
-if (settingsIcon) {
-  settingsIcon.addEventListener("click", () => {
+if (settingsBtn) {
+  settingsBtn.addEventListener("click", () => {
     const saved = getSavedSettings();
     if (saved) {
       document.getElementById("debugMode").checked = !!saved.debug;
@@ -349,16 +509,254 @@ if (saveSettingsBtn) {
   });
 }
 
+// Wire new/open/close buttons and search logic
+(function() {
+  const newBtn = document.getElementById("newTabBtn");
+  const openBtn = document.getElementById("openActiveBtn");
+  const closeBtn = document.getElementById("closeTabBtn");
+  const backBtn = document.getElementById("backBtn");
+  const forwardBtn = document.getElementById("forwardBtn");
+  const reloadBtn = document.getElementById("reloadBtn");
+
+  function getInputUrlOrSearch() {
+    const raw = document.getElementById("urlInput").value.trim();
+    if (!raw) return "";
+    // if it's a plain query (no spaces? or no scheme), use search engine
+    const isLikelyQuery = !/^https?:\/\//i.test(raw) && raw.indexOf(" ") !== -1 || (!raw.includes(".") && raw.indexOf(" ") === -1);
+    if (isLikelyQuery) {
+      const engine = document.getElementById("searchEngine").value;
+      return engine + encodeURIComponent(raw);
+    }
+    // If user typed domain without scheme, ensure https first
+    if (!/^https?:\/\//i.test(raw)) return "https://" + raw;
+    return raw;
+  }
+
+  newBtn.addEventListener("click", () => {
+    // Always open a blank tab (not a duplicate)
+    const proxyVal = document.getElementById("proxySelect").value;
+    const saved = getSavedSettings();
+    const settings = saved ? JSON.stringify(saved) : "";
+    Tabs.create("", proxyVal, settings);
+  });
+
+  openBtn.addEventListener("click", () => {
+    const url = getInputUrlOrSearch();
+    if (!url) { alert("Please enter a URL or search query."); return; }
+    const activeFrame = Tabs.getActiveFrame();
+    if (!activeFrame) {
+      const proxyVal = document.getElementById("proxySelect").value;
+      const saved = getSavedSettings();
+      Tabs.create(url, proxyVal, saved ? JSON.stringify(saved) : "");
+      return;
+    }
+    // load into active tab
+    const proxyVal = document.getElementById("proxySelect").value;
+    const saved = getSavedSettings();
+    const settings = saved ? JSON.stringify(saved) : "";
+    const proxyBase = proxyMapping[proxyVal] || proxyMapping["1"];
+    fetchAndReplace(proxyBase, url, proxyVal, settings, Tabs.activeId);
+  });
+
+  closeBtn.addEventListener("click", () => {
+    if (Tabs.activeId) Tabs.close(Tabs.activeId);
+  });
+
+  // Navigation buttons for active tab
+  backBtn.addEventListener("click", () => {
+    const frame = Tabs.getActiveFrame();
+    if (frame && frame.contentWindow && frame.contentWindow.history) {
+      try { frame.contentWindow.history.back(); } catch(e) {}
+    }
+  });
+  forwardBtn.addEventListener("click", () => {
+    const frame = Tabs.getActiveFrame();
+    if (frame && frame.contentWindow && frame.contentWindow.history) {
+      try { frame.contentWindow.history.forward(); } catch(e) {}
+    }
+  });
+  reloadBtn.addEventListener("click", () => {
+    const frame = Tabs.getActiveFrame();
+    if (frame && frame.contentWindow) {
+      try { frame.contentWindow.location.reload(); } catch(e) {}
+    }
+  });
+
+  document.getElementById("urlInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      openBtn.click();
+    }
+  });
+})();
+
 // /////////////////////////////
-// Auto-load if Query Parameters Are Present
+// Auto-load from query parameters (creates a tab instead of replacing document)
 // /////////////////////////////
 (function() {
   const urlParam = getQueryParam("url");
   const proxyVal = getQueryParam("proxy") || "1";
   if (urlParam) {
+    // Hide browser UI and show only the proxied site
+    const mainContainer = document.getElementById("main-container");
+    if (mainContainer) {
+      mainContainer.style.display = "none";
+    }
+    // Create a full-window iframe for the proxied site
     const proxyBase = proxyMapping[proxyVal] || proxyMapping["1"];
-    document.getElementById("main-container").style.display = "none";
     const settings = getQueryParam("settings");
-    fetchAndReplace(proxyBase, decodeURIComponent(urlParam), proxyVal, settings);
+    const decoded = decodeURIComponent(urlParam);
+    const urlToLoad = /^https?:\/\//i.test(decoded) ? decoded : "https://" + decoded;
+
+    const fullFrame = document.createElement("iframe");
+    fullFrame.style.position = "fixed";
+    fullFrame.style.top = "0";
+    fullFrame.style.left = "0";
+    fullFrame.style.width = "100vw";
+    fullFrame.style.height = "100vh";
+    fullFrame.style.border = "none";
+    fullFrame.style.zIndex = "9999";
+    fullFrame.setAttribute("sandbox", "allow-scripts allow-forms allow-same-origin");
+    document.body.appendChild(fullFrame);
+
+    // Fetch and inject proxied content into the full-frame
+    fetchAndReplace(proxyBase, urlToLoad, proxyVal, settings, null, fullFrame);
   }
 })();
+
+// Patch fetchAndReplace to allow direct iframe injection if a frame is provided
+async function fetchAndReplace(proxyBase, targetUrl, proxyId, settings, tabId, directFrame) {
+  // If the target is a data: URL, just show it directly in the iframe
+  if (/^data:/i.test(targetUrl)) {
+    let frame = directFrame;
+    if (!frame && tabId) frame = document.getElementById("frame-" + tabId);
+    if (!frame) return;
+    frame.src = targetUrl;
+    // Optionally set tab title
+    if (tabId) Tabs.updateTabTitle(tabId, "data: resource");
+    return;
+  }
+
+  // Prevent double-proxy: if targetUrl is a proxy endpoint, extract the real target
+  if (isProxyUrl(targetUrl)) {
+    try {
+      if (proxyId === "4") {
+        const match = targetUrl.match(/url=([^&]+)/);
+        if (match && match[1]) targetUrl = decodeURIComponent(match[1]);
+      } else {
+        const match = targetUrl.match(/url=([^&]+)/);
+        if (match && match[1]) targetUrl = decodeURIComponent(match[1]);
+        else if (targetUrl.includes("/fetch/")) {
+          targetUrl = targetUrl.split("/fetch/")[1];
+        }
+      }
+    } catch (e) { /* fallback: leave as-is */ }
+  }
+
+  let data;
+  if (proxyId === "4") {
+    const fetchUrl = proxyBase + encodeURIComponent(targetUrl);
+    try {
+      let response = await fetch(fetchUrl);
+      if (!response.ok) throw new Error("HTTP error " + response.status);
+      let json = await response.json();
+      data = json.contents;
+    } catch (error) {
+      if (directFrame) {
+        directFrame.contentDocument.body.innerHTML = "Error loading site (AllOrigins): " + error;
+      } else if (tabId) {
+        const frame = document.getElementById("frame-" + tabId);
+        if (frame && frame.contentDocument) {
+          frame.contentDocument.body.innerHTML = "Error loading site (AllOrigins): " + error;
+        }
+      }
+      return;
+    }
+  } else {
+    let fetchUrl = proxyBase + targetUrl;
+    let response;
+    try {
+      response = await fetch(fetchUrl);
+      if (!response.ok) throw new Error("HTTP error " + response.status);
+    } catch (error) {
+      if (targetUrl.startsWith("https://")) {
+        targetUrl = targetUrl.replace("https://", "http://");
+        fetchUrl = proxyBase + targetUrl;
+        try {
+          response = await fetch(fetchUrl);
+          if (!response.ok) throw new Error("Fallback HTTP error " + response.status);
+        } catch (err) {
+          if (directFrame) {
+            directFrame.contentDocument.body.innerHTML = "Error loading site (fallback): " + err;
+          } else if (tabId) {
+            const frame = document.getElementById("frame-" + tabId);
+            if (frame && frame.contentDocument) {
+              frame.contentDocument.body.innerHTML = "Error loading site (fallback): " + err;
+            }
+          }
+          return;
+        }
+      } else {
+        if (directFrame) {
+          directFrame.contentDocument.body.innerHTML = "Error loading site: " + error;
+        } else if (tabId) {
+          const frame = document.getElementById("frame-" + tabId);
+          if (frame && frame.contentDocument) {
+            frame.contentDocument.body.innerHTML = "Error loading site: " + error;
+          }
+        }
+        return;
+      }
+    }
+    data = await response.text();
+  }
+
+  data = forceBaseTag(data, targetUrl);
+  data = rewriteResourceUrls(data, targetUrl, proxyBase);
+  data = injectInterceptor(data, targetUrl, proxyBase, proxyId);
+
+  if (/<title>/i.test(data)) {
+    data = data.replace(/<title>.*<\/title>/i, `<title>${new URL(targetUrl).hostname} — Aurora Preview</title>`);
+  } else if (/<head>/i.test(data)) {
+    data = data.replace(/<head>/i, `<head><title>${new URL(targetUrl).hostname} — Aurora Preview</title>`);
+  }
+
+  // Write into provided iframe or tab iframe
+  let frame = directFrame;
+  if (!frame && tabId) frame = document.getElementById("frame-" + tabId);
+  if (!frame) return;
+  try {
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(data);
+    doc.close();
+    if (tabId) Tabs.updateTabTitle(tabId, (doc.title || targetUrl));
+  } catch (e) {
+    try {
+      frame.srcdoc = data;
+    } catch (err) {
+      console.error("Failed to write proxied content into iframe:", err);
+    }
+  }
+}
+
+// After DOMContentLoaded or in your UI setup logic, set DuckDuckGo as default search engine
+document.addEventListener("DOMContentLoaded", () => {
+  const searchEngine = document.getElementById("searchEngine");
+  if (searchEngine) {
+    searchEngine.value = "https://duckduckgo.com/?q=";
+  }
+  // Add more proxies to the proxy selector if not already present
+  const proxySelect = document.getElementById("proxySelect");
+  if (proxySelect && proxySelect.options.length < 8) {
+    proxySelect.innerHTML = `
+      <option value="1">CorsProxy.io</option>
+      <option value="2">CORS Anywhere</option>
+      <option value="3">ThingProxy</option>
+      <option value="4">AllOrigins</option>
+      <option value="5">cors.sh</option>
+      <option value="6">Codetabs</option>
+      <option value="7">ScraperLink</option>
+      <option value="8">corsproxy.org</option>
+    `;
+  }
+});
