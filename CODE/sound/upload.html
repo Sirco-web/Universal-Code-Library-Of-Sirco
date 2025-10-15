@@ -111,68 +111,6 @@
       box-shadow: 0 2px rgba(0,0,0,0.2);
     }
   </style>
-
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
 </head>
 <body>
   <div class="soundboard-container">
@@ -191,6 +129,43 @@
     </div>
   </div>
 
-  
+  <script>
+    let dataUrl = '';
+    const fileInput = document.getElementById('file-input');
+    const labelIn  = document.getElementById('label');
+    const uploadBtn = document.getElementById('upload-btn');
+    const resetBtn  = document.getElementById('reset-btn');
+
+    // Read selected file as DataURL
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => dataUrl = reader.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // On upload, save to localStorage and go back
+    uploadBtn.addEventListener('click', () => {
+      const label = labelIn.value.trim();
+      if (!label || !dataUrl) {
+        alert('Please enter a label and choose an audio file.');
+        return;
+      }
+      const stored = JSON.parse(localStorage.getItem('customSounds') || '[]');
+      stored.push({ label, dataUrl });
+      localStorage.setItem('customSounds', JSON.stringify(stored));
+      window.location.href = 'index.html';
+    });
+
+    // Reset all custom sounds
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to delete all uploaded sounds?')) {
+        localStorage.removeItem('customSounds');
+        alert('All sounds have been reset.');
+      }
+    });
+  </script>
 </body>
 </html>

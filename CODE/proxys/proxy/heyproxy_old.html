@@ -30,69 +30,37 @@
     </style>
 
     <!-- Cookie Validation -->
-    
+    <script>
+        const cookies = document.cookie.split("; ");
+        const accessCookie = cookies.find(row => row.startsWith("access="));
 
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+        if (accessCookie && accessCookie.split("=")[1] === "1") {
+            // Valid cookie found, show the page
+            document.addEventListener("DOMContentLoaded", () => {
+                document.body.style.display = "flex"; // Display content
+                loadFromGitHub("https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/hey_proxy.html");
+            });
+        } else {
+            // No valid cookie, redirect to main page
+            window.location.replace("/index.html");
+        }
 
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
+        async function loadFromGitHub(url) {
+            try {
+                if (!url) throw new Error("GitHub URL is missing.");
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch content.");
+
+                const content = await response.text();
+                document.open();
+                document.write(content);
+                document.close();
+            } catch (error) {
+                document.body.innerHTML = `<h1>Error</h1><p id="errorMessage">${error.message}</p>`;
             }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
+        }
+    </script>
 </head>
 <body>
     <h1>Loading...</h1>

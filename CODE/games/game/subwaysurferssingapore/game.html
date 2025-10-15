@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
+    <script src="poki-sdk.js"></script>
     
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -66,76 +75,22 @@
         }
 
     </style>
-
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
 </head>
 <body>
-    
+    <script>
+        window.NOSW = true;
+        window.GAME_CONFIG = {
+            pokiSdkDebug: false,
+            leaderboard: 'mockup',
+            bundlesPath: './bundles',
+            quality: 'high'
+        }
+    </script>
     <div id="message">
         <h1>Loading</h1>
         <h1 class="dot one">.</h1><h1 class="dot two">.</h1><h1 class="dot three">.</h1>
     </div>
-    
-    
+    <script src="js/loading.js"></script>
+    <script src="js/boot.js"></script>
 </body>
 </html>

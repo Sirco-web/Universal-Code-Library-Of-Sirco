@@ -23,68 +23,6 @@
 		.top-row { display:flex; justify-content:flex-end; gap:0.6rem; margin-bottom:0.75rem; }
 		.note { margin-top:0.5rem; color:#5a7a9b; }
 	</style>
-
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
 </head>
 <body>
 	<div class="container">
@@ -128,6 +66,85 @@
 		<p class="note">Tip: After saving, the shortcut works on every page (analytics.js is injected site-wide).</p>
 	</div>
 
-	
+	<script>
+		// load current config (analytics.js exposes helpers on window.__shortcutConfig if present)
+		function getConfig() {
+			try {
+				if (window.__shortcutConfig && window.__shortcutConfig.get) return window.__shortcutConfig.get();
+				const s = localStorage.getItem('shortcut_config');
+				return s ? JSON.parse(s) : null;
+			} catch (e) { return null; }
+		}
+		function saveConfig(cfg) {
+			try {
+				localStorage.setItem('shortcut_config', JSON.stringify(cfg));
+				if (window.__shortcutConfig && window.__shortcutConfig.save) window.__shortcutConfig.save(cfg);
+			} catch (e) {}
+		}
+
+		const ctrl = document.getElementById('ctrl');
+		const alt = document.getElementById('alt');
+		const shift = document.getElementById('shift');
+		const meta = document.getElementById('meta');
+		const mainKey = document.getElementById('mainKey');
+		const customURL = document.getElementById('customURL');
+
+		const DEFAULT = { modifiers:{ctrl:false,alt:true,shift:false,meta:false}, key:'p', action:'goto', customURL:'/' };
+
+		function populate() {
+			const cfg = getConfig() || DEFAULT;
+			ctrl.checked = !!cfg.modifiers.ctrl;
+			alt.checked = !!cfg.modifiers.alt;
+			shift.checked = !!cfg.modifiers.shift;
+			meta.checked = !!cfg.modifiers.meta;
+			mainKey.value = cfg.key || 'z';
+			customURL.value = cfg.customURL || '';
+			const radios = document.getElementsByName('action');
+			for (const r of radios) r.checked = (r.value === (cfg.action || 'none'));
+		}
+		populate();
+
+		document.getElementById('saveBtn').onclick = () => {
+			const action = document.querySelector('input[name="action"]:checked').value;
+			const cfg = {
+				modifiers: { ctrl: !!ctrl.checked, alt: !!alt.checked, shift: !!shift.checked, meta: !!meta.checked },
+				key: (mainKey.value || '').toLowerCase() || 'z',
+				action,
+				customURL: customURL.value.trim()
+			};
+			saveConfig(cfg);
+			alert('Shortcut saved.');
+		};
+
+		document.getElementById('testBtn').onclick = () => {
+			const cfg = getConfig() || DEFAULT;
+			// perform locally
+			try { if (typeof window.removeAccessKey === 'function') window.removeAccessKey(); } catch (e) {}
+			if (cfg.action === 'google') window.open('https://www.google.com', '_blank');
+			if (cfg.action === 'custom' && cfg.customURL) {
+				const href = (cfg.customURL.startsWith('http://') || cfg.customURL.startsWith('https://')) ? cfg.customURL : ('https://' + cfg.customURL);
+				window.open(href, '_blank');
+			}
+			// notify service worker
+			try {
+				if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+					navigator.serviceWorker.controller.postMessage({
+						type: 'SHORTCUT_TRIGGERED',
+						action: cfg.action || 'none',
+						customURL: cfg.customURL || '',
+						timestamp: Date.now()
+					});
+				}
+			} catch (e) {}
+		};
+
+		document.getElementById('resetBtn').onclick = () => {
+			if (confirm('Reset shortcut to default (Alt+P, go to /)?')) {
+				saveConfig(DEFAULT);
+				populate();
+				alert('Reset to default.');
+			}
+		};
+	</script>
 </body>
 </html>

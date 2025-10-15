@@ -27,68 +27,6 @@
         }
         a.button-link:hover { background: #0056b3; }
     </style>
-
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
 </head>
 <body>
     <div id="container">
@@ -147,6 +85,250 @@
             <div id="message-recover"></div>
         </div>
     </div>
-    
+    <script>
+        let BACKEND_URL = '';
+        fetch('/backend.json')
+            .then(res => res.json())
+            .then(cfg => {
+                BACKEND_URL = cfg.url.replace(/\/$/, '');
+                main();
+            });
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i=0;i < ca.length;i++) {
+                let c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+
+        function getGreeting(name) {
+            const hour = new Date().getHours();
+            let greet = "Hello";
+            if (hour >= 5 && hour < 12) greet = "Good morning";
+            else if (hour >= 12 && hour < 18) greet = "Good afternoon";
+            else if (hour >= 18 && hour < 22) greet = "Good evening";
+            else greet = "Hello";
+            return `${greet}, ${name}`;
+        }
+
+        function fetchUserRole(username) {
+            fetch(BACKEND_URL + '/cookie-role?username=' + encodeURIComponent(username), {
+                method: 'GET',
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                let role = (data && data.role) ? data.role : 'Active user';
+                document.getElementById('account-role-status').innerHTML = 'Account status: <span style="color:#007bff;">' + role + '</span>';
+            })
+            .catch(() => {
+                document.getElementById('account-role-status').innerHTML = 'Account status: <span style="color:#007bff;">Active user</span>';
+            });
+        }
+
+        function fetchUserName(username, cb) {
+            const name = getCookie('cookie_saver_name');
+            if (name) {
+                cb(name);
+                return;
+            }
+            fetch(BACKEND_URL + '/cookie-profile?username=' + encodeURIComponent(username), {
+                method: 'GET',
+                headers: { 'ngrok-skip-browser-warning': 'true' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.name) cb(data.name);
+                else cb(username);
+            })
+            .catch(() => cb(username));
+        }
+
+        function showAccountInfo(username) {
+            document.getElementById('account-info').classList.remove('hidden');
+            document.getElementById('signin-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('recover-section').classList.add('hidden');
+            document.getElementById('login-status').innerHTML = 'Logged in as <span>' + username + '</span>';
+            fetchUserRole(username);
+            fetchUserName(username, function(name) {
+                const greetingDiv = document.getElementById('greeting');
+                greetingDiv.textContent = getGreeting(name);
+                greetingDiv.style.display = '';
+            });
+            const newsletter = getCookie('newsletter_hide');
+            const newsletterName = getCookie('newsletter_name');
+            const newsletterEmail = getCookie('newsletter_email');
+            if (newsletter === '1' && newsletterName && newsletterEmail) {
+                document.getElementById('newsletter-status').innerHTML =
+                    `You are <span style="color:green;">subscribed</span> to the newsletter as <b>${newsletterName}</b> (<span style="color:#555;">${newsletterEmail}</span>).
+                    <button id="newsletter-unsub-btn" style="margin-left:1em;background:#ff4444;color:#fff;border:none;border-radius:4px;padding:0.3em 0.8em;cursor:pointer;">Unsubscribe</button>`;
+                setTimeout(() => {
+                    const unsubBtn = document.getElementById('newsletter-unsub-btn');
+                    if (unsubBtn) {
+                        unsubBtn.onclick = function() {
+                            fetch(BACKEND_URL + '/newsletter-unsub', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                                body: JSON.stringify({ name: newsletterName, email: newsletterEmail, timestamp: new Date().toISOString() })
+                            }).then(() => {
+                                document.getElementById('newsletter-status').innerHTML = 'You have been unsubscribed from the newsletter.';
+                                document.cookie = 'newsletter_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                document.cookie = 'newsletter_email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                                document.cookie = 'newsletter_hide=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                            }).catch(() => {
+                                document.getElementById('newsletter-status').innerHTML = 'Error unsubscribing. Please try again.';
+                            });
+                        };
+                    }
+                }, 100);
+            } else {
+                document.getElementById('newsletter-status').innerHTML = 'You are <span style="color:#f44;">not subscribed</span> to the newsletter.';
+            }
+        }
+
+        function showSignin() {
+            document.getElementById('account-info').classList.add('hidden');
+            document.getElementById('signin-section').classList.remove('hidden');
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('recover-section').classList.add('hidden');
+        }
+        function showSignup() {
+            document.getElementById('account-info').classList.add('hidden');
+            document.getElementById('signin-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.remove('hidden');
+            document.getElementById('recover-section').classList.add('hidden');
+        }
+        function showRecover() {
+            document.getElementById('account-info').classList.add('hidden');
+            document.getElementById('signin-section').classList.add('hidden');
+            document.getElementById('signup-section').classList.add('hidden');
+            document.getElementById('recover-section').classList.remove('hidden');
+        }
+
+        function main() {
+            const username = getCookie('cookie_saver_username');
+            const signedup = getCookie('cookie_saver_signedup');
+            if (username && signedup === '1') {
+                showAccountInfo(username);
+            } else {
+                showSignin();
+            }
+
+            document.getElementById('show-signup').onclick = showSignup;
+            document.getElementById('show-signin').onclick = showSignin;
+            document.getElementById('show-recover').onclick = showRecover;
+            document.getElementById('show-recover2').onclick = showRecover;
+            document.getElementById('back-to-signup').onclick = showSignup;
+            document.getElementById('back-to-signin').onclick = showSignin;
+
+            document.getElementById('signin-form').onsubmit = function(e) {
+                e.preventDefault();
+                const username = document.getElementById('signin-username').value.trim();
+                const password = document.getElementById('signin-password').value.trim();
+                if (!username || !password) {
+                    document.getElementById('message').textContent = 'Please enter username and password.';
+                    document.getElementById('message').style.color = 'red';
+                    return;
+                }
+                fetch(BACKEND_URL + '/cookie-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        document.cookie = 'cookie_saver_signedup=1; path=/;';
+                        document.cookie = 'cookie_saver_username=' + encodeURIComponent(username) + '; path=/;';
+                        document.cookie = 'cookie_saver_password=' + encodeURIComponent(password) + '; path=/;';
+                        document.getElementById('message').textContent = '';
+                        showAccountInfo(username);
+                    } else {
+                        document.getElementById('message').textContent = 'Invalid username or password.';
+                        document.getElementById('message').style.color = 'red';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('message').textContent = 'Could not sign in. Please try again.';
+                    document.getElementById('message').style.color = 'red';
+                });
+            };
+
+            document.getElementById('signup-form').onsubmit = function(e) {
+                e.preventDefault();
+                const username = document.getElementById('signup-username').value.trim();
+                const password = document.getElementById('signup-password').value.trim();
+                const name = document.getElementById('signup-name').value.trim();
+                const email = document.getElementById('signup-email').value.trim();
+                if (!username || !password || !name || !email) {
+                    document.getElementById('message-signup').textContent = 'Please fill in all fields.';
+                    document.getElementById('message-signup').style.color = 'red';
+                    return;
+                }
+                fetch(BACKEND_URL + '/cookie-signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, name, email })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('message-signup').textContent = 'Sign up successful! You can now sign in.';
+                        document.getElementById('message-signup').style.color = 'green';
+                        showSignin();
+                    } else {
+                        document.getElementById('message-signup').textContent = 'Sign up failed: ' + data.error;
+                        document.getElementById('message-signup').style.color = 'red';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('message-signup').textContent = 'Could not sign up. Please try again.';
+                    document.getElementById('message-signup').style.color = 'red';
+                });
+            };
+
+            document.getElementById('recover-btn').onclick = function() {
+                const email = document.getElementById('recover-email').value.trim();
+                const name = document.getElementById('recover-name').value.trim();
+                if (!email || !name) {
+                    document.getElementById('message-recover').textContent = 'Please enter your email and name.';
+                    document.getElementById('message-recover').style.color = 'red';
+                    return;
+                }
+                fetch(BACKEND_URL + '/cookie-recover', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('message-recover').textContent = 'Recovery email sent! Please check your inbox.';
+                        document.getElementById('message-recover').style.color = 'green';
+                        showSignin();
+                    } else {
+                        document.getElementById('message-recover').textContent = 'Recovery failed: ' + data.error;
+                        document.getElementById('message-recover').style.color = 'red';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('message-recover').textContent = 'Could not recover account. Please try again.';
+                    document.getElementById('message-recover').style.color = 'red';
+                });
+            };
+
+            document.getElementById('logout-btn').onclick = function() {
+                document.cookie = 'cookie_saver_signedup=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = 'cookie_saver_username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = 'cookie_saver_password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                showSignin();
+            };
+        }
+    </script>
 </body>
 </html>

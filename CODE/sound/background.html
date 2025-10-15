@@ -204,68 +204,6 @@
       padding:1px 6px; border-radius:6px;
     }
   </style>
-
-<script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Fully replace document with white background and 404 iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>404</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              background: white !important;
-              overflow: hidden;
-              height: 100%;
-              width: 100%;
-            }
-            iframe {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              border: none;
-              background: white !important;
-              z-index: 999999;
-              display: block;
-            }
-          </style>
-        </head>
-        <body>
-          <iframe src="/404.html"></iframe>
-        </body>
-      `;
-      setTimeout(() => {
-        window.location.href = "/404.html";
-      }, 2500);
-      return;
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random recheck between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
 </head>
 <body>
   <div class="wrap">
@@ -316,6 +254,223 @@
     </div>
   </div>
 
-  
+  <script>
+    // ---- Data ---------------------------------------------------------------
+    const solids = [
+      { name:'red', css:'red' },
+      { name:'blue', css:'blue' },
+      { name:'yellow', css:'gold' },
+      { name:'green', css:'seagreen' },
+      { name:'orange', css:'orange' },
+      { name:'purple', css:'rebeccapurple' }
+    ];
+
+    const combos = [
+      { name:'red-blue', css:'linear-gradient(135deg, red, blue)' },
+      { name:'blue-yellow', css:'linear-gradient(135deg, blue, gold)' },
+      { name:'red-yellow', css:'linear-gradient(135deg, red, gold)' },
+      { name:'green-orange', css:'linear-gradient(135deg, seagreen, orange)' },
+      { name:'orange-purple', css:'linear-gradient(135deg, orange, rebeccapurple)' },
+      { name:'green-purple', css:'linear-gradient(135deg, seagreen, rebeccapurple)' }
+    ];
+
+    // Default (non-seasonal) image backgrounds
+    const images = [
+      'city','meltdown','skibidi toilet','ocean','factory','rainbow',
+      'puppies','kitties','clouds','football','baseball','america','cheeto puff','farm','jesus','satan','babies','ur mom','chong'
+    ];
+
+    // Seasonal backgrounds: only include when current date is within [start, end]
+    // Filenames must exactly match name + '.jpg'
+    const seasonalBackgrounds = [
+      { name:'christmas',      start:'12-01', end:'12-31' },
+      { name:'santa',          start:'12-20', end:'12-25' },
+      { name:'2026',           start:'12-31', end:'01-10' },
+      { name:'winter',         start:'12-01', end:'02-28' },
+      { name:'pink',           start:'02-01', end:'02-28' },
+      { name:'hearts',         start:'02-10', end:'02-15' },
+      { name:'spring',         start:'03-01', end:'05-31' },
+      { name:'lucky',          start:'03-01', end:'03-31' },
+      { name:'extra lucky',    start:'03-17', end:'03-17' },
+      { name:'easter',         start:'04-01', end:'04-10' },
+      { name:'summer',         start:'06-01', end:'08-31' },
+      { name:'schools out',    start:'05-20', end:'06-10' },
+      { name:'independence',   start:'07-01', end:'07-10' },
+      { name:'back to school', start:'08-01', end:'08-31' },
+      { name:'fall',           start:'09-01', end:'11-30' },
+      { name:'halloween',      start:'10-01', end:'11-01' },
+      { name:'spooky',         start:'10-15', end:'11-01' },
+      { name:'turkey',         start:'11-01', end:'12-01' }
+    ];
+
+    // helper to check if today is in [start, end] (MM-DD)
+    function isDateInRange(start, end) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const [sm, sd] = start.split('-').map(Number);
+      const [em, ed] = end.split('-').map(Number);
+      let from = new Date(year, sm - 1, sd);
+      let to   = new Date(year, em - 1, ed);
+      // wrap across new year
+      if (from > to) {
+        to.setFullYear(year + 1);
+      }
+      return today >= from && today <= to;
+    }
+
+    // add active seasonals into images array
+    const activeSeasonals = seasonalBackgrounds
+      .filter(bg => isDateInRange(bg.start, bg.end))
+      .map(bg => bg.name);
+    images.push(...activeSeasonals);
+
+    // mark all seasonals for badge styling
+    const seasonalSet = new Set(seasonalBackgrounds.map(bg => bg.name));
+
+    // ---- State --------------------------------------------------------------
+    let selected = null;
+
+    // ---- DOM refs -----------------------------------------------------------
+    const preview = document.getElementById('preview');
+    const previewLabel = document.getElementById('previewLabel');
+    const question = document.getElementById('question');
+    const applyBtn = document.getElementById('applyBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const solidGrid = document.getElementById('solidGrid');
+    const comboGrid = document.getElementById('comboGrid');
+    const imageGrid = document.getElementById('imageGrid');
+
+    // ---- Helpers ------------------------------------------------------------
+    function clearSelectionsIn(container){
+      container.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+    }
+    function enableApply(enable=true){ applyBtn.disabled = !enable; }
+
+    function setPreviewToColor(css, label){
+      preview.style.background = css;
+      preview.style.backgroundSize = 'cover';
+      preview.classList.remove('random');
+      question.style.opacity = 0;
+      previewLabel.textContent = label ?? 'Selected color';
+    }
+
+    function setPreviewToImage(src, label){
+      preview.style.background = `url("${src}") center/cover no-repeat, #111`;
+      preview.classList.remove('random');
+      question.style.opacity = 0;
+      previewLabel.textContent = label ?? 'Selected image';
+    }
+
+    function setPreviewToRandom(){
+      preview.style.background = 'radial-gradient(120px 80px at 30% 20%, #2a2e3a, #141722)';
+      preview.classList.add('random');
+      previewLabel.textContent = 'Random';
+    }
+
+    function encodeFileName(name){
+      return encodeURI(name + '.jpg');
+    }
+
+    function getAllOptions(){
+      const colorOptions = [
+        ...solids.map(c => ({type:'color', name:c.name, value:c.css})),
+        ...combos.map(c => ({type:'color', name:c.name, value:c.css}))
+      ];
+      const imageOptions = images.map(n => ({type:'image', name:n, value:encodeFileName(n)}));
+      return [...colorOptions, ...imageOptions];
+    }
+
+    function pickRandom(){
+      const all = getAllOptions();
+      return all[Math.floor(Math.random() * all.length)];
+    }
+
+    function persistAndReturn(selection){
+      try{
+        localStorage.setItem('soundboardBackground', JSON.stringify(selection));
+      }catch(e){}
+      window.location.href = 'index.html';
+    }
+
+    // ---- Build UI: colors ---------------------------------------------------
+    function makeSwatch(item){
+      const el = document.createElement('button');
+      el.className = 'swatch';
+      el.style.background = item.css;
+      el.title = item.name;
+      el.innerHTML = `<span class="name">${item.name}</span>`;
+      el.addEventListener('click', () => {
+        clearSelectionsIn(solidGrid);
+        clearSelectionsIn(comboGrid);
+        imageGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+        el.classList.add('selected');
+
+        selected = { type:'color', name:item.name, value:item.css };
+        setPreviewToColor(item.css, item.name);
+        enableApply(true);
+      });
+      return el;
+    }
+
+    solids.forEach(c => solidGrid.appendChild(makeSwatch(c)));
+    combos.forEach(c => comboGrid.appendChild(makeSwatch(c)));
+
+    // ---- Build UI: images ---------------------------------------------------
+    images.forEach(name => {
+      const src = encodeFileName(name);
+      const el = document.createElement('button');
+      el.className = 'tile' + (seasonalSet.has(name) ? ' seasonal' : '');
+      el.title = name;
+      el.innerHTML = `
+        <img src="${src}" alt="${name} background" />
+        <span class="badge">${name}</span>
+      `;
+      el.addEventListener('click', () => {
+        solidGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+        comboGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+        imageGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+        el.classList.add('selected');
+
+        selected = { type:'image', name, value:src };
+        setPreviewToImage(src, name);
+        enableApply(true);
+      });
+      imageGrid.appendChild(el);
+    });
+
+    // ---- Actions ------------------------------------------------------------
+    randomBtn.addEventListener('click', () => {
+      solidGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+      comboGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+      imageGrid.querySelectorAll('.selected').forEach(n => n.classList.remove('selected'));
+
+      selected = { type:'random' };
+      setPreviewToRandom();
+      enableApply(true);
+    });
+
+    applyBtn.addEventListener('click', () => {
+      if(!selected){ return; }
+      if(selected.type === 'random'){
+        const rand = pickRandom();
+        persistAndReturn(rand);
+      } else {
+        persistAndReturn(selected);
+      }
+    });
+
+    // Optional: hydrate last selection
+    (function hydrateFromLast(){
+      try{
+        const last = JSON.parse(localStorage.getItem('soundboardBackground') || 'null');
+        if(!last) return;
+        if(last.type === 'color'){
+          setPreviewToColor(last.value, last.name + ' (last applied)');
+        }else if(last.type === 'image'){
+          setPreviewToImage(last.value, last.name + ' (last applied)');
+        }
+      }catch(_){}
+    })();
+  </script>
 </body>
 </html>
