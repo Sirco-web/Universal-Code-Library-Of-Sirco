@@ -1,14 +1,19 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Upload Sound</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap"
-    rel="stylesheet"
-  />
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Upload Sound</title>
+<link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&amp;display=swap" rel="stylesheet"/>
+<style>
     /* Same animated gradient */
     @keyframes gradientShift {
       0%   { background-position:   0% 50%; }
@@ -111,25 +116,41 @@
       box-shadow: 0 2px rgba(0,0,0,0.2);
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <div class="soundboard-container">
-    <a href="index.html" class="back-button" title="Back to Soundboard">
-      <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9.707 14.707a1 1 0 01-1.414 0L3 9.414l5.293-5.293a1 1 0 111.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"/>
-      </svg>
-    </a>
-
-    <h1>Upload Sound</h1>
-    <div class="upload-form">
-      <input type="text" id="label" placeholder="Button Label" />
-      <input type="file" accept="audio/*" id="file-input" />
-      <button id="upload-btn">Upload &amp; Return</button>
-      <button id="reset-btn" type="button">Reset Sounds</button>
-    </div>
-  </div>
-
-  <script>
+<div class="soundboard-container">
+<a class="back-button" href="index.html" title="Back to Soundboard">
+<svg viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.707 14.707a1 1 0 01-1.414 0L3 9.414l5.293-5.293a1 1 0 111.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"></path>
+</svg>
+</a>
+<h1>Upload Sound</h1>
+<div class="upload-form">
+<input id="label" placeholder="Button Label" type="text"/>
+<input accept="audio/*" id="file-input" type="file"/>
+<button id="upload-btn">Upload &amp; Return</button>
+<button id="reset-btn" type="button">Reset Sounds</button>
+</div>
+</div>
+<script>
     let dataUrl = '';
     const fileInput = document.getElementById('file-input');
     const labelIn  = document.getElementById('label');

@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxys Page</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
 
-    <style>
+<html lang="en">
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proxys Page</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<style>
         body {
             display: none; /* Hide all content until cookie is validated */
             background-color: #ffffff; /* Blank white page */
@@ -95,9 +102,8 @@
             padding-left: 20px;
         }
     </style>
-
-    <!-- Cookie Validation -->
-    <script>
+<!-- Cookie Validation -->
+<script>
         const cookies = document.cookie.split("; ");
         const accessCookie = cookies.find(row => row.startsWith("access="));
 
@@ -149,45 +155,53 @@
 
         document.addEventListener("DOMContentLoaded", loadProxies);
     </script>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-
-    <h1>Welcome to the Proxys Page</h1>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
-
-    <!-- Proxy List Container -->
-    <div class="proxy-container" id="proxyList">
-        <!-- Proxy buttons dynamically added here -->
-    </div>
-
-    <div class="info-section">
-        <h2>INSTRUCTIONS</h2>
-        
-        <p>Copy and paste this into the proxy of your choice for faster results:</p>
-        <p><code>http://duckduckgo.com/</code></p>
-        <p>For most proxies, click the Google icon and then the DuckDuckGo icon so you do not have to verify that you're a robot.</p>
-
-        <h2>Proxy NEWS!</h2>
-        <ul>
-            <li><strong>5/4/25:</strong> Made ALL proxys not require a Password. B/c people can't read the INSTRUCTIONS!</li>
-            <li><strong>4/27/25:</strong> fixed the Doge Proxy and Google Proxy</li>
-            <li><strong>4/27/25:</strong> Doge Proxy and Google Proxy are back!</li>
-            <li><strong>4/1/25:</strong> Doge Proxy and Google Proxy are back!</li>
-            <li><strong>3/31/25:</strong> Doge Proxy has been blocked and discontinued until a new one is made.</li>
-        </ul>
-    </div>
-
-    <footer>
-        <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
-        <p>Disclaimer: This website is not affiliated with any of the proxies listed. All rights belong to their respective owners.</p>
-    </footer>
-
-    <!-- Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
-
+<h1>Welcome to the Proxys Page</h1>
+<!-- Back Button -->
+<button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
+<!-- Proxy List Container -->
+<div class="proxy-container" id="proxyList">
+<!-- Proxy buttons dynamically added here -->
+</div>
+<div class="info-section">
+<h2>INSTRUCTIONS</h2>
+<p>Copy and paste this into the proxy of your choice for faster results:</p>
+<p><code>http://duckduckgo.com/</code></p>
+<p>For most proxies, click the Google icon and then the DuckDuckGo icon so you do not have to verify that you're a robot.</p>
+<h2>Proxy NEWS!</h2>
+<ul>
+<li><strong>5/4/25:</strong> Made ALL proxys not require a Password. B/c people can't read the INSTRUCTIONS!</li>
+<li><strong>4/27/25:</strong> fixed the Doge Proxy and Google Proxy</li>
+<li><strong>4/27/25:</strong> Doge Proxy and Google Proxy are back!</li>
+<li><strong>4/1/25:</strong> Doge Proxy and Google Proxy are back!</li>
+<li><strong>3/31/25:</strong> Doge Proxy has been blocked and discontinued until a new one is made.</li>
+</ul>
+</div>
+<footer>
+<p>© 2025 Firewall Freedom. All rights reserved.</p>
+<p>Disclaimer: This website is not affiliated with any of the proxies listed. All rights belong to their respective owners.</p>
+</footer>
+<!-- Grabify Tracking -->
+<iframe class="hidden" height="1" src="https://grabify.link/9B53TJ" style="border:none;" width="1"></iframe>
 <script src="/analytics.js?5h"></script>
-
 </body>
 </html>

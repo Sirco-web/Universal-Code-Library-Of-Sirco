@@ -1,13 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport"
-		  content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Air Pen</title>
-	<link href="normalize.css" rel="stylesheet" type="text/css">
-	<style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" name="viewport"/>
+<meta content="ie=edge" http-equiv="X-UA-Compatible"/>
+<title>Air Pen</title>
+<link href="normalize.css" rel="stylesheet" type="text/css"/>
+<style>
 		html {
 			-webkit-box-sizing: border-box;
 			box-sizing: border-box;
@@ -59,17 +66,34 @@
 			height: 100%;
 		}
 	</style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
 <div class="o-canvas-wrapper">
-	<canvas class="o-select-none" id="o-canvas">Your browser needs to be updated!</canvas>
+<canvas class="o-select-none" id="o-canvas">Your browser needs to be updated!</canvas>
 </div>
 <div class="o-buttons-wrapper">
-	<button class="o-button" id="o-clear-button">Clear</button>
-	<button class="o-button" id="o-grid-button">Grid</button>
-	<button class="o-button" id="o-save-button">Save</button>
+<button class="o-button" id="o-clear-button">Clear</button>
+<button class="o-button" id="o-grid-button">Grid</button>
+<button class="o-button" id="o-save-button">Save</button>
 </div>
-
 <script>
 function checkCookie() {
     const cookies = document.cookie.split("; ");

@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Aurora Gateway</title>
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Aurora Gateway</title>
+<style>
     /* Main page styling */
     body {
       margin: 0;
@@ -124,44 +132,57 @@
       margin-top: 10px;
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <!-- Settings Icon -->
-  <div id="settingsIcon" title="Settings"></div>
-  
-  <!-- Main Landing Interface -->
-  <div id="main-container">
-    <div id="interface">
-      <h1>Aurora Gateway</h1>
-      <div>
-        <select id="proxySelect">
-          <option value="1">CorsProxy.io</option>
-          <option value="2">CORS Anywhere</option>
-          <option value="3">ThingProxy</option>
-          <option value="4">AllOrigins</option>
-        </select>
-      </div>
-      <input type="text" id="urlInput" placeholder="Enter site URL (e.g. https://crazygames.com)" />
-      <button onclick="loadSite()">Load Site</button>
-      <p class="info">(Or use URL parameters: <code>?proxy=1&url=https://crazygames.com</code>)</p>
-    </div>
-  </div>
-  
-  <!-- Settings Modal -->
-  <div id="settingsModal">
-    <div id="settingsModalContent">
-      <span id="settingsModalClose">&times;</span>
-      <h2>Settings</h2>
-      <label for="debugMode">Debug Mode:</label>
-      <input type="checkbox" id="debugMode" />
-      
-      <label for="extraOptions">Extra Options:</label>
-      <input type="text" id="extraOptions" placeholder="e.g., foo=bar" />
-      
-      <button id="saveSettingsBtn">Save Settings</button>
-    </div>
-  </div>
-  
-  <script src="old_index.js"></script>
+<!-- Settings Icon -->
+<div id="settingsIcon" title="Settings"></div>
+<!-- Main Landing Interface -->
+<div id="main-container">
+<div id="interface">
+<h1>Aurora Gateway</h1>
+<div>
+<select id="proxySelect">
+<option value="1">CorsProxy.io</option>
+<option value="2">CORS Anywhere</option>
+<option value="3">ThingProxy</option>
+<option value="4">AllOrigins</option>
+</select>
+</div>
+<input id="urlInput" placeholder="Enter site URL (e.g. https://crazygames.com)" type="text"/>
+<button onclick="loadSite()">Load Site</button>
+<p class="info">(Or use URL parameters: <code>?proxy=1&amp;url=https://crazygames.com</code>)</p>
+</div>
+</div>
+<!-- Settings Modal -->
+<div id="settingsModal">
+<div id="settingsModalContent">
+<span id="settingsModalClose">×</span>
+<h2>Settings</h2>
+<label for="debugMode">Debug Mode:</label>
+<input id="debugMode" type="checkbox"/>
+<label for="extraOptions">Extra Options:</label>
+<input id="extraOptions" placeholder="e.g., foo=bar" type="text"/>
+<button id="saveSettingsBtn">Save Settings</button>
+</div>
+</div>
+<script src="old_index.js"></script>
 </body>
 </html>

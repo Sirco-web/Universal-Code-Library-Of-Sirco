@@ -1,11 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Game Dictionary</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Game Dictionary</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<style>
     /* page styles updated to match the rest of the site */
     :root{
       --brand:#007bff;
@@ -64,11 +72,10 @@
     .search { width:100%; max-width:420px; padding:8px 10px; border-radius:8px; border:1px solid rgba(2,6,23,0.08); background:transparent; font-size:14px; color:inherit }
     .search:focus { outline:2px solid rgba(0,123,255,0.12); box-shadow:0 4px 12px rgba(2,6,23,0.04); }
   </style>
-  <!-- fonts & visual/theme logic (copied-in behavior instead of shallow welcome includes) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Theme overrides for dark mode (applies when .dark on html) -->
-  <style id="theme-overrides">
+<!-- fonts & visual/theme logic (copied-in behavior instead of shallow welcome includes) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Theme overrides for dark mode (applies when .dark on html) -->
+<style id="theme-overrides">
     /* default light vars (kept by existing CSS). dark-mode overrides below */
     html.dark {
       --page-bg: #0b1020;
@@ -82,8 +89,7 @@
     html.dark .card { background: var(--card-bg); border-color: rgba(255,255,255,0.03); }
     html.dark .muted { color: var(--muted); }
   </style>
-
-  <script>
+<script>
     // theme detection & persistence (cookie + localStorage fallback)
     (function(){
       function getCookie(name){
@@ -122,39 +128,52 @@
       };
     })();
   </script>
-  <script src="/welcome/stars.js" defer></script>
-</head>
+<script defer="" src="/welcome/stars.js"></script>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-
-  <canvas id="canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
-
-  <div class="wrap">
-    <header class="site-header">
-      <div class="logo">GD</div>
-      <div>
-        <h1>Game Dictionary #1</h1>
-        <div class="muted">Discover and cache playable game bundles for offline use</div>
-      </div>
-    </header>
-
-    <section class="hero" role="region" aria-label="overview">
-      <div class="info">
-        <div id="status" class="muted">Loading index...</div>
-        <div class="muted" id="hint">Game Dictionary is a beta feature and may contain bugs. Some games may not work, and some games may take time to load.</div>
-       <div style="margin-top:10px">
-         <input id="search" class="search" placeholder="Search games by name or title…" aria-label="Search games">
-       </div>
-      </div>
-      <div class="center">
-        <button id="refresh" class="btn small">Refresh</button>
-        <button id="toggleRecent" class="btn ghost small" title="Toggle Recently Played">Recent: On</button>
-      </div>
-    </section>
-
-    <div id="games" aria-live="polite"></div>
-  </div>
-
-  <script>
+<canvas id="canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+<div class="wrap">
+<header class="site-header">
+<div class="logo">GD</div>
+<div>
+<h1>Game Dictionary #1</h1>
+<div class="muted">Discover and cache playable game bundles for offline use</div>
+</div>
+</header>
+<section aria-label="overview" class="hero" role="region">
+<div class="info">
+<div class="muted" id="status">Loading index...</div>
+<div class="muted" id="hint">Game Dictionary is a beta feature and may contain bugs. Some games may not work, and some games may take time to load.</div>
+<div style="margin-top:10px">
+<input aria-label="Search games" class="search" id="search" placeholder="Search games by name or title…"/>
+</div>
+</div>
+<div class="center">
+<button class="btn small" id="refresh">Refresh</button>
+<button class="btn ghost small" id="toggleRecent" title="Toggle Recently Played">Recent: On</button>
+</div>
+</section>
+<div aria-live="polite" id="games"></div>
+</div>
+<script>
     // Fixed raw base URL (DO NOT allow to change) — use explicit master ref as provided
     const RAW_BASE = 'https://raw.githubusercontent.com/Firewall-Freedom/file-s/refs/heads/master/';
     const INDEX_XML_URL = RAW_BASE + 'index.xml';

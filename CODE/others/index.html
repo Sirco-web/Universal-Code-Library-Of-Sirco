@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBG Mirror Site Checker</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
 
-    <script>
+<html lang="en">
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UBG Mirror Site Checker</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<script>
         function checkPassword() {
             const correctPassword = "password12345"; // Change this password as needed
             const cookieValue = document.cookie.split("; ").find(row => row.startsWith("siteAccess="));
@@ -98,8 +105,7 @@
             loadSites();
         };
     </script>
-
-    <style>
+<style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -136,24 +142,36 @@
             background-color: #0056b3;
         }
     </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-
-    <h1>UBG Mirror Site Version Checker</h1>
-    <p>This page checks the version of different UBG mirror sites.</p>
-
-    <div class="highlight">
-        <p>Main Site: (<span id="mainSiteLink">Checking...</span>)</p>
-        <p>Main Site Version: <span id="mainSiteVersion">Checking...</span></p>
-    </div>
-
-    <div id="siteList" class="site-list">
-        <!-- Versions will be dynamically generated here -->
-    </div>
-
-    <button class="back-button" onclick="window.location.href='/welcome';">Back to Welcome Page</button>
-
+<h1>UBG Mirror Site Version Checker</h1>
+<p>This page checks the version of different UBG mirror sites.</p>
+<div class="highlight">
+<p>Main Site: (<span id="mainSiteLink">Checking...</span>)</p>
+<p>Main Site Version: <span id="mainSiteVersion">Checking...</span></p>
+</div>
+<div class="site-list" id="siteList">
+<!-- Versions will be dynamically generated here -->
+</div>
+<button class="back-button" onclick="window.location.href='/welcome';">Back to Welcome Page</button>
 <script src="/analytics.js?5h"></script>
-
 </body>
 </html>

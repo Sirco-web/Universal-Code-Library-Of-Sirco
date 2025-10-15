@@ -1,14 +1,19 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Soundboard</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap"
-    rel="stylesheet"
-  />
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Soundboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&amp;display=swap" rel="stylesheet"/>
+<style>
     /* Animated full-page gradient */
     @keyframes gradientShift {
       0%   { background-position:   0% 50%; }
@@ -239,137 +244,148 @@
       margin-top: 8px;
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  
-  <div class="soundboard-container">
-  <a href="background.html" class="bg-button" title="Change background">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2C6.477 2 2 6.146 2 11c0 4.553 3.822 8 8.5 8 .338 0 .722-.03 1.1-.09a3.5 3.5 0 0 0 3.884-2.387l.33-1.03A3.001 3.001 0 0 1 19 13c0-2.059-1.387-4.014-3.36-5.18C14.364 4.905 13.328 2 12 2ZM7 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4 2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-    </svg>
+<div class="soundboard-container">
+<a class="bg-button" href="background.html" title="Change background">
+<svg aria-hidden="true" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.477 2 2 6.146 2 11c0 4.553 3.822 8 8.5 8 .338 0 .722-.03 1.1-.09a3.5 3.5 0 0 0 3.884-2.387l.33-1.03A3.001 3.001 0 0 1 19 13c0-2.059-1.387-4.014-3.36-5.18C14.364 4.905 13.328 2 12 2ZM7 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4 2a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-2 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+</svg>
     Background
   </a>
-    
-    <!-- Upload page link -->
-    <a href="upload.html" class="upload-button" title="Upload Sound">
-      <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 10l5-5 5 5H11v4H9v-4H5z M3 16h14v-2H3v2z"/>
-      </svg>
-    </a>
-
-    <h1>Soundboard</h1>
-
-    <div class="volume-control">
-      <label for="volume-slider">Volume</label>
-      <input type="range" id="volume-slider" min="0" max="100" value="100" />
-      <input type="number" id="volume-input" min="0" max="1000" value="100" />%
+<!-- Upload page link -->
+<a class="upload-button" href="upload.html" title="Upload Sound">
+<svg viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 10l5-5 5 5H11v4H9v-4H5z M3 16h14v-2H3v2z"></path>
+</svg>
+</a>
+<h1>Soundboard</h1>
+<div class="volume-control">
+<label for="volume-slider">Volume</label>
+<input id="volume-slider" max="100" min="0" type="range" value="100"/>
+<input id="volume-input" max="1000" min="0" type="number" value="100"/>%
     </div>
-
-    <div class="buttons">
-      <button class="sound-button" data-sound="bruh.mp3">bruh</button>
-      <button class="sound-button" data-sound="wtf.mp3">i got no rizz</button>
-      <button class="sound-button" data-sound="soulmate.mp3">wedding piano thing</button>
-      <button class="sound-button" data-sound="br_br_patapim.mp3">brainrot AAAA</button>
-      <button class="sound-button" data-sound="hellnaw.mp3">oh HELL no</button>
-      <button class="sound-button" data-sound="yippee.mp3">yippee</button>
-      <button class="sound-button" data-sound="cheer.mp3">kids cheer</button>
-      <button class="sound-button" data-sound="heartbreak.mp3">womp womp</button>
-      <button class="sound-button" data-sound="emotionaldamage.mp3">EMOTIONAL DAMAGE</button>
-      <button class="sound-button" data-sound="ohio.mp3">ohio</button>
-      <button class="sound-button" data-sound="mid.mp3">rizz</button>
-      <button class="sound-button" data-sound="discord.mp3">discord</button>
-      <button class="sound-button" data-sound="kafutilaugh.mp3">baby laugh</button>
-      <button class="sound-button" data-sound="gotye.mp3">galaxy brain🗣️🧠</button>
-      <button class="sound-button" data-sound="moan.mp3">moan</button>
-      <button class="sound-button" data-sound="fart.mp3">fart</button>
-      <button class="sound-button" data-sound="uwu.mp3">uwu</button>
-      <button class="sound-button" data-sound="spongebob.mp3">spongebob</button>
-      <button class="sound-button" data-sound="taco.mp3">taco bell</button>
-      <button class="sound-button" data-sound="saxy.mp3">saxy😏</button>
-      <button class="sound-button" data-sound="thomas.mp3">thomas the dank</button>
-      <button class="sound-button" data-sound="mexicoahh.mp3">horn</button>
-      <button class="sound-button" data-sound="burgerking.mp3">burger king wtf</button>
-      <button class="sound-button" data-sound="bababoi.mp3">bababoi</button>
-      <button class="sound-button" data-sound="caseohburgerking.mp3">caseoh at burger king</button>
-      <button class="sound-button" data-sound="eardrumwhopper.mp3">burger king LOUD</button>
-      <button class="sound-button" data-sound="gay.mp3">gay</button>
-      <button class="sound-button" data-sound="scream.mp3">scream</button>
-      <button class="sound-button" data-sound="samsung.mp3">samsung</button>
-      <button class="sound-button" data-sound="krustykrab.mp3">krusty krab</button>
-      <button class="sound-button" data-sound="squidward.mp3">what the sigma</button>
-      <button class="sound-button" data-sound="uwuburp.mp3">uwu burp</button>
-      <button class="sound-button" data-sound="apple.mp3">iphone</button>
-      <button class="sound-button" data-sound="samsungremix.mp3">samsung remix</button>
-      <button class="sound-button" data-sound="weird.mp3">stupid n</button>
-      <button class="sound-button" data-sound="metalpipe.mp3">metal pipe</button>
-      <button class="sound-button" data-sound="hub.mp3">cornhub</button>
-      <button class="sound-button" data-sound="geda.mp3">gedagedi</button>
-      <button class="sound-button" data-sound="eagle.mp3">eagle</button>
-      <button class="sound-button" data-sound="goku.mp3">goku</button>
-      <button class="sound-button" data-sound="wiisports.mp3">wii sports LOUD</button>
-      <button class="sound-button" data-sound="hellothere.mp3">hello there</button>
-      <button class="sound-button" data-sound="huh.mp3">huh</button>
-      <button class="sound-button" data-sound="oof.mp3">oof</button>
-      <button class="sound-button" data-sound="21.mp3">21</button>
-      <button class="sound-button" data-sound="genalpha.mp3">gen alpha</button>
-      <button class="sound-button" data-sound="jet2.mp3">jet2 holiday</button>
-      <button class="sound-button" data-sound="lizard.mp3">lizard</button>
-      <button class="sound-button" data-sound="bone.mp3">bad to the bone</button>
-      <button class="sound-button" data-sound="incorrect.mp3">buzzer</button>
-      <button class="sound-button" data-sound="crack.mp3">bone crack</button>
-      <button class="sound-button" data-sound="mariojump.mp3">mario jump</button>
-      <button class="sound-button" data-sound="punch.mp3">punch</button>
-      <button class="sound-button" data-sound="ohmygod.mp3">oh my god</button>
-      <button class="sound-button" data-sound="mustard.mp3">MUSTARD</button>
-      <button class="sound-button" data-sound="india.mp3">indian music</button>
-      <button class="sound-button" data-sound="nono.mp3">nono square</button>
-      <button class="sound-button" data-sound="quack.mp3">quack</button>
-      <button class="sound-button" data-sound="subway.mp3">subway surfers</button>
-      <button class="sound-button" data-sound="dogsniff.mp3">dog sniff</button>
-      <button class="sound-button" data-sound="whatthehell.mp3">what the hell</button>
-      <button class="sound-button" data-sound="brainfart.mp3">brain fart</button>
-      <button class="sound-button" data-sound="heaven.mp3">heaven</button>
-      <button class="sound-button" data-sound="linging.mp3">yo phone linging</button>
-      <button class="sound-button" data-sound="sniffsniff.mp3">sniff sniff</button>
-      <button class="sound-button" data-sound="chingchong.mp3">ching chong</button>
-      <button class="sound-button" data-sound="electriczoo.mp3">electric zoo</button>
-      <button class="sound-button" data-sound="airhorn.mp3">air horn</button>
-      <button class="sound-button" data-sound="amogus.mp3">among us</button>
-      <button class="sound-button" data-sound="pew.mp3">pew</button>
-      <button class="sound-button" data-sound="fish.mp3">fish</button>
-      <button class="sound-button" data-sound="dun.mp3">dun dun dun</button>
-      <button class="sound-button" data-sound="violin.mp3">violin</button>
-      <button class="sound-button" data-sound="applepay.mp3">apple pay</button>
-      <button class="sound-button" data-sound="boom.mp3">vine boom</button>
-      <button class="sound-button" data-sound="pluh.mp3">pluh</button>
-      <button class="sound-button" data-sound="fah.mp3">fah</button>
-      <button class="sound-button" data-sound="wow.mp3">wow</button>
-      <button class="sound-button" data-sound="sodapop.mp3">soda pop</button>
-      <button class="sound-button" data-sound="clashroyale.mp3">clash royale</button>
-      <button class="sound-button" data-sound="idiot.mp3">u are an idiot</button>
-      <button class="sound-button" data-sound="hogrider.mp3">hog rider</button>
-      <button class="sound-button" data-sound="awww.mp3">awww</button>
-      <button class="sound-button" data-sound="prowler.mp3">prowler</button>
-      <button class="sound-button" data-sound="67.mp3">67</button>
-      <button class="sound-button" data-sound="catlaugh.mp3">cat laugh</button>
-      <button class="sound-button" data-sound="butttwin.mp3">digging in yo butt</button>
-      <button class="sound-button" data-sound="fears.mp3">fears to fathom</button>
-    </div>
-    <!-- Mode controls between buttons and footer -->
-    <div class="mode-bar">
-      <button id="chaos-btn">Chaos (C)</button>
-      <button id="loop-btn">Loop (L)</button>
-      <button id="stop-btn">Stop (S)</button>
-    </div>
-
-    <footer>
-      <div>©2025 BustAnEar LLC. All rights reserved.</div>
-      <div>By using this soundboard, you agree to our terms and conditions.</div>
-    </footer>
-  </div>
-
-  <audio id="player" preload="auto" style="display:none"></audio>
-  <script>
+<div class="buttons">
+<button class="sound-button" data-sound="bruh.mp3">bruh</button>
+<button class="sound-button" data-sound="wtf.mp3">i got no rizz</button>
+<button class="sound-button" data-sound="soulmate.mp3">wedding piano thing</button>
+<button class="sound-button" data-sound="br_br_patapim.mp3">brainrot AAAA</button>
+<button class="sound-button" data-sound="hellnaw.mp3">oh HELL no</button>
+<button class="sound-button" data-sound="yippee.mp3">yippee</button>
+<button class="sound-button" data-sound="cheer.mp3">kids cheer</button>
+<button class="sound-button" data-sound="heartbreak.mp3">womp womp</button>
+<button class="sound-button" data-sound="emotionaldamage.mp3">EMOTIONAL DAMAGE</button>
+<button class="sound-button" data-sound="ohio.mp3">ohio</button>
+<button class="sound-button" data-sound="mid.mp3">rizz</button>
+<button class="sound-button" data-sound="discord.mp3">discord</button>
+<button class="sound-button" data-sound="kafutilaugh.mp3">baby laugh</button>
+<button class="sound-button" data-sound="gotye.mp3">galaxy brain🗣️🧠</button>
+<button class="sound-button" data-sound="moan.mp3">moan</button>
+<button class="sound-button" data-sound="fart.mp3">fart</button>
+<button class="sound-button" data-sound="uwu.mp3">uwu</button>
+<button class="sound-button" data-sound="spongebob.mp3">spongebob</button>
+<button class="sound-button" data-sound="taco.mp3">taco bell</button>
+<button class="sound-button" data-sound="saxy.mp3">saxy😏</button>
+<button class="sound-button" data-sound="thomas.mp3">thomas the dank</button>
+<button class="sound-button" data-sound="mexicoahh.mp3">horn</button>
+<button class="sound-button" data-sound="burgerking.mp3">burger king wtf</button>
+<button class="sound-button" data-sound="bababoi.mp3">bababoi</button>
+<button class="sound-button" data-sound="caseohburgerking.mp3">caseoh at burger king</button>
+<button class="sound-button" data-sound="eardrumwhopper.mp3">burger king LOUD</button>
+<button class="sound-button" data-sound="gay.mp3">gay</button>
+<button class="sound-button" data-sound="scream.mp3">scream</button>
+<button class="sound-button" data-sound="samsung.mp3">samsung</button>
+<button class="sound-button" data-sound="krustykrab.mp3">krusty krab</button>
+<button class="sound-button" data-sound="squidward.mp3">what the sigma</button>
+<button class="sound-button" data-sound="uwuburp.mp3">uwu burp</button>
+<button class="sound-button" data-sound="apple.mp3">iphone</button>
+<button class="sound-button" data-sound="samsungremix.mp3">samsung remix</button>
+<button class="sound-button" data-sound="weird.mp3">stupid n</button>
+<button class="sound-button" data-sound="metalpipe.mp3">metal pipe</button>
+<button class="sound-button" data-sound="hub.mp3">cornhub</button>
+<button class="sound-button" data-sound="geda.mp3">gedagedi</button>
+<button class="sound-button" data-sound="eagle.mp3">eagle</button>
+<button class="sound-button" data-sound="goku.mp3">goku</button>
+<button class="sound-button" data-sound="wiisports.mp3">wii sports LOUD</button>
+<button class="sound-button" data-sound="hellothere.mp3">hello there</button>
+<button class="sound-button" data-sound="huh.mp3">huh</button>
+<button class="sound-button" data-sound="oof.mp3">oof</button>
+<button class="sound-button" data-sound="21.mp3">21</button>
+<button class="sound-button" data-sound="genalpha.mp3">gen alpha</button>
+<button class="sound-button" data-sound="jet2.mp3">jet2 holiday</button>
+<button class="sound-button" data-sound="lizard.mp3">lizard</button>
+<button class="sound-button" data-sound="bone.mp3">bad to the bone</button>
+<button class="sound-button" data-sound="incorrect.mp3">buzzer</button>
+<button class="sound-button" data-sound="crack.mp3">bone crack</button>
+<button class="sound-button" data-sound="mariojump.mp3">mario jump</button>
+<button class="sound-button" data-sound="punch.mp3">punch</button>
+<button class="sound-button" data-sound="ohmygod.mp3">oh my god</button>
+<button class="sound-button" data-sound="mustard.mp3">MUSTARD</button>
+<button class="sound-button" data-sound="india.mp3">indian music</button>
+<button class="sound-button" data-sound="nono.mp3">nono square</button>
+<button class="sound-button" data-sound="quack.mp3">quack</button>
+<button class="sound-button" data-sound="subway.mp3">subway surfers</button>
+<button class="sound-button" data-sound="dogsniff.mp3">dog sniff</button>
+<button class="sound-button" data-sound="whatthehell.mp3">what the hell</button>
+<button class="sound-button" data-sound="brainfart.mp3">brain fart</button>
+<button class="sound-button" data-sound="heaven.mp3">heaven</button>
+<button class="sound-button" data-sound="linging.mp3">yo phone linging</button>
+<button class="sound-button" data-sound="sniffsniff.mp3">sniff sniff</button>
+<button class="sound-button" data-sound="chingchong.mp3">ching chong</button>
+<button class="sound-button" data-sound="electriczoo.mp3">electric zoo</button>
+<button class="sound-button" data-sound="airhorn.mp3">air horn</button>
+<button class="sound-button" data-sound="amogus.mp3">among us</button>
+<button class="sound-button" data-sound="pew.mp3">pew</button>
+<button class="sound-button" data-sound="fish.mp3">fish</button>
+<button class="sound-button" data-sound="dun.mp3">dun dun dun</button>
+<button class="sound-button" data-sound="violin.mp3">violin</button>
+<button class="sound-button" data-sound="applepay.mp3">apple pay</button>
+<button class="sound-button" data-sound="boom.mp3">vine boom</button>
+<button class="sound-button" data-sound="pluh.mp3">pluh</button>
+<button class="sound-button" data-sound="fah.mp3">fah</button>
+<button class="sound-button" data-sound="wow.mp3">wow</button>
+<button class="sound-button" data-sound="sodapop.mp3">soda pop</button>
+<button class="sound-button" data-sound="clashroyale.mp3">clash royale</button>
+<button class="sound-button" data-sound="idiot.mp3">u are an idiot</button>
+<button class="sound-button" data-sound="hogrider.mp3">hog rider</button>
+<button class="sound-button" data-sound="awww.mp3">awww</button>
+<button class="sound-button" data-sound="prowler.mp3">prowler</button>
+<button class="sound-button" data-sound="67.mp3">67</button>
+<button class="sound-button" data-sound="catlaugh.mp3">cat laugh</button>
+<button class="sound-button" data-sound="butttwin.mp3">digging in yo butt</button>
+<button class="sound-button" data-sound="fears.mp3">fears to fathom</button>
+</div>
+<!-- Mode controls between buttons and footer -->
+<div class="mode-bar">
+<button id="chaos-btn">Chaos (C)</button>
+<button id="loop-btn">Loop (L)</button>
+<button id="stop-btn">Stop (S)</button>
+</div>
+<footer>
+<div>©2025 BustAnEar LLC. All rights reserved.</div>
+<div>By using this soundboard, you agree to our terms and conditions.</div>
+</footer>
+</div>
+<audio id="player" preload="auto" style="display:none"></audio>
+<script>
     // Elements
     const slider   = document.getElementById('volume-slider');
     const volInput = document.getElementById('volume-input');

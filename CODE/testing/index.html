@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testing Portal</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
 
-    <script>
+<html lang="en">
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Testing Portal</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<script>
         function checkCookie() {
             const cookies = document.cookie.split("; ");
             const accessCookie = cookies.find(row => row.startsWith("access="));
@@ -20,9 +27,7 @@
             checkCookie(); // Verify cookie before loading the page
         };
     </script>
-    
-
-    <style>
+<style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
         .hidden { display: none; }
         .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background: white; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
@@ -47,8 +52,7 @@
         }
         button:hover { background-color: #0056b3; }
     </style>
-
-    <script>
+<script>
         let selectedPage = "";
 
         function showDisclaimer(page) {
@@ -61,33 +65,44 @@
             window.location.href = selectedPage;
         }
     </script>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-
-    <h1>Testing Portal</h1>
-
-    <!-- Back Button -->
-    <button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
-
-    <div class="container" id="selection">
-        <p class="warning">⚠️ This page is for learning purposes only. It should not be used to take actual tests.</p>
-        <p>Select the type of test environment:</p>
-        <div class="button-container">
-            <button onclick="showDisclaimer('/CODE/testing/nwea.html')">Nwea Testing</button>
-            <button onclick="showDisclaimer('/CODE/testing/map.html')">Map Testing</button>
-        </div>
-    </div>
-
-    <div class="container hidden" id="disclaimer">
-        <h2>Disclaimer & Agreement</h2>
-        <p>This website and its contents are provided for entertainment purposes only. We are not responsible for any misuse of the services offered, including violations of rules, policies, or laws that come to your location or institution. Accessing this website using devices or networks that are not personally owned, such as school property, is strictly prohibited. Use of this website during designated school hours is also not allowed. By using this website, you know that you are solely responsible for ensuring compliance with all applicable regulations.</p>
-        <button onclick="acceptDisclaimer()">I Understand & Agree</button>
-    </div>
-
-    <!-- Grabify Tracking -->
-    <iframe src="https://grabify.link/9B53TJ" width="1" height="1" style="border:none;" class="hidden"></iframe>
-
+<h1>Testing Portal</h1>
+<!-- Back Button -->
+<button class="back-button" onclick="window.location.href='/welcome/index.html';">Back to Welcome Page</button>
+<div class="container" id="selection">
+<p class="warning">⚠️ This page is for learning purposes only. It should not be used to take actual tests.</p>
+<p>Select the type of test environment:</p>
+<div class="button-container">
+<button onclick="showDisclaimer('/CODE/testing/nwea.html')">Nwea Testing</button>
+<button onclick="showDisclaimer('/CODE/testing/map.html')">Map Testing</button>
+</div>
+</div>
+<div class="container hidden" id="disclaimer">
+<h2>Disclaimer &amp; Agreement</h2>
+<p>This website and its contents are provided for entertainment purposes only. We are not responsible for any misuse of the services offered, including violations of rules, policies, or laws that come to your location or institution. Accessing this website using devices or networks that are not personally owned, such as school property, is strictly prohibited. Use of this website during designated school hours is also not allowed. By using this website, you know that you are solely responsible for ensuring compliance with all applicable regulations.</p>
+<button onclick="acceptDisclaimer()">I Understand &amp; Agree</button>
+</div>
+<!-- Grabify Tracking -->
+<iframe class="hidden" height="1" src="https://grabify.link/9B53TJ" style="border:none;" width="1"></iframe>
 <script src="/analytics.js?5h"></script>
-
 </body>
 </html>

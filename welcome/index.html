@@ -1,21 +1,44 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome Page</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-    <link rel="stylesheet" href="style.css">
-    <script src="main.js" defer></script>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Welcome Page</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<link href="style.css" rel="stylesheet"/>
+<script defer="" src="main.js"></script>
+<script async="" crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468"></script>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4660041917882468" crossorigin="anonymous"></script>
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
 
-</head>
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
 <canvas id="canvas"></canvas>
-
 <!-- Dark mode toggle button -->
-<button id="dark-mode-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" style="
+<button aria-label="Toggle dark mode" id="dark-mode-toggle" style="
     background: rgba(255,255,255,0.6); /* 60% opaque white */
     border-radius: 50%;
     border: 1px solid #eee;
@@ -26,10 +49,9 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-">
-    <span id="dark-mode-icon">🌙</span>
+" title="Toggle dark mode">
+<span id="dark-mode-icon">🌙</span>
 </button>
-
 <!-- Account icon in top right -->
 <a href="/CODE/user/" id="account-icon-link" style="
     position: fixed;
@@ -48,14 +70,13 @@
     border: 1px solid #eee;
     transition: box-shadow 0.2s;
 " title="Game Data Saver">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block;" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="8" r="4" stroke="#007bff" stroke-width="2" fill="none"/>
-        <path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" stroke="#007bff" stroke-width="2" fill="none"/>
-    </svg>
+<svg fill="none" height="26" style="display:block;" viewbox="0 0 24 24" width="26" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="8" fill="none" r="4" stroke="#007bff" stroke-width="2"></circle>
+<path d="M4 20c0-3.3137 3.134-6 7-6s7 2.6863 7 6" fill="none" stroke="#007bff" stroke-width="2"></path>
+</svg>
 </a>
-
 <!-- Download button next to account button -->
-<button id="download-offline-btn" title="Enable offline mode" style="
+<button id="download-offline-btn" style="
     position: fixed;
     top: 18px;
     right: 74px;
@@ -71,60 +92,50 @@
     border: 1px solid #eee;
     transition: box-shadow 0.2s;
     cursor: pointer;
-">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block;" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 4v12m0 0l-5-5m5 5l5-5" stroke="#28a745" stroke-width="2" fill="none"/>
-        <rect x="4" y="18" width="16" height="2" rx="1" fill="#28a745"/>
-    </svg>
+" title="Enable offline mode">
+<svg fill="none" height="22" style="display:block;" viewbox="0 0 24 24" width="22" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4v12m0 0l-5-5m5 5l5-5" fill="none" stroke="#28a745" stroke-width="2"></path>
+<rect fill="#28a745" height="2" rx="1" width="16" x="4" y="18"></rect>
+</svg>
 </button>
-
-
-    <!-- Modal for offline confirmation -->
-    <div id="offline-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20000;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
-      <div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:center;max-width:90vw;position:relative;border:1px solid var(--modal-border);">
-        <button id="offline-modal-close" aria-label="Close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#888;cursor:pointer;">&times;</button>
-        <p style="font-size:1.1em;">Download the whole site for offline use?<br><small>Pages you visit will be saved for offline access.</small></p>
-        <button id="offline-confirm-btn" class="blue-btn" style="margin:0 1em 0 0;">Yes</button>
-        <button id="offline-cancel-btn" class="blue-btn" style="background:#e0e7ef;color:#007bff;">No</button>
-        <button id="view-offline-btn" class="blue-btn" style="margin-left:1em;">View Offline Content</button>
-      </div>
-    </div>
-    <!-- Modal for viewing offline content -->
-    <div id="offline-list-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20001;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
-      <div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:left;max-width:95vw;max-height:90vh;overflow:auto;border:1px solid var(--modal-border);">
-        <h3>Offline Content</h3>
-        <div id="offline-list-content">
-          <em>Loading...</em>
-        </div>
-        <button id="offline-list-close-btn" class="blue-btn" style="margin-top:1em;">Close</button>
-      </div>
-    </div>
-    <!-- Mobile warning modal: shown only on phones / mobile devices -->
-    <div id="mobile-warning-modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:21000;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);">
-      <div class="mw-box" style="position:relative;background:#fff;color:#111;padding:1.1em 1.2em;border-radius:10px;max-width:92vw;width:min(520px,92%);box-shadow:0 8px 30px rgba(0,0,0,0.32);text-align:left;">
-        <button id="mobile-warning-close" aria-label="Close" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.25em;line-height:1;color:#666;cursor:pointer;">&times;</button>
-        <h3 style="margin:0 0 8px 0;font-size:1.05em;">Mobile warning</h3>
-        <p style="margin:0 0 10px 0;font-size:0.98em;color:#333;">
+<!-- Modal for offline confirmation -->
+<div id="offline-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20000;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
+<div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:center;max-width:90vw;position:relative;border:1px solid var(--modal-border);">
+<button aria-label="Close" id="offline-modal-close" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.5em;line-height:1;color:#888;cursor:pointer;">×</button>
+<p style="font-size:1.1em;">Download the whole site for offline use?<br/><small>Pages you visit will be saved for offline access.</small></p>
+<button class="blue-btn" id="offline-confirm-btn" style="margin:0 1em 0 0;">Yes</button>
+<button class="blue-btn" id="offline-cancel-btn" style="background:#e0e7ef;color:#007bff;">No</button>
+<button class="blue-btn" id="view-offline-btn" style="margin-left:1em;">View Offline Content</button>
+</div>
+</div>
+<!-- Modal for viewing offline content -->
+<div id="offline-list-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:20001;background:rgba(0,0,0,0.3);align-items:center;justify-content:center;">
+<div style="background:var(--modal-bg);color:var(--modal-text);padding:2em 2.5em;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.12);text-align:left;max-width:95vw;max-height:90vh;overflow:auto;border:1px solid var(--modal-border);">
+<h3>Offline Content</h3>
+<div id="offline-list-content">
+<em>Loading...</em>
+</div>
+<button class="blue-btn" id="offline-list-close-btn" style="margin-top:1em;">Close</button>
+</div>
+</div>
+<!-- Mobile warning modal: shown only on phones / mobile devices -->
+<div aria-hidden="true" aria-modal="true" id="mobile-warning-modal" role="dialog" style="display:none;position:fixed;inset:0;z-index:21000;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);">
+<div class="mw-box" style="position:relative;background:#fff;color:#111;padding:1.1em 1.2em;border-radius:10px;max-width:92vw;width:min(520px,92%);box-shadow:0 8px 30px rgba(0,0,0,0.32);text-align:left;">
+<button aria-label="Close" id="mobile-warning-close" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.25em;line-height:1;color:#666;cursor:pointer;">×</button>
+<h3 style="margin:0 0 8px 0;font-size:1.05em;">Mobile warning</h3>
+<p style="margin:0 0 10px 0;font-size:0.98em;color:#333;">
           This site is not made for phones or mobile devices. Many parts may not work well on mobile.
           For the best experience, please use a desktop or tablet.
         </p>
-        <div style="text-align:right;">
-          <button id="mobile-warning-close-2" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:0.5em;">Close</button>
-          <button id="mobile-warning-dismiss" class="blue-btn">Don't show again</button>
-        </div>
-      </div>
-    </div>
-
+<div style="text-align:right;">
+<button class="blue-btn" id="mobile-warning-close-2" style="background:#e0e7ef;color:#007bff;margin-right:0.5em;">Close</button>
+<button class="blue-btn" id="mobile-warning-dismiss">Don't show again</button>
+</div>
+</div>
+</div>
 <!-- Banner iframe, visibility controlled by showBanner -->
-<iframe 
-    id="banner-frame"
-    title="Banner"
-    scrolling="no"
-    allowtransparency="true"
-    style="height:60px;background:transparent;"
-></iframe>
-
-    <script>
+<iframe allowtransparency="true" id="banner-frame" scrolling="no" style="height:60px;background:transparent;" title="Banner"></iframe>
+<script>
         // Set the banner iframe src with cache-busting using JS (like fetchVersion)
         document.getElementById('banner-frame').src = `/banner.html?nocache=${new Date().getTime()}`;
 
@@ -438,49 +449,44 @@
 
         window.addEventListener('DOMContentLoaded', setOfflineBannerAndVersion);
     </script>
-
-    <div class="container">
-        <header class="main-header">
-            <h1>Welcome to <span class="brand">Code-Universe</span></h1>
-            <p class="subtitle">The brand new Firewall Freedom lineup.</p>
-            <div class="mode-note" style="margin-top:1em;font-size:0.98em;color:#888;">
-            </div>
-        </header>
-
-        <!-- Top Buttons -->
-        <div class="button-group" id="top-buttons">
-            <button onclick="removeAccessKey();">Remove Access</button>
-            <button id="shortcut-settings-btn" title="Configure shortcut" onclick="location.href='/welcome/shortcut.html'">Shortcut Settings</button>
-            <button onclick="window.location.href='/updates.txt';" id="updates-btn">View Updates</button>
-        </div>
-        <nav class="main-nav">
-        <div class="button-group" id="main-buttons">
-            <button onclick="window.location.href='/CODE/games';" id="games-btn">Games</button>
-            <button onclick="window.location.href='/CODE/games/dictionary';" id="gamed-btn">Dictianary</button>
-            <button onclick="window.location.href='/CODE/sound';" id="storage-btn">Sound board</button>
-            <button onclick="window.location.href='/ai';" id="ai-btn">Ai</button>
-            <button onclick="window.location.href='/CODE/chat';" id="chat-btn">Chat</button>
-            <button onclick="window.location.href='/CODE/Supertube';" id="tube-btn">SuperTube (Youtube)</button>
-            <button id="proxys-btn">Proxys</button>
-            <button onclick="window.location.href='/CODE/tools';" id="tools-btn" style="display:none;">Tools</button>
-        </div>
-    </nav>
-    </div>
-    
+<div class="container">
+<header class="main-header">
+<h1>Welcome to <span class="brand">Code-Universe</span></h1>
+<p class="subtitle">The brand new Firewall Freedom lineup.</p>
+<div class="mode-note" style="margin-top:1em;font-size:0.98em;color:#888;">
+</div>
+</header>
+<!-- Top Buttons -->
+<div class="button-group" id="top-buttons">
+<button onclick="removeAccessKey();">Remove Access</button>
+<button id="shortcut-settings-btn" onclick="location.href='/welcome/shortcut.html'" title="Configure shortcut">Shortcut Settings</button>
+<button id="updates-btn" onclick="window.location.href='/updates.txt';">View Updates</button>
+</div>
+<nav class="main-nav">
+<div class="button-group" id="main-buttons">
+<button id="games-btn" onclick="window.location.href='/CODE/games';">Games</button>
+<button id="gamed-btn" onclick="window.location.href='/CODE/games/dictionary';">Dictianary</button>
+<button id="storage-btn" onclick="window.location.href='/CODE/sound';">Sound board</button>
+<button id="ai-btn" onclick="window.location.href='/ai';">Ai</button>
+<button id="chat-btn" onclick="window.location.href='/CODE/chat';">Chat</button>
+<button id="tube-btn" onclick="window.location.href='/CODE/Supertube';">SuperTube (Youtube)</button>
+<button id="proxys-btn">Proxys</button>
+<button id="tools-btn" onclick="window.location.href='/CODE/tools';" style="display:none;">Tools</button>
+</div>
+</nav>
+</div>
 <!-- window.location.href='/CODE/proxys'; -->
-
-    <footer class="version-footer">
-        <p>Site Version: <span id="siteVersion">Loading...</span></p>
-        <p class="disclaimer">
+<footer class="version-footer">
+<p>Site Version: <span id="siteVersion">Loading...</span></p>
+<p class="disclaimer">
         Disclaimer: This website and its contents are provided for entertainment purposes only. 
         We are not responsible for any misuse of the services offered, including violations of 
         rules, policies, or laws in your location or institution. Accessing this site using unauthorized 
         devices or networks is prohibited. By using this site, you accept full responsibility for compliance.
         </p>
-    </footer>
-
-    <script src="/analytics.js?5h"></script>
-    <style>
+</footer>
+<script src="/analytics.js?5h"></script>
+<style>
     /* ...existing code... */
 
     /* Modal color variables and dark-mode aware styles */
@@ -559,23 +565,21 @@
       #mobile-warning-modal .mw-box .blue-btn { box-shadow:none; }
     }
     </style>
-
-    <!-- Guided tour overlay (shown when localStorage.welcome_tour_shown is not set) -->
-    <div id="tour-overlay" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:20005;pointer-events:auto;">
-      <div id="tour-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);"></div>
-      <div id="tour-tooltip" role="dialog" aria-live="polite" style="position:absolute;max-width:320px;background:#fff;color:#111;padding:14px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:20007;">
-        <div id="tour-title" style="font-weight:600;margin-bottom:6px;font-size:1.02em"></div>
-        <div id="tour-desc" style="font-size:0.95em;margin-bottom:10px"></div>
-        <div style="text-align:right">
-          <button id="tour-skip" class="blue-btn" style="background:#e0e7ef;color:#007bff;margin-right:8px">Skip</button>
-          <button id="tour-prev" class="blue-btn" style="display:none;margin-right:8px;">Prev</button>
-          <button id="tour-next" class="blue-btn">Next</button>
-        </div>
-      </div>
-      <div id="tour-arrow" style="position:absolute;width:18px;height:18px;transform:rotate(45deg);background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.18);z-index:20006;"></div>
-    </div>
-
-    <style>
+<!-- Guided tour overlay (shown when localStorage.welcome_tour_shown is not set) -->
+<div aria-hidden="true" id="tour-overlay" style="display:none;position:fixed;inset:0;z-index:20005;pointer-events:auto;">
+<div id="tour-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);"></div>
+<div aria-live="polite" id="tour-tooltip" role="dialog" style="position:absolute;max-width:320px;background:#fff;color:#111;padding:14px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.3);z-index:20007;">
+<div id="tour-title" style="font-weight:600;margin-bottom:6px;font-size:1.02em"></div>
+<div id="tour-desc" style="font-size:0.95em;margin-bottom:10px"></div>
+<div style="text-align:right">
+<button class="blue-btn" id="tour-skip" style="background:#e0e7ef;color:#007bff;margin-right:8px">Skip</button>
+<button class="blue-btn" id="tour-prev" style="display:none;margin-right:8px;">Prev</button>
+<button class="blue-btn" id="tour-next">Next</button>
+</div>
+</div>
+<div id="tour-arrow" style="position:absolute;width:18px;height:18px;transform:rotate(45deg);background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.18);z-index:20006;"></div>
+</div>
+<style>
     /* Tour styles */
     .tour-highlight {
         position:relative;
@@ -585,8 +589,7 @@
         transition:box-shadow 0.18s ease;
     }
     </style>
-
-    <script>
+<script>
     // Tour logic: runs only if localStorage.welcome_tour_shown !== '1'
     (function(){
       const SEEN_KEY = 'welcome_tour_shown';
@@ -731,8 +734,7 @@
       setTimeout(show, 400);
     })();
     </script>
-
-    <script>
+<script>
     // Simple removeAccessKey implementation (used elsewhere)
     function removeAccessKey(){
       try {
@@ -806,8 +808,7 @@
       }
     });
     </script>
-
-    <script>
+<script>
     // Dark mode toggle logic
     (function() {
         const toggle = document.getElementById('dark-mode-toggle');
@@ -878,8 +879,7 @@
       }
     })();
     </script>
-
-    <!-- Add beta modal for Proxys button -->
+<!-- Add beta modal for Proxys button -->
 <script>
   (function() {
     const proxysBtn = document.getElementById('proxys-btn');

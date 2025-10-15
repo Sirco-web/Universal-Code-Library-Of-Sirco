@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Enter Blaster</title>
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Enter Blaster</title>
+<style>
     body { margin: 0; font-family: sans-serif; }
     #blasterBtn {
       position: fixed;
@@ -24,12 +32,29 @@
       border: none;
     }
   </style>
-</head>
-<body>
-  <button id="blasterBtn">Start Enter Blaster</button>
-  <iframe id="targetFrame" src="index.html"></iframe>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
 
-  <script>
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
+<body>
+<button id="blasterBtn">Start Enter Blaster</button>
+<iframe id="targetFrame" src="index.html"></iframe>
+<script>
     const btn = document.getElementById('blasterBtn');
     const iframe = document.getElementById('targetFrame');
     let blasting = false;

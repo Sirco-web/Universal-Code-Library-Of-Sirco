@@ -1,16 +1,41 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Aurora-Gateway V2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Aurora-Gateway V2</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
     body { margin:0; font-family:sans-serif; background:#0f1115; color:#e6e9ef; display:flex; align-items:center; justify-content:center; height:100vh; }
     #loading { font-size:1.5em; }
     iframe { width:100%; height:100vh; border:none; display:none; }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
 
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <script>
 function checkCookie() {
     const cookies = document.cookie.split("; ");
@@ -21,12 +46,10 @@ function checkCookie() {
 }
 checkCookie();
 </script>
-  
 <body>
-  <div id="loading">🚀 Starting our engines!!!</div>
-  <iframe id="chatFrame"></iframe>
-
-  <script>
+<div id="loading">🚀 Starting our engines!!!</div>
+<iframe id="chatFrame"></iframe>
+<script>
     function confuseInspectors() {
       const junk = ["alpha","beta","gamma","delta"];
       return junk.map(x => x.split("").reverse().join("")).join("-");

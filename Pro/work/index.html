@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Proxys Beta — Known Issues</title>
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Proxys Beta — Known Issues</title>
+<style>
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       background: #f8fafc;
@@ -39,24 +47,42 @@
       text-decoration: underline;
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <div class="container">
-    <h1>Proxys Beta — Known Issues</h1>
-    <p>
-      This is a beta feature. Some sites may not work.<br>
+<div class="container">
+<h1>Proxys Beta — Known Issues</h1>
+<p>
+      This is a beta feature. Some sites may not work.<br/>
       Please be patient while we improve compatibility.
     </p>
-    <ul>
-      <li><b>crazygames.com</b> does not work (blocked by their server).</li>
-      <li><b>YouTube</b> does not work (blocked by their server/CORS).</li>
-      <li>Some games and media sites may refuse to load or show errors.</li>
-      <li>Sites with strict CORS or anti-proxy protections may fail.</li>
-      <li>Performance and reliability may vary.</li>
-    </ul>
-    <p>
+<ul>
+<li><b>crazygames.com</b> does not work (blocked by their server).</li>
+<li><b>YouTube</b> does not work (blocked by their server/CORS).</li>
+<li>Some games and media sites may refuse to load or show errors.</li>
+<li>Sites with strict CORS or anti-proxy protections may fail.</li>
+<li>Performance and reliability may vary.</li>
+</ul>
+<p>
       For updates and feedback, check back here or <a href="/Pro">try the Proxys tab</a>.
     </p>
-  </div>
+</div>
 </body>
 </html>

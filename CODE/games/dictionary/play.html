@@ -1,8 +1,16 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <!-- Immediate cookie check BEFORE any head assets -->
-  <script>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<!-- Immediate cookie check BEFORE any head assets -->
+<script>
     (function () {
       const cookies = document.cookie.split("; ").map(c => c.trim());
       const accessCookie = cookies.find(c => c.startsWith("access="));
@@ -12,12 +20,10 @@
       }
     })();
   </script>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Play Game</title>
-
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Play Game</title>
+<style>
     html, body {
       height: 100%;
       margin: 0;
@@ -60,42 +66,48 @@
     }
     .fs-icon { width: 9px; height: 9px; display: block; }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
 <div id="progressContainer" style="
   position:fixed; top:0; left:0; width:100%; height:4px;
   background:#eee; z-index:10002; display:none;">
-  <div id="progressBar" style="
+<div id="progressBar" style="
     height:100%; width:0%; background:#4caf50; transition:width 0.3s;"></div>
 </div>
-  <!-- sandbox tokens and allow attributes enable fullscreen & pointer-lock -->
-  <iframe id="frame"
-          sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock"
-          allow="fullscreen; pointer-lock"
-          allowfullscreen></iframe>
-
-  <div id="msg" class="error" role="alert"></div>
-
-  <div class="immersive-controls" aria-hidden="false">
-    <button id="enterImmersive" class="btn" title="Enter immersive mode" aria-label="Enter immersive">
-      <svg class="fs-icon" viewBox="0 0 24 24" fill="none"
-           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M3 7V3h4" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M17 3h4v4" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 17v4h-4" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M7 21H3v-4" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <button id="exitImmersive" class="btn ghost" style="display:none"
-            title="Exit immersive" aria-label="Exit immersive">✕</button>
-  </div>
-
-  <!-- External main logic -->
-  <script src="progress.js"></script>
-  <script src="main.js"></script>
+<!-- sandbox tokens and allow attributes enable fullscreen & pointer-lock -->
+<iframe allow="fullscreen; pointer-lock" allowfullscreen="" id="frame" sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock"></iframe>
+<div class="error" id="msg" role="alert"></div>
+<div aria-hidden="false" class="immersive-controls">
+<button aria-label="Enter immersive" class="btn" id="enterImmersive" title="Enter immersive mode">
+<svg aria-hidden="true" class="fs-icon" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 7V3h4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M17 3h4v4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M21 17v4h-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M7 21H3v-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button aria-label="Exit immersive" class="btn ghost" id="exitImmersive" style="display:none" title="Exit immersive">✕</button>
+</div>
+<!-- External main logic -->
+<script src="progress.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

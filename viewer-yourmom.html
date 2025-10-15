@@ -1,10 +1,18 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LocalStorage Admin Panel</title>
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LocalStorage Admin Panel</title>
+<style>
     body { font-family: Arial, sans-serif; background: #f8f8ff; margin: 0; padding: 0; }
     .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px; }
     h1 { text-align: center; margin-bottom: 24px; }
@@ -23,45 +31,63 @@
     .success-msg { color: #43a047; font-weight: bold; margin-bottom: 12px; }
     .error-msg { color: #e53935; font-weight: bold; margin-bottom: 12px; }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <div class="container">
-    <h1>LocalStorage Admin Panel</h1>
-    <div class="add-row">
-      <input type="text" id="newKey" placeholder="New key" />
-      <input type="text" id="newValue" placeholder="New value" />
-      <button class="save" onclick="addKey()">Add</button>
-    </div>
-    <div style="margin-bottom:18px;">
-      <button class="danger" onclick="deleteAll()">Delete ALL LocalStorage Data</button>
-      <span id="msg"></span>
-    </div>
-    <table id="lsTable">
-      <thead>
-        <tr><th>Key</th><th>Value</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <hr style="margin:32px 0;">
-    <h2>Cookie Admin</h2>
-    <div class="add-row">
-      <input type="text" id="newCookieKey" placeholder="New cookie name" />
-      <input type="text" id="newCookieValue" placeholder="New cookie value" />
-      <button class="save" onclick="addCookie()">Add Cookie</button>
-    </div>
-    <div style="margin-bottom:18px;">
-      <button class="danger" onclick="deleteAllCookies()">Delete ALL Cookies</button>
-      <span id="cookieMsg"></span>
-    </div>
-    <table id="cookieTable">
-      <thead>
-        <tr><th>Name</th><th>Value</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <div class="footer">&copy; 2025 LocalStorage Admin Panel</div>
-  <script>
+<div class="container">
+<h1>LocalStorage Admin Panel</h1>
+<div class="add-row">
+<input id="newKey" placeholder="New key" type="text"/>
+<input id="newValue" placeholder="New value" type="text"/>
+<button class="save" onclick="addKey()">Add</button>
+</div>
+<div style="margin-bottom:18px;">
+<button class="danger" onclick="deleteAll()">Delete ALL LocalStorage Data</button>
+<span id="msg"></span>
+</div>
+<table id="lsTable">
+<thead>
+<tr><th>Key</th><th>Value</th><th>Actions</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+<hr style="margin:32px 0;"/>
+<h2>Cookie Admin</h2>
+<div class="add-row">
+<input id="newCookieKey" placeholder="New cookie name" type="text"/>
+<input id="newCookieValue" placeholder="New cookie value" type="text"/>
+<button class="save" onclick="addCookie()">Add Cookie</button>
+</div>
+<div style="margin-bottom:18px;">
+<button class="danger" onclick="deleteAllCookies()">Delete ALL Cookies</button>
+<span id="cookieMsg"></span>
+</div>
+<table id="cookieTable">
+<thead>
+<tr><th>Name</th><th>Value</th><th>Actions</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="footer">© 2025 LocalStorage Admin Panel</div>
+<script>
     function renderTable() {
       const tbody = document.querySelector('#lsTable tbody');
       tbody.innerHTML = '';

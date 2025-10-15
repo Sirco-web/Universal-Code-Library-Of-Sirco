@@ -1,10 +1,18 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Background Selector</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Background Selector</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<style>
     :root{
       --bg:#0f0f12;
       --panel:#16171c;
@@ -204,57 +212,69 @@
       padding:1px 6px; border-radius:6px;
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="title">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z" fill="url(#g)"/>
-          <defs><linearGradient id="g" x1="0" x2="24" y1="0" y2="24"><stop stop-color="#7c5cff"/><stop offset="1" stop-color="#00d0ff"/></linearGradient></defs>
-        </svg>
-        <div>
-          <h1>Background selector</h1>
-          <div class="hint">Pick a vibe. Apply it. Return to your soundboard.</div>
-        </div>
-      </div>
-      <div class="actions">
-        <button id="randomBtn" class="secondary" title="Pick a random background">Random</button>
-        <button id="applyBtn" class="primary" disabled>Apply and return</button>
-      </div>
-    </header>
-
-    <div class="top-bar">
-      <div id="preview" class="preview">
-        <div id="question" class="question">?</div>
-        <div id="previewLabel" class="label">Nothing selected</div>
-      </div>
-    </div>
-
-    <section class="section">
-      <h2>Solid colors</h2>
-      <p class="sub">Simple, bold backgrounds.</p>
-      <div id="solidGrid" class="grid colors"></div>
-    </section>
-
-    <section class="section">
-      <h2>Combo colors</h2>
-      <p class="sub">Two-tone gradients for extra flavor.</p>
-      <div id="comboGrid" class="grid colors"></div>
-    </section>
-
-    <section class="section">
-      <h2>Image backgrounds</h2>
-      <p class="sub">Filenames are exact (name.jpg). Add your paths later.</p>
-      <div id="imageGrid" class="grid images"></div>
-    </section>
-
-    <div class="footer">
+<div class="wrap">
+<header>
+<div class="title">
+<svg aria-hidden="true" fill="none" height="28" viewbox="0 0 24 24" width="28">
+<path d="M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z" fill="url(#g)"></path>
+<defs><lineargradient id="g" x1="0" x2="24" y1="0" y2="24"><stop stop-color="#7c5cff"></stop><stop offset="1" stop-color="#00d0ff"></stop></lineargradient></defs>
+</svg>
+<div>
+<h1>Background selector</h1>
+<div class="hint">Pick a vibe. Apply it. Return to your soundboard.</div>
+</div>
+</div>
+<div class="actions">
+<button class="secondary" id="randomBtn" title="Pick a random background">Random</button>
+<button class="primary" disabled="" id="applyBtn">Apply and return</button>
+</div>
+</header>
+<div class="top-bar">
+<div class="preview" id="preview">
+<div class="question" id="question">?</div>
+<div class="label" id="previewLabel">Nothing selected</div>
+</div>
+</div>
+<section class="section">
+<h2>Solid colors</h2>
+<p class="sub">Simple, bold backgrounds.</p>
+<div class="grid colors" id="solidGrid"></div>
+</section>
+<section class="section">
+<h2>Combo colors</h2>
+<p class="sub">Two-tone gradients for extra flavor.</p>
+<div class="grid colors" id="comboGrid"></div>
+</section>
+<section class="section">
+<h2>Image backgrounds</h2>
+<p class="sub">Filenames are exact (name.jpg). Add your paths later.</p>
+<div class="grid images" id="imageGrid"></div>
+</section>
+<div class="footer">
       Tip: Click a tile to preview. Use <span class="kbd">Random</span> for chaos, then <span class="kbd">Apply and return</span>.
     </div>
-  </div>
-
-  <script>
+</div>
+<script>
     // ---- Data ---------------------------------------------------------------
     const solids = [
       { name:'red', css:'red' },

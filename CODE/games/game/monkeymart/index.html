@@ -1,4 +1,11 @@
-<html lang="en"><head><script id="gamemonetize-sdk" src="https://api.gamemonetize.com/sdk.js"></script><script>(function(){(function(){function e(g){this.t={};this.tick=function(h,m,f){var n=void 0!=f?f:(new Date).getTime();this.t[h]=[n,m];if(void 0==f)try{window.console.timeStamp("CSI/"+h)}catch(q){}};this.getStartTickTime=function(){return this.t.start[0]};this.tick("start",null,g)}var a;if(window.performance)var d=(a=window.performance.timing)&&a.responseStart;var p=0<d?new e(d):new e;window.jstiming={Timer:e,load:p};if(a){var b=a.navigationStart;0<b&&d>=b&&(window.jstiming.srt=d-b)}if(a){var c=window.jstiming.load;
+<html lang="en"><head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script><script id="gamemonetize-sdk" src="https://api.gamemonetize.com/sdk.js"></script><script>(function(){(function(){function e(g){this.t={};this.tick=function(h,m,f){var n=void 0!=f?f:(new Date).getTime();this.t[h]=[n,m];if(void 0==f)try{window.console.timeStamp("CSI/"+h)}catch(q){}};this.getStartTickTime=function(){return this.t.start[0]};this.tick("start",null,g)}var a;if(window.performance)var d=(a=window.performance.timing)&&a.responseStart;var p=0<d?new e(d):new e;window.jstiming={Timer:e,load:p};if(a){var b=a.navigationStart;0<b&&d>=b&&(window.jstiming.srt=d-b)}if(a){var c=window.jstiming.load;
 0<b&&d>=b&&(c.tick("_wtsrt",void 0,b),c.tick("wtsrt_","_wtsrt",d),c.tick("tbsd_","wtsrt_"))}try{var k=window.top!=window.self,l=window.location.href;a=null;window.chrome&&window.chrome.csi&&(a=Math.floor(window.chrome.csi().pageT),c&&0<b&&(c.tick("_tbnd",void 0,window.chrome.csi().startE),c.tick("tbnd_","_tbnd",b)));null==a&&window.gtbExternal&&(a=k?window.gtbExternal.frameT(l):window.gtbExternal.pageT());null==a&&window.external&&(k?a=window.external.frameT(l):(a=window.external.pageT,c&&0<b&&(c.tick("_tbnd",
 void 0,window.external.startE),c.tick("tbnd_","_tbnd",b))));a&&(window.jstiming.pt=a)}catch(g){}})();}).call(this);
 window["__csi"]={a:false,b:false,c:"default",v:"default",g:null,d:false};if(window.jstiming){window.jstiming.beaconImageReferences_={};window.jstiming.reportCounter_=1;var getTick=function(a,b,c){var d=a.t[b],e=a.t.start;if(d&&(e||c))return d=a.t[b][0],e=void 0!=c?c:e[0],a=d-e,Math.round(a)},getReportUri=function(a,b,c){var d="";window.jstiming.srt&&(d+="&srt="+window.jstiming.srt,delete window.jstiming.srt);window.jstiming.pt&&(d+="&tbsrt="+window.jstiming.pt,delete window.jstiming.pt);try{window.external&&window.external.tran?d+="&tran="+window.external.tran:window.gtbExternal&&
@@ -49,7 +56,7 @@ function checkCookie() {
 }
 checkCookie();
 </script>
-</script><script>
+<script>
 /* mp-start */
 window['___jsl']=window['___jsl']||{};
 /* mp-end */
@@ -911,15 +918,12 @@ gadgets.config.init({"core.io":{"jsonProxyUrl":"//%host%/gadgets/makeRequest","p
             background-image: url("https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/bg_loading.png");
         }
     </style>
-    <meta charset="utf-8">
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui, shrink-to-fit=no" name="viewport">
-    <meta content="yes" name="apple-mobile-web-app-capable">
-    <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Monkey Mart</title>
-    
-	
-    
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui, shrink-to-fit=no" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<title>Monkey Mart</title>
 <style type="text/css">#button {
   display:none;
 }
@@ -12944,32 +12948,50 @@ if (Module["preInit"]) {
 var shouldRunNow = true;
 if (Module["noInitialRun"]) shouldRunNow = false;
 noExitRuntime = true;
-run();</script></head><body dir="ltr" data-new-gr-c-s-check-loaded="14.1100.0" data-gr-ext-installed=""><script src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/Jump_Gamemonetize3.js" type="text/javascript"></script><script>
+run();</script><script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head><body data-gr-ext-installed="" data-new-gr-c-s-check-loaded="14.1100.0" dir="ltr"><script src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/Jump_Gamemonetize3.js" type="text/javascript"></script><script>
         var mpConfig = {
             "game": "monkey-mart",
             "partner": "miniplay"
         };
     </script>
-    <div class="canvas-app-container" id="app-container" style="width: 1366px; height: 665px;">
-        <div class="canvas-app-canvas-container" id="canvas-container">
-            <canvas class="canvas-app-canvas" height="665" id="canvas" tabindex="1" width="1366"></canvas>
-        </div>
-        <div class="buttons-background">
-        </div>
-        <!-- center and anchor to bottom of page -->
-        <div id="progress-bar-root" style="position: absolute; bottom: 54px; left: 50%; visibility: hidden; z-index: 4;">
-            <!-- <div id="progress-bar-text"> -->
-            <img id="progress-bar-bg" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/load_bar_bg.png" width="499" style="margin-left: -249.5px;">
-            <img id="progress-bar-fg" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/load_bar_fg.png" style="position: absolute; clip: rect(0px, 499px, 40px, 0px); margin-top: 0px; margin-left: -499px;" width="499">
-        </div>
-    </div>
-    <!-- -->
-    <!-- <div id="bannerTop" class="banner-styleTop"></div> -->
-    <!-- <div id="bannerBottom" class="banner-styleBottom"></div> -->
-    <!-- -->
-    <script id="engine-loader" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/dmloader.js" type="text/javascript"></script>
-    <!-- -->
-    <script id="engine-setup" type="text/javascript">
+<div class="canvas-app-container" id="app-container" style="width: 1366px; height: 665px;">
+<div class="canvas-app-canvas-container" id="canvas-container">
+<canvas class="canvas-app-canvas" height="665" id="canvas" tabindex="1" width="1366"></canvas>
+</div>
+<div class="buttons-background">
+</div>
+<!-- center and anchor to bottom of page -->
+<div id="progress-bar-root" style="position: absolute; bottom: 54px; left: 50%; visibility: hidden; z-index: 4;">
+<!-- <div id="progress-bar-text"> -->
+<img id="progress-bar-bg" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/load_bar_bg.png" style="margin-left: -249.5px;" width="499"/>
+<img id="progress-bar-fg" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/load_bar_fg.png" style="position: absolute; clip: rect(0px, 499px, 40px, 0px); margin-top: 0px; margin-left: -499px;" width="499"/>
+</div>
+</div>
+<!-- -->
+<!-- <div id="bannerTop" class="banner-styleTop"></div> -->
+<!-- <div id="bannerBottom" class="banner-styleBottom"></div> -->
+<!-- -->
+<script id="engine-loader" src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/dmloader.js" type="text/javascript"></script>
+<!-- -->
+<script id="engine-setup" type="text/javascript">
         var extra_params = {
             archive_location_filter: function(path) {
                 return ("https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/archive" + path + "");
@@ -13112,7 +13134,7 @@ run();</script></head><body dir="ltr" data-new-gr-c-s-check-loaded="14.1100.0" d
             }
         };
     </script>
-    <script id="engine-start" type="text/javascript">
+<script id="engine-start" type="text/javascript">
         var currentPercentage = 0
 
         Progress.updateProgress = function(percentage) {
@@ -13147,7 +13169,7 @@ run();</script></head><body dir="ltr" data-new-gr-c-s-check-loaded="14.1100.0" d
         EngineLoader.stream_wasm ="false" ==="true";
         EngineLoader.load("canvas", "https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/MonkeyMart");
     </script>
-    <script type="text/javascript">
+<script type="text/javascript">
         function poki_showBanner(vBanner) {}
 
         function poki_showBigBanner(vBanner) {}
@@ -13158,7 +13180,7 @@ run();</script></head><body dir="ltr" data-new-gr-c-s-check-loaded="14.1100.0" d
 
         }
     </script>
-    <script id="poki-sdk-setup" type="text/javascript">
+<script id="poki-sdk-setup" type="text/javascript">
         var data = {};
         var isLoadFinished = false;
         Progress.addListener(function(percentage) {
@@ -13173,9 +13195,7 @@ run();</script></head><body dir="ltr" data-new-gr-c-s-check-loaded="14.1100.0" d
         };
         JumpGame.startup("ugi7ftbv2kgodcq7vful9u9v34wein5z");
     </script>
-    <script src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/GameAnalytics.js" type="text/javascript"></script>
-	<script src="https://s3.amazonaws.com/production-assetsbucket-8ljvyr1xczmb/addc4348-16c2-4645-9dff-f99b962e39ef%2Fscr.js"></script>
-
-
+<script src="https://218463058-163927403382736103.preview.editmysite.com/uploads/b/139890129-297434511671085883/files/GameAnalytics.js" type="text/javascript"></script>
+<script src="https://s3.amazonaws.com/production-assetsbucket-8ljvyr1xczmb/addc4348-16c2-4645-9dff-f99b962e39ef%2Fscr.js"></script>
 <script>gadgets.util.runOnLoadHandlers();</script><script>window.google.csi.tickDl();
-</script><div id="button" class="imgb imgb_vis" style="position: fixed; top: 10%; left: -100px; z-index: 10; display: none;"><a target="_blank" href="https://sites.google.com/site/classroom6x/" title="More of best games"><img src="https://lh4.googleusercontent.com/lUEWrXMVEr4AdjKISyJahDRJ61bwfvHdpeYm86Djn5U8oCm9dI60NGXSBqad9HUvzTXgqlkosA_hWV-VuXPjzrkGvh3_kNSgYk8ySWzXnDpbBCBiooyBbU8oBy3YBZMDkW8RcRVmDuC0raoeqZBm8kBlqs6c5mdfkJeN2aE68lXS_lcOZ5_F7lIuM6qLVg" width="100" height="30" style="cursor:pointer;" alt="More Unblocked Games"></a></div></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
+</script><div class="imgb imgb_vis" id="button" style="position: fixed; top: 10%; left: -100px; z-index: 10; display: none;"><a href="https://sites.google.com/site/classroom6x/" target="_blank" title="More of best games"><img alt="More Unblocked Games" height="30" src="https://lh4.googleusercontent.com/lUEWrXMVEr4AdjKISyJahDRJ61bwfvHdpeYm86Djn5U8oCm9dI60NGXSBqad9HUvzTXgqlkosA_hWV-VuXPjzrkGvh3_kNSgYk8ySWzXnDpbBCBiooyBbU8oBy3YBZMDkW8RcRVmDuC0raoeqZBm8kBlqs6c5mdfkJeN2aE68lXS_lcOZ5_F7lIuM6qLVg" style="cursor:pointer;" width="100"/></a></div></body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

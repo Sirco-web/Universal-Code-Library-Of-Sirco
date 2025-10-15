@@ -1,9 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Aurora Gateway</title>
-  <style>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<title>Aurora Gateway</title>
+<style>
     /* filepath: /workspaces/universal-code-library/Pro/prox.html */
     /* Reworked styles to present a browser-like chrome and window */
     :root{
@@ -199,10 +207,27 @@
       .tab{ padding:6px 8px; font-size:13px; }
     }
   </style>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
 
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-  <script>
+<script>
     function checkCookie() {
       const cookies = document.cookie.split("; ");
       const accessCookie = cookies.find(row => row.startsWith("access="));
@@ -219,77 +244,63 @@
     }
     checkCookie();
   </script>
-
-  <div id="main-container">
-    <!-- browser top chrome: window controls + tabs -->
-    <div class="browser-chrome" role="toolbar" aria-label="Browser chrome">
-      <div class="window-controls" aria-hidden="true">
-        <div class="control-dot dot-close"></div>
-        <div class="control-dot dot-min"></div>
-        <div class="control-dot dot-max"></div>
-      </div>
-
-      <div id="tabs" role="tablist" aria-label="Open tabs">
-        <!-- tabs created by index.js -->
-      </div>
-
-      <!-- Add settings button at right -->
-      <button id="settingsBtn" class="iconBtn" style="margin-left:8px;" title="Settings">Settings</button>
-    </div>
-
-    <!-- toolbar with nav buttons and address bar -->
-    <div id="toolbar" role="navigation" aria-label="Browser toolbar">
-      <div class="nav-group">
-        <button class="nav-btn" id="backBtn" title="Back" aria-label="Back">◀</button>
-        <button class="nav-btn" id="forwardBtn" title="Forward" aria-label="Forward">▶</button>
-        <button class="nav-btn" id="reloadBtn" title="Reload" aria-label="Reload">⟳</button>
-      </div>
-
-      <div id="address-wrap">
-        <select id="searchEngine" title="Search engine">
-          <option value="https://www.google.com/search?q=">Google</option>
-          <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-          <option value="https://search.brave.com/search?q=">Brave</option>
-        </select>
-
-        <input type="text" id="urlInput" placeholder="Enter site URL or search (e.g. github.com or 'cats')" aria-label="Address bar" />
-
-        <select id="proxySelect" title="Proxy">
-          <option value="1">CorsProxy.io</option>
-          <option value="2">CORS Anywhere</option>
-          <option value="3">ThingProxy</option>
-          <option value="4">AllOrigins</option>
-        </select>
-
-        <button class="iconBtn" id="newTabBtn" title="New tab">＋</button>
-        <button class="iconBtn" id="openActiveBtn" title="Open">Open</button>
-        <button class="iconBtn" id="closeTabBtn" title="Close tab">✕</button>
-      </div>
-    </div>
-
-    <!-- content area where per-tab frames are shown -->
-    <div id="tabContents" role="main" aria-live="polite">
-      <!-- iframes created by index.js -->
-    </div>
-
-    <div class="status-bar" id="statusBar">Aurora Gateway — Tabbed proxy browser</div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div id="settingsModal" style="display: none;">
-    <div id="settingsModalContent">
-      <span id="settingsModalClose">&times;</span>
-      <h2>Settings</h2>
-      <label for="debugMode">Debug Mode:</label>
-      <input type="checkbox" id="debugMode" />
-      
-      <label for="extraOptions">Extra Options:</label>
-      <input type="text" id="extraOptions" placeholder="e.g., foo=bar" />
-      
-      <button id="saveSettingsBtn">Save Settings</button>
-    </div>
-  </div>
-  
-  <script src="index.js"></script>
+<div id="main-container">
+<!-- browser top chrome: window controls + tabs -->
+<div aria-label="Browser chrome" class="browser-chrome" role="toolbar">
+<div aria-hidden="true" class="window-controls">
+<div class="control-dot dot-close"></div>
+<div class="control-dot dot-min"></div>
+<div class="control-dot dot-max"></div>
+</div>
+<div aria-label="Open tabs" id="tabs" role="tablist">
+<!-- tabs created by index.js -->
+</div>
+<!-- Add settings button at right -->
+<button class="iconBtn" id="settingsBtn" style="margin-left:8px;" title="Settings">Settings</button>
+</div>
+<!-- toolbar with nav buttons and address bar -->
+<div aria-label="Browser toolbar" id="toolbar" role="navigation">
+<div class="nav-group">
+<button aria-label="Back" class="nav-btn" id="backBtn" title="Back">◀</button>
+<button aria-label="Forward" class="nav-btn" id="forwardBtn" title="Forward">▶</button>
+<button aria-label="Reload" class="nav-btn" id="reloadBtn" title="Reload">⟳</button>
+</div>
+<div id="address-wrap">
+<select id="searchEngine" title="Search engine">
+<option value="https://www.google.com/search?q=">Google</option>
+<option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+<option value="https://search.brave.com/search?q=">Brave</option>
+</select>
+<input aria-label="Address bar" id="urlInput" placeholder="Enter site URL or search (e.g. github.com or 'cats')" type="text"/>
+<select id="proxySelect" title="Proxy">
+<option value="1">CorsProxy.io</option>
+<option value="2">CORS Anywhere</option>
+<option value="3">ThingProxy</option>
+<option value="4">AllOrigins</option>
+</select>
+<button class="iconBtn" id="newTabBtn" title="New tab">＋</button>
+<button class="iconBtn" id="openActiveBtn" title="Open">Open</button>
+<button class="iconBtn" id="closeTabBtn" title="Close tab">✕</button>
+</div>
+</div>
+<!-- content area where per-tab frames are shown -->
+<div aria-live="polite" id="tabContents" role="main">
+<!-- iframes created by index.js -->
+</div>
+<div class="status-bar" id="statusBar">Aurora Gateway — Tabbed proxy browser</div>
+</div>
+<!-- Settings Modal -->
+<div id="settingsModal" style="display: none;">
+<div id="settingsModalContent">
+<span id="settingsModalClose">×</span>
+<h2>Settings</h2>
+<label for="debugMode">Debug Mode:</label>
+<input id="debugMode" type="checkbox"/>
+<label for="extraOptions">Extra Options:</label>
+<input id="extraOptions" placeholder="e.g., foo=bar" type="text"/>
+<button id="saveSettingsBtn">Save Settings</button>
+</div>
+</div>
+<script src="index.js"></script>
 </body>
 </html>

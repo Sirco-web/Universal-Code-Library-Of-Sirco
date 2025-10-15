@@ -1,11 +1,19 @@
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Key Remover</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-    <script>
+<head><script>(function () {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dynamic Key Remover</title>
+<link href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png" rel="icon" type="image/png"/>
+<script>
         const defaultKey = "'"; // Default key for removing cookies
         let currentKey = defaultKey;
 
@@ -52,14 +60,30 @@
             document.addEventListener("keydown", keyHandler);
         };
     </script>
-</head>
+<script>function checkCookie() {
+  const cookies = document.cookie.split("; ").map(c => c.trim());
+  const accessCookie = cookies.find(c => c.startsWith("access="));
+  const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+  if (accessValue !== "1") {
+    window.location.replace("/404.html");
+  }
+}
+
+function scheduleNextCheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    checkCookie();
+    scheduleNextCheck();
+  }, next);
+}
+
+checkCookie();
+scheduleNextCheck();</script></head>
 <body>
-    <h1>Dynamic Key Remover Page</h1>
-    <p id="currentKey"></p> <!-- Displays the current remover key -->
-    <button onclick="setRemoverKey(prompt('Enter new remover key:'))">Change Remover Key</button>
-    <p id="message"></p>
-
+<h1>Dynamic Key Remover Page</h1>
+<p id="currentKey"></p> <!-- Displays the current remover key -->
+<button onclick="setRemoverKey(prompt('Enter new remover key:'))">Change Remover Key</button>
+<p id="message"></p>
 <script src="/analytics.js?5h"></script>
-
 </body>
 </html>
