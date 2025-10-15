@@ -6,46 +6,7 @@
     <link rel="shortcut icon" href="images/knowledge_book.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/inter.css">
-<link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.26tY-h6gH9w.L.W.O/am=AgM/d=0/rs=AN8SPfrixlL1amy8r1f0UQHcZ2HL9amUjg/m=el_main_css"><script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Replace everything with only the iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>Access Denied</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="margin:0;overflow:hidden;">
-          <iframe src="/404.html"
-                  style="position:fixed;top:0;left:0;width:100vw;height:100vh;
-                         border:none;z-index:9999;"></iframe>
-        </body>
-      `;
-      return; // stop further code if cookie invalid
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random interval between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
-</head>
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.26tY-h6gH9w.L.W.O/am=AgM/d=0/rs=AN8SPfrixlL1amy8r1f0UQHcZ2HL9amUjg/m=el_main_css"></head>
 
 <body>
     
@@ -213,7 +174,16 @@
     </div>
 
 <!-- Code injected by live-server -->
-
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
 <script>
 // <![CDATA[  <-- For SVG support
 if ('WebSocket' in window) {

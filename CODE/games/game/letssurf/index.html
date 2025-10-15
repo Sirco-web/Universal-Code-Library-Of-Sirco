@@ -23,7 +23,16 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="resources/icons/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
-
+<script>
+function checkCookie() {
+    const cookies = document.cookie.split("; ");
+    const accessCookie = cookies.find(row => row.startsWith("access="));
+    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
+        window.location.href = "/index.html"; // Redirect if no valid cookie
+    }
+}
+checkCookie();
+</script>
     <script src="resources/js/base-error-reporting.js"></script>
     <script src="resources/js/surf-error-reporting.js"></script>
     <script src="resources/js/assert.js"></script>
@@ -34,46 +43,7 @@
     <script src="resources/js/util.js"></script>
     <script src="resources/js/strings.js"></script>
     <link href="resources/css/interface.css" rel="stylesheet" media="all"/>
-  <script>
-  function checkCookie() {
-    const cookies = document.cookie.split("; ").map(c => c.trim());
-    const accessCookie = cookies.find(c => c.startsWith("access="));
-    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
-
-    if (accessValue !== "1") {
-      // Replace everything with only the iframe
-      document.documentElement.innerHTML = `
-        <head>
-          <title>Access Denied</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="margin:0;overflow:hidden;">
-          <iframe src="/404.html"
-                  style="position:fixed;top:0;left:0;width:100vw;height:100vh;
-                         border:none;z-index:9999;"></iframe>
-        </body>
-      `;
-      return; // stop further code if cookie invalid
-    }
-  }
-
-  // Run immediately
-  checkCookie();
-
-  // Random interval between 10–25 seconds
-  function scheduleNextCheck() {
-    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
-    setTimeout(() => {
-      checkCookie();
-      scheduleNextCheck();
-    }, next);
-  }
-
-  scheduleNextCheck();
-</script>
-
-</head>
+  </head>
     <body>
         <div id="hamburger-container"></div>
         <div id="modal-root"></div>
