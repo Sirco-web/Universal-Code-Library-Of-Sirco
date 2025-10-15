@@ -21,16 +21,7 @@
         <meta name="author" content="3kh0.co" />
 
         <link rel="stylesheet" href="TemplateData/style.css" />
-<script>
-function checkCookie() {
-    const cookies = document.cookie.split("; ");
-    const accessCookie = cookies.find(row => row.startsWith("access="));
-    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-        window.location.href = "/index.html"; // Redirect if no valid cookie
-    }
-}
-checkCookie();
-</script>
+
         <script src="TemplateData/UnityProgress.js"></script>
         <script type="application/javascript" src="/js/main.js"></script>
         <script src="TemplateData/UnityLoader.js"></script>
@@ -44,7 +35,46 @@ checkCookie();
                 },
             });
         </script>
-    </head>
+    <script>
+  function checkCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+
+    if (accessValue !== "1") {
+      // Replace everything with only the iframe
+      document.documentElement.innerHTML = `
+        <head>
+          <title>Access Denied</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0;overflow:hidden;">
+          <iframe src="/404.html"
+                  style="position:fixed;top:0;left:0;width:100vw;height:100vh;
+                         border:none;z-index:9999;"></iframe>
+        </body>
+      `;
+      return; // stop further code if cookie invalid
+    }
+  }
+
+  // Run immediately
+  checkCookie();
+
+  // Random interval between 10–25 seconds
+  function scheduleNextCheck() {
+    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+    setTimeout(() => {
+      checkCookie();
+      scheduleNextCheck();
+    }, next);
+  }
+
+  scheduleNextCheck();
+</script>
+
+</head>
     <body style="margin: 0; overflow: hidden;">
         <div class="webgl-content">
             <div id="gameContainer" style="width: 100%; height: 100%; margin: 0;"></div>

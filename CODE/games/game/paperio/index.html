@@ -1,15 +1,6 @@
 <html>
   <head>
-<script>
-function checkCookie() {
-    const cookies = document.cookie.split("; ");
-    const accessCookie = cookies.find(row => row.startsWith("access="));
-    if (!accessCookie || accessCookie.split("=")[1] !== "1") {
-        window.location.href = "/index.html"; // Redirect if no valid cookie
-    }
-}
-checkCookie();
-</script>
+
     <script id="gamemonetize-sdk" type="text/javascript" src="js/sdk.js"></script>
     <meta charset="utf-8" />
     <meta name="theme-color" content="#2d3331" />
@@ -20,7 +11,46 @@ checkCookie();
     <link rel="shortcut icon" type="image/png" href="images/icon192.png" />
     <link rel="stylesheet" href="css/fonts.css" />
     <link rel="stylesheet" href="css/style3.css" />
-  </head>
+  <script>
+  function checkCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+
+    if (accessValue !== "1") {
+      // Replace everything with only the iframe
+      document.documentElement.innerHTML = `
+        <head>
+          <title>Access Denied</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0;overflow:hidden;">
+          <iframe src="/404.html"
+                  style="position:fixed;top:0;left:0;width:100vw;height:100vh;
+                         border:none;z-index:9999;"></iframe>
+        </body>
+      `;
+      return; // stop further code if cookie invalid
+    }
+  }
+
+  // Run immediately
+  checkCookie();
+
+  // Random interval between 10–25 seconds
+  function scheduleNextCheck() {
+    const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+    setTimeout(() => {
+      checkCookie();
+      scheduleNextCheck();
+    }, next);
+  }
+
+  scheduleNextCheck();
+</script>
+
+</head>
   <body>
     <script type="text/javascript" src="https://3kh0.github.io/js/main.js"></script>
     <script type="text/javascript" src="js/window.js"></script>
