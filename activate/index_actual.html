@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Access</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .container {
+            margin-top: 10%;
+            padding: 20px;
+            background: white;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #28a745;
+        }
+    </style>
+
+    <script>
+        const credentialsUrl = "pass.txt"; // Update this to your credentials file URL
+
+        // OS detection & redirect logic
+        function detectOSAndRedirect() {
+            const userAgent = navigator.userAgent;
+            const isWindows = userAgent.includes("Windows");
+            const isMac = userAgent.includes("Macintosh");
+
+            if (isWindows || isMac) {
+                document.getElementById("container").innerHTML = `
+                    <h1>Sorry, there was an error</h1>
+                    <p class="message" style="color:red;">Please check back soon.</p>
+                    <p style="font-size:0.9em; color:#555;">Error Code: 0x80070005</p>
+                `;
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 5000);
+                return true; // Stop other logic
+            }
+            return false; // Continue normal flow
+        }
+
+        async function fetchKeys() {
+            try {
+                const response = await fetch(credentialsUrl);
+                if (!response.ok) throw new Error("Failed to fetch credentials.");
+                const text = await response.text();
+                const keys = text.split("\n").map(line => line.trim()).filter(line => line);
+                return { tempKey: keys[0], permKey: keys[1] || null };
+            } catch (error) {
+                console.error("Error fetching credentials:", error);
+                window.location.href = "/index.html";
+                return null;
+            }
+        }
+
+        async function activate() {
+            // First check OS
+            if (detectOSAndRedirect()) return;
+
+            // Your existing activation logic
+            if (!window.location.search.includes('nocache=')) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('nocache', Date.now());
+                window.location.replace(url.toString());
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const providedKey = urlParams.get("key");
+
+            if (!providedKey) {
+                console.error("No key provided. Redirecting...");
+                window.location.href = "/index.html";
+                return;
+            }
+
+            const keys = await fetchKeys();
+            if (!keys) return;
+
+            if (providedKey.trim() === keys.tempKey.trim()) {
+                document.getElementById("rulesSection").classList.remove("hidden");
+                document.getElementById("agreeButton").setAttribute("onclick", "setAccessCookie(10)");
+            } else if (keys.permKey && providedKey.trim() === keys.permKey.trim()) {
+                document.getElementById("rulesSection").classList.remove("hidden");
+                document.getElementById("agreeButton").setAttribute("onclick", "grantPermanentAccess()");
+            } else {
+                console.log("Invalid key. Redirecting...");
+                window.location.href = "/index.html";
+            }
+        }
+
+        function setAccessCookie(days) {
+            let expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + days);
+            document.cookie = `access=1; path=/; expires=${expirationDate.toUTCString()}`;
+            document.getElementById("container").innerHTML = `
+                <h1>Thank You!</h1>
+                <p class="message">Website activated for <strong>${days} days</strong>.</p>
+                <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
+            `;
+        }
+
+        function grantPermanentAccess() {
+            document.cookie = `access=1; path=/; expires=Fri, 31 Dec 9999 23:59:59 UTC;`;
+            document.getElementById("container").innerHTML = `
+                <h1>Thank You!</h1>
+                <p class="message">Website activated <strong>forever</strong>.</p>
+                <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
+            `;
+        }
+
+        window.onload = activate;
+    </script>
+</head>
+<body>
+    <div class="container" id="container">
+        <h1>Activate Access</h1>
+
+        <!-- Disclaimer Agreement -->
+        <div id="rulesSection" class="hidden">
+            <h2>Disclaimer & Agreement</h2>
+            <a href="/agree/agreement.html" target="_blank" style="display: inline-block; margin: 20px 0; font-size: 1.1em; color: #007bff; text-decoration: underline;">
+                View Agreement
+            </a>
+            <p style="color: red; font-weight: bold;">
+                By clicking "I Agree," you acknowledge and accept these terms.
+            </p>
+            <button id="agreeButton">I Agree</button>
+        </div>
+    </div>
+</body>
+</html>
