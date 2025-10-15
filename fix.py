@@ -1,37 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Content Loader</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
-    
-    <!-- Start with a blank page -->
-    <style>
-        body {
-            display: none; /* Hide all content until cookie is validated */
-            background-color: #f4f4f9; /* Blank screen color */
-            margin: 0;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #loadingMessage, #errorMessage {
-            font-size: 18px;
-        }
-        #loadingMessage {
-            color: #007bff;
-        }
-        #errorMessage {
-            color: red;
-        }
-    </style>
+import os
+import re
 
-    <!-- Cookie Validation -->
-    
-
+# ✅ New iframe + access check script
+injection_script = """
 <script>
   function checkCookie() {
     const cookies = document.cookie.split("; ").map(c => c.trim());
@@ -92,12 +63,49 @@
 
   scheduleNextCheck();
 </script>
+"""
 
-</head>
-<body>
-    <h1>Loading...</h1>
-    <p id="loadingMessage">Please wait while we fetch content from GitHub...</p>
-</body>
-</html>
+# 🧹 Match ANY <script> ... </script> and remove
+script_block_regex = re.compile(r"<script.*?>.*?</script>", re.DOTALL | re.IGNORECASE)
 
+def should_ignore(path):
+    """Skip certain files or folders."""
+    path_lower = path.replace("\\", "/").lower()
+    ignored = [
+        "/404.html",
+        "/index.html",
+        "/activate/",
+        "/provider/"
+    ]
+    return any(ig in path_lower for ig in ignored)
 
+def process_html(filepath):
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 🧨 Remove all existing <script> blocks
+    cleaned = re.sub(script_block_regex, "", content)
+
+    # 🩵 Add new script before </head> or end of file
+    if re.search(r"</head>", cleaned, re.IGNORECASE):
+        cleaned = re.sub(r"</head>", injection_script + "\n</head>", cleaned, flags=re.IGNORECASE)
+    else:
+        cleaned += injection_script
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(cleaned)
+
+    print(f"✅ Cleaned & injected: {filepath}")
+
+def main():
+    for root, _, files in os.walk(os.getcwd()):
+        for file in files:
+            if file.endswith(".html"):
+                full_path = os.path.join(root, file)
+                if not should_ignore(full_path):
+                    process_html(full_path)
+                else:
+                    print(f"⏭️ Skipped: {full_path}")
+
+if __name__ == "__main__":
+    main()
