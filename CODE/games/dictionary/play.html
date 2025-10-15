@@ -1,459 +1,101 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Immediate cookie check BEFORE any head assets -->
+  <script>
+    (function () {
+      const cookies = document.cookie.split("; ").map(c => c.trim());
+      const accessCookie = cookies.find(c => c.startsWith("access="));
+      const accessValue = accessCookie ? accessCookie.split("=")[1] : null;
+      if (accessValue !== "1") {
+        window.location.replace("/404.html");
+      }
+    })();
+  </script>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Play Game</title>
+
   <style>
-    /* minimal UI - top bar removed */
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
-    #frame{width:100%;height:100%;border:0;display:block}
-    .error{position:fixed;left:12px;right:12px;top:12px;padding:12px;background:#fff0f0;color:#b00;border:1px solid #f3c2c2;border-radius:6px;display:none;z-index:9999;font-family:Inter,Arial,sans-serif;opacity:0;transition:opacity 0.6s ease;}
-    /* immersive controls */
-    /* tiny corner control (top-right, much smaller) */
-    .immersive-controls{position:fixed;right:8px;top:8px;display:flex;gap:6px;z-index:10001}
-    .immersive-controls .btn{opacity:0.95;min-width:18px;min-height:18px;padding:4px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center}
-    /* fullscreen-corners icon style (reduced by ~2x) */
-    .fs-icon{width:9px;height:9px;display:block}
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    /* Gate: keep page hidden until manifest-driven downloads finish */
+    body { visibility: hidden; }
+    #frame { width: 100%; height: 100%; border: 0; display: block; }
+    .error {
+      position: fixed;
+      left: 12px; right: 12px; top: 12px;
+      padding: 12px;
+      background: #fff0f0;
+      color: #b00;
+      border: 1px solid #f3c2c2;
+      border-radius: 6px;
+      display: none;
+      z-index: 9999;
+      font-family: Inter, Arial, sans-serif;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .immersive-controls {
+      position: fixed;
+      right: 8px;
+      top: 8px;
+      display: flex;
+      gap: 6px;
+      z-index: 10001;
+    }
+    .immersive-controls .btn {
+      opacity: 0.95;
+      min-width: 18px;
+      min-height: 18px;
+      padding: 4px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fs-icon { width: 9px; height: 9px; display: block; }
   </style>
 </head>
 <body>
-  <!-- top bar removed per request -->
+<div id="progressContainer" style="
+  position:fixed; top:0; left:0; width:100%; height:4px;
+  background:#eee; z-index:10002; display:none;">
+  <div id="progressBar" style="
+    height:100%; width:0%; background:#4caf50; transition:width 0.3s;"></div>
+</div>
+  <!-- sandbox tokens and allow attributes enable fullscreen & pointer-lock -->
+  <iframe id="frame"
+          sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock"
+          allow="fullscreen; pointer-lock"
+          allowfullscreen></iframe>
 
-  <!-- sandbox tokens and allow attributes enable fullscreen & pointer-lock where permitted -->
-  <iframe id="frame" sandbox="allow-scripts allow-forms allow-same-origin allow-pointer-lock" allow="fullscreen; pointer-lock" allowfullscreen></iframe>
   <div id="msg" class="error" role="alert"></div>
 
   <div class="immersive-controls" aria-hidden="false">
-    <!-- tiny corner-style fullscreen icon (box corners) -->
     <button id="enterImmersive" class="btn" title="Enter immersive mode" aria-label="Enter immersive">
-      <svg class="fs-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M3 9V3h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 15v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 9V3h-6" stroke="currentColor" stroke-width="0" opacity="0"/>
-        <path d="M3 15v6h6" stroke="currentColor" stroke-width="0" opacity="0"/>
-        <!-- corners only -->
-        <path d="M3 7V3h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M17 3h4v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 17v4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M7 21H3v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg class="fs-icon" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M3 7V3h4" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M17 3h4v4" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M21 17v4h-4" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 21H3v-4" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <button id="exitImmersive" class="btn ghost" style="display:none" title="Exit immersive" aria-label="Exit immersive">✕</button>
+    <button id="exitImmersive" class="btn ghost" style="display:none"
+            title="Exit immersive" aria-label="Exit immersive">✕</button>
   </div>
 
-<script>
-const RAW_BASE = 'https://raw.githubusercontent.com/Firewall-Freedom/file-s/refs/heads/master/';
-
-// --- blob URL tracking ---
-const createdBlobUrls = new Set();
-function registerBlobUrl(u){ createdBlobUrls.add(u); return u; }
-window.addEventListener('unload', () => { for (const u of createdBlobUrls) try { URL.revokeObjectURL(u); } catch(e){} createdBlobUrls.clear(); });
-
-function q(name){ return new URLSearchParams(location.search).get(name) || ''; }
-function showMsg(text){ const m=document.getElementById('msg'); m.textContent=text; m.style.display='block'; m.style.opacity='1'; }
-function hideMsg(){ const m=document.getElementById('msg'); m.style.opacity='0'; setTimeout(()=>{ m.style.display='none'; m.textContent=''; }, 600); }
-
-async function fetchNoCache(url, as='text'){
-  try{
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r || !r.ok) return null;
-    if(as === 'arraybuffer') return await r.arrayBuffer();
-    if(as === 'blob') return await r.blob();
-    return { text: await r.text(), contentType: r.headers.get('content-type') || '' };
-  }catch(e){ return null; }
-}
-
-function xmlParse(text){ try{ return new DOMParser().parseFromString(text, 'application/xml'); }catch(e){ return null; } }
-function isAbsoluteUrl(v){ return /^([a-zA-Z][a-zA-Z\d+\-.]*:)?\/\//.test(v) || /^[a-zA-Z]+:/.test(v) || v.startsWith('data:') || v.startsWith('blob:') || v.startsWith('mailto:') || v.startsWith('javascript:'); }
-function inferMimeFromPath(path){
-  const ext = (path.split('.').pop() || '').toLowerCase();
-  if(ext === 'css') return 'text/css';
-  if(ext === 'js' || ext === 'mjs') return 'application/javascript';
-  if(ext === 'html' || ext === 'htm') return 'text/html';
-  if(ext === 'json') return 'application/json';
-  if(ext === 'svg') return 'image/svg+xml';
-  if(['png','jpg','jpeg','gif','webp','ico'].includes(ext)) return 'image/' + (ext === 'jpg' ? 'jpeg' : ext);
-  if(['woff','woff2','ttf','eot'].includes(ext)) {
-    if(ext === 'woff') return 'font/woff';
-    if(ext === 'woff2') return 'font/woff2';
-    if(ext === 'ttf') return 'font/ttf';
-    if(ext === 'eot') return 'application/vnd.ms-fontobject';
-  }
-  return 'application/octet-stream';
-}
-
-// fetch resource and return a blob URL; prefers server content-type when available
-// now accepts optional fileMap to allow retrying via repository index lookup
-async function fetchToBlobUrl(rawUrl, fileMap){
-  try{
-    const resp = await fetch(rawUrl, {cache:'no-store'});
-    if(resp && resp.ok){
-      const blob = await resp.blob();
-      let mime = resp.headers.get('content-type') || '';
-      if(!mime) mime = inferMimeFromPath(rawUrl);
-      const fixedBlob = blob.type ? blob : new Blob([await blob.arrayBuffer()], {type: mime});
-      const url = URL.createObjectURL(fixedBlob);
-      return registerBlobUrl(url);
-    }
-  }catch(e){}
-  // fallback: if rawUrl is within RAW_BASE and fileMap provided, try matching case-insensitive path
-  try{
-    if(fileMap && rawUrl.startsWith(RAW_BASE)){
-      const rel = rawUrl.substring(RAW_BASE.length).replace(/^\/+/,'');
-      const alt = fileMap[rel.toLowerCase()];
-      if(alt && alt !== rel){
-        const altRaw = RAW_BASE + alt;
-        try{
-          const resp2 = await fetch(altRaw, {cache:'no-store'});
-          if(resp2 && resp2.ok){
-            const blob2 = await resp2.blob();
-            const mime2 = resp2.headers.get('content-type') || inferMimeFromPath(altRaw);
-            const fixed2 = blob2.type ? blob2 : new Blob([await blob2.arrayBuffer()], {type: mime2});
-            const url2 = URL.createObjectURL(fixed2);
-            return registerBlobUrl(url2);
-          }
-        }catch(e){}
-      }
-    }
-  }catch(e){}
-  return null;
-}
-
-// resolve a relative path or absolute URL to the actual raw URL using fileMap if available
-// IMPORTANT: absolute site paths under /CODE/ are blocked (return null). Other absolute paths (leading /) are mapped to RAW_BASE.
-function resolveRepoRawUrl(pathOrUrl, baseRaw, fileMap){
-  // If it's an absolute site path (starts with '/'), handle carefully:
-  if (typeof pathOrUrl === 'string' && pathOrUrl.startsWith('/')) {
-    const lower = pathOrUrl.toLowerCase();
-    // Block any site-local /CODE/... requests from being mapped to RAW (avoid touching app-local files)
-    if (lower.startsWith('/code/')) {
-      return null; // explicitly blocked — do not fetch from RAW_BASE for site /CODE/* paths
-    }
-    // For other absolute root paths (e.g. /cloak.js), map to RAW_BASE (repo root).
-    // This allows files referenced as "/cloak.js" to be served from the repository raw URL.
-    const trimmed = pathOrUrl.replace(/^\/+/, '');
-    return RAW_BASE + trimmed;
-  }
-
-  if(isAbsoluteUrl(pathOrUrl)) return pathOrUrl;
-  try{
-    const abs = new URL(pathOrUrl, baseRaw).href;
-    // if abs is already under RAW_BASE, try to map using fileMap
-    if(abs.startsWith(RAW_BASE)){
-      const rel = abs.substring(RAW_BASE.length).replace(/^\/+/,'');
-      if(fileMap){
-        const alt = fileMap[rel.toLowerCase()];
-        if(alt) return RAW_BASE + alt;
-      }
-    }
-    return abs;
-  }catch(e){
-    return null;
-  }
-}
-
-async function rewriteCssAndCreateBlob(cssText, baseRaw, fileMap){
-  const urlPattern = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
-  const matches = [];
-  let m;
-  while((m = urlPattern.exec(cssText)) !== null){
-    matches.push(m[2]);
-  }
-  const unique = Array.from(new Set(matches));
-  const replacements = {};
-  for(const rel of unique){
-    if(isAbsoluteUrl(rel) || rel.startsWith('data:') || rel.startsWith('#')) continue;
-    try{
-      const resolved = resolveRepoRawUrl(rel, baseRaw, fileMap);
-      const blobUrl = await fetchToBlobUrl(resolved, fileMap);
-      if(blobUrl) replacements[rel] = blobUrl;
-    }catch(e){}
-  }
-  const rewritten = cssText.replace(urlPattern, (m, q, path)=>{
-    if(replacements[path]) return `url("${replacements[path]}")`;
-    return m;
-  });
-  const blob = new Blob([rewritten], {type: 'text/css'});
-  const cssBlob = URL.createObjectURL(blob);
-  return registerBlobUrl(cssBlob);
-}
-
-function preferHtmlCandidate(files, gameName){
-  const idx = files.find(f => /(^|\/)index\.html$/i.test(f));
-  if(idx) return idx;
-  const anyHtml = files.find(f => /\.(html?|xhtml)$/i.test(f));
-  if(anyHtml) return anyHtml;
-  return null;
-}
-
-function looksLikeHTML(text){
-  if(!text) return false;
-  const t = text.trim().slice(0,1200).toLowerCase();
-  return t.startsWith('<!doctype') || t.includes('<html') || t.includes('<body') || t.includes('<script') || t.includes('<meta') || t.includes('<!doctype html');
-}
-
-async function findPlayableEntry(files, gameName){
-  const candidates = Array.from(files);
-  if(candidates.length === 0 && gameName) candidates.push(gameName + '/index.html');
-  const preferred = preferHtmlCandidate(candidates, gameName);
-  if(preferred){
-    const i = candidates.indexOf(preferred);
-    if(i > 0){ candidates.splice(i,1); candidates.unshift(preferred); }
-  } else {
-    const folderIndex = gameName + '/index.html';
-    if(!candidates.includes(folderIndex)) candidates.push(folderIndex);
-  }
-  for(const c of candidates){
-    const rawUrl = RAW_BASE + c;
-    const r = await fetchNoCache(rawUrl, 'text');
-    if(!r) continue;
-    const ct = (r.contentType || '').toLowerCase();
-    if(ct.includes('text/html') || ct.includes('application/xhtml+xml') || looksLikeHTML(r.text)){
-      return { path: c, rawUrl, htmlText: r.text, files }; // include files for later map building
-    }
-  }
-  if(candidates.length > 0) return { path: candidates[0], rawUrl: RAW_BASE + candidates[0], htmlText: null, files };
-  return null;
-}
-
-async function loadGame(gameId){
-  hideMsg();
-  const xmlResp = await fetchNoCache(RAW_BASE + 'index.xml', 'text');
-  if(!xmlResp){ showMsg('Unable to fetch index.xml.'); return; }
-  const xml = xmlParse(xmlResp.text);
-  if(!xml){ showMsg('Invalid index.xml'); return; }
-
-  const games = Array.from(xml.querySelectorAll('game'));
-  const target = games.find(g=>{
-    const attr = g.getAttribute('name') || '';
-    const inner = (g.querySelector('name') && g.querySelector('name').textContent) || '';
-    return attr === gameId || inner === gameId;
-  });
-  if(!target){ showMsg('Game not found in index.xml: ' + gameId); return; }
-
-  const files = [];
-  target.querySelectorAll('file').forEach(f => {
-    const fp = (f.textContent || '').trim();
-    if(fp) files.push(fp);
-  });
-  const gameName = target.getAttribute('name') || gameId;
-
-  const playable = await findPlayableEntry(files, gameName);
-  if(!playable){
-    showMsg('No files listed for this game.');
-    return;
-  }
-
-  if(!playable.htmlText){
-    showMsg('No HTML entry found for this game. Open the game repo directly if needed.');
-    document.getElementById('frame').srcdoc = '<!doctype html><meta charset="utf-8"><body style="font-family:Inter,Arial,sans-serif;padding:20px;"><h3>No HTML entry</h3><p>The repository lists a non-HTML entry as primary; open the repo if needed.</p></body>';
-    return;
-  }
-
-  // Build case-insensitive lookup map for files in this game
-  const fileMap = {};
-  files.forEach(f => {
-    const key = f.replace(/^\/+/,'').toLowerCase();
-    if(!fileMap[key]) fileMap[key] = f;
-  });
-
-  // parse and prepare rewriting
-  const htmlText = playable.htmlText;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlText, 'text/html');
-  const baseRaw = RAW_BASE + (playable.path.includes('/') ? playable.path.substring(0, playable.path.lastIndexOf('/')+1) : '');
-
-  // CSS: fetch, rewrite url(...) refs, blob and point links to blobs
-  const linkEls = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
-  await Promise.all(linkEls.map(async link => {
-    try{
-      const href = link.getAttribute('href');
-      if(!href) return;
-      const resolved = resolveRepoRawUrl(href, baseRaw, fileMap);
-      if (!resolved) {
-        // blocked or non-resolvable (likely site-local absolute path). Do not attempt to fetch from RAW; leave as-is.
-        return;
-      }
-      const cssFetch = await fetch(resolved, {cache:'no-store'}).catch(()=>null);
-      if(!cssFetch || !cssFetch.ok) return;
-      const cssText = await cssFetch.text();
-      const cssBlobUrl = await rewriteCssAndCreateBlob(cssText, resolved.substring(0, resolved.lastIndexOf('/')+1), fileMap);
-      if(cssBlobUrl) link.setAttribute('href', cssBlobUrl);
-    }catch(e){}
-  }));
-
-  // Scripts: fetch and replace src with blob URLs
-  const scriptEls = Array.from(doc.querySelectorAll('script[src]'));
-  await Promise.all(scriptEls.map(async s=>{
-    try{
-      const src = s.getAttribute('src');
-      if(!src) return;
-      const resolved = resolveRepoRawUrl(src, baseRaw, fileMap);
-      if (!resolved) {
-        // blocked or non-resolvable: don't try to fetch from RAW (prevents local /CODE/... requests)
-        return;
-      }
-      const blobUrl = await fetchToBlobUrl(resolved, fileMap);
-      if(blobUrl) s.setAttribute('src', blobUrl);
-    }catch(e){}
-  }));
-
-  // Images, media, icons
-  const srcSelectors = ['img[src]','audio[src]','video[src]','source[src]','track[src]','link[rel~="icon"]'];
-  const srcEls = Array.from(doc.querySelectorAll(srcSelectors.join(',')));
-  await Promise.all(srcEls.map(async el=>{
-    try{
-      const isLinkIcon = el.tagName.toLowerCase() === 'link' && el.getAttribute('rel') && el.getAttribute('rel').toLowerCase().includes('icon');
-      const attr = isLinkIcon ? 'href' : 'src';
-      const val = el.getAttribute(attr);
-      if(!val) return;
-      const resolved = resolveRepoRawUrl(val, baseRaw, fileMap);
-      if (!resolved) {
-        // blocked or non-resolvable — skip replacing, leave original attribute untouched
-        // still handle srcset below only if it's a relative repo path (resolveRepoRawUrl would have returned non-null)
-      } else {
-        const blobUrl = await fetchToBlobUrl(resolved, fileMap);
-        if(blobUrl) el.setAttribute(attr, blobUrl);
-      }
-
-      // handle srcset if present (for img and source elements)
-      if (el.hasAttribute('srcset')) {
-        const srcset = el.getAttribute('srcset') || '';
-        const parts = srcset.split(',').map(p => p.trim()).filter(Boolean);
-        const rewrittenParts = await Promise.all(parts.map(async part => {
-          // part may be "url descriptor" or just "url"
-          const [urlPart, ...rest] = part.split(/\s+/);
-          try {
-            const abs = resolveRepoRawUrl(urlPart, baseRaw, fileMap);
-            if (!abs) {
-              // blocked or absolute site path — keep original entry
-              return part;
-            }
-            const b = await fetchToBlobUrl(abs, fileMap);
-            return (b || urlPart) + (rest.length ? ' ' + rest.join(' ') : '');
-          } catch (e) { return part; }
-        }));
-        el.setAttribute('srcset', rewrittenParts.join(', '));
-      }
-    }catch(e){}
-  }));
-
-  // inline styles and <style> url(...) -> make absolute to RAW so fonts/images resolve (we used fileMap for CSS rewriting already)
-  Array.from(doc.querySelectorAll('[style]')).forEach(el=>{
-    const s = el.getAttribute('style') || '';
-    const replaced = s.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (m, q, path)=>{
-      if(isAbsoluteUrl(path) || path.startsWith('#') || path.startsWith('data:')) return m;
-      try{ const abs = resolveRepoRawUrl(path, baseRaw, fileMap); return `url("${abs}")`; }catch(e){ return m; }
-    });
-    if(replaced !== s) el.setAttribute('style', replaced);
-  });
-  Array.from(doc.querySelectorAll('style')).forEach(st=>{
-    const s = st.textContent || '';
-    const replaced = s.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g, (m, q, path)=>{
-      if(isAbsoluteUrl(path) || path.startsWith('#') || path.startsWith('data:')) return m;
-      try{ const abs = resolveRepoRawUrl(path, baseRaw, fileMap); return `url("${abs}")`; }catch(e){ return m; }
-    });
-    if(replaced !== s) st.textContent = replaced;
-  });
-
-  // remove any existing <base> to avoid surprises, then insert a base that points to the game's raw folder
-  const existingBase = doc.querySelector('base');
-  if (existingBase) existingBase.remove();
-  try {
-    // ensure relative URLs inside the injected document resolve to the repo raw folder
-    const baseEl = doc.createElement('base');
-    baseEl.setAttribute('href', baseRaw);
-    // prefer to insert at head start
-    if (doc.head) doc.head.insertBefore(baseEl, doc.head.firstChild);
-  } catch (e) {
-    // ignore if insertion fails
-  }
-
-  // inject rewritten HTML into iframe
-  const out = '<!doctype html>\n' + doc.documentElement.outerHTML;
-  const iframe = document.getElementById('frame');
-  iframe.srcdoc = out;
-}
-
-const gameId = q('game') || '';
-if(!gameId){ showMsg('No game specified.'); }
-else loadGame(gameId);
-
-// reload now is handled by reloading the full page (no top bar button)
-
-// Immersive (fullscreen + pointer lock) helpers
-const iframeEl = document.getElementById('frame');
-const enterBtn = document.getElementById('enterImmersive');
-const exitBtn = document.getElementById('exitImmersive');
-function updateImmersiveUI() {
-  const locked = (document.pointerLockElement === iframeEl);
-  const fs = (document.fullscreenElement === iframeEl);
-  if (fs) enterBtn.style.display = 'none';
-  else enterBtn.style.display = '';
-  exitBtn.style.display = (fs || locked) ? '' : 'none';
-}
-
-async function enterImmersive() {
-  // Must be called in user gesture. Request fullscreen first.
-  try {
-    if (iframeEl.requestFullscreen) {
-      await iframeEl.requestFullscreen({ navigationUI: 'hide' });
-    }
-  } catch (e) {
-    showMsg('Fullscreen request failed: ' + (e && e.message || e));
-    return;
-  }
-  // Then request pointer lock on the iframe element (best-effort)
-  try {
-    if (iframeEl.requestPointerLock) {
-      iframeEl.requestPointerLock();
-    }
-  } catch (e) {
-    // ignore — pointer lock may fail (browser policies)
-  }
-  updateImmersiveUI();
-}
-
-function exitImmersive() {
-  try { if (document.exitPointerLock) document.exitPointerLock(); } catch (e) {}
-  try { if (document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
-  updateImmersiveUI();
-}
-
-enterBtn.addEventListener('click', (ev) => { ev.preventDefault(); enterImmersive(); });
-exitBtn.addEventListener('click', (ev) => { ev.preventDefault(); exitImmersive(); });
-
-// Clicking the iframe is a user gesture — attempt to enter immersive mode
-iframeEl.addEventListener('click', (ev) => {
-  // do not auto-enter if already fullscreen or locked
-  if (document.fullscreenElement === iframeEl || document.pointerLockElement === iframeEl) return;
-  // user-intent: try immersive
-  enterImmersive();
-});
-
-// Track pointer lock / fullscreen changes
-document.addEventListener('fullscreenchange', () => {
-  updateImmersiveUI();
-  if (document.fullscreenElement !== iframeEl) {
-    // only show transient exited message (fade out) when truly exited
-    if (document.pointerLockElement !== iframeEl) showTransientMessage('Exited fullscreen.', 3500);
-  }
-});
-document.addEventListener('pointerlockchange', () => {
-  updateImmersiveUI();
-  if (document.pointerLockElement !== iframeEl) {
-    showTransientMessage('Pointer unlocked. Press immersive icon to relock and fullscreen.', 3500);
-  } else {
-    hideMsg();
-  }
-});
-document.addEventListener('pointerlockerror', () => {
-  showTransientMessage('Pointer lock failed or was blocked by the browser.', 3500);
-});
-
-// Initialize UI state
-updateImmersiveUI();
-</script>
+  <!-- External main logic -->
+  <script src="progress.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
