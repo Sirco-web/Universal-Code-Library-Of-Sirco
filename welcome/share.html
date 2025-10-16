@@ -2,30 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Status & Share</title>
+  <title>Share Access</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #status { margin-bottom: 20px; font-size: 1.2em; }
-    select, button { padding: 8px 12px; margin: 5px; }
-    #shareLink { margin-top: 20px; word-break: break-all; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    .success {
+      background: #e6f9ec;
+      color: #2e7d32;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    select, input {
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 1em;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #shareLink {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f1f1f1;
+      border-radius: 6px;
+      font-family: monospace;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
-  <h2>Access Cookie Status</h2>
-  <div id="status">Checking…</div>
+  <div class="card">
+    <div id="status"></div>
 
-  <div id="controls" style="display:none;">
-    <label for="duration">Share duration:</label>
-    <select id="duration">
-      <option value="1h">1 hour</option>
-      <option value="6h">6 hours</option>
-      <option value="12h">12 hours</option>
-      <option value="1d">1 day</option>
-    </select>
-    <button id="shareBtn">Generate Share Link</button>
+    <div id="controls" style="display:none;">
+      <div class="controls">
+        <label for="duration">Duration:</label>
+        <select id="duration">
+          <option value="1h">1 hour</option>
+          <option value="6h">6 hours</option>
+          <option value="12h">12 hours</option>
+          <option value="24h">1 day</option>
+        </select>
+        <label for="customHours">Custom (hours):</label>
+        <input type="number" id="customHours" min="1" max="24" placeholder="e.g. 3">
+        <button id="shareBtn">Generate Share Link</button>
+      </div>
+    </div>
+
+    <div id="shareLink"></div>
   </div>
-
-  <div id="shareLink"></div>
 
   <script>
     function hasAccessCookie() {
@@ -52,21 +112,24 @@
     function updateStatus() {
       const statusEl = document.getElementById("status");
       if (hasAccessCookie()) {
-        statusEl.textContent = "Access cookie found (value=1). You can share access.";
+        statusEl.innerHTML = `<div class="success">✅ You can share access</div>`;
         document.getElementById("controls").style.display = "block";
       } else {
-        statusEl.textContent = "No valid access cookie found.";
+        statusEl.innerHTML = `<div style="color:red;font-weight:600;">No valid access cookie found.</div>`;
       }
     }
 
     function generateShareLink() {
-      const duration = document.getElementById("duration").value;
+      let duration = document.getElementById("duration").value;
+      const custom = parseInt(document.getElementById("customHours").value, 10);
+      if (!isNaN(custom) && custom > 0 && custom <= 24) {
+        duration = custom + "h";
+      }
+
       const now = new Date();
       let expiry = new Date(now);
-      if (duration === "1h") expiry.setHours(expiry.getHours()+1);
-      if (duration === "6h") expiry.setHours(expiry.getHours()+6);
-      if (duration === "12h") expiry.setHours(expiry.getHours()+12);
-      if (duration === "1d") expiry.setDate(expiry.getDate()+1);
+      const hours = parseInt(duration);
+      expiry.setHours(expiry.getHours() + hours);
 
       const iso = expiry.toISOString();
       const raw = `${iso}:${duration}`;
