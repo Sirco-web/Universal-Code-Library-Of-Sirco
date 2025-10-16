@@ -6,35 +6,33 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     #status { margin-bottom: 20px; font-size: 1.2em; }
-    button { padding: 10px 16px; }
+    select, button { padding: 8px 12px; margin: 5px; }
     #shareLink { margin-top: 20px; word-break: break-all; }
   </style>
 </head>
 <body>
   <h2>Access Cookie Status</h2>
   <div id="status">Checking…</div>
-  <button id="shareBtn">Share</button>
+
+  <div id="controls" style="display:none;">
+    <label for="duration">Share duration:</label>
+    <select id="duration">
+      <option value="1h">1 hour</option>
+      <option value="6h">6 hours</option>
+      <option value="12h">12 hours</option>
+      <option value="1d">1 day</option>
+    </select>
+    <button id="shareBtn">Generate Share Link</button>
+  </div>
+
   <div id="shareLink"></div>
 
   <script>
-    function getAccessCookie() {
+    function hasAccessCookie() {
       const raw = document.cookie.split("; ").find(c => c.startsWith("access="));
-      if (!raw) return null;
-      const parts = raw.split("=");
-      if (parts.length < 2) return null;
-      const val = parts[1];
-      const match = val.match(/\|(.*)$/);
-      return match ? match[1] : null;
-    }
-
-    function timeLeft(expiry) {
-      const now = new Date();
-      const exp = new Date(expiry);
-      const diff = exp - now;
-      if (diff <= 0) return "Expired";
-      const mins = Math.floor(diff / 60000);
-      const secs = Math.floor((diff % 60000) / 1000);
-      return `${mins} min ${secs} sec`;
+      if (!raw) return false;
+      const val = raw.split("=")[1];
+      return val === "1";
     }
 
     function base64(str) { return btoa(unescape(encodeURIComponent(str))); }
@@ -52,23 +50,29 @@
     }
 
     function updateStatus() {
-      const expiry = getAccessCookie();
       const statusEl = document.getElementById("status");
-      if (!expiry) { statusEl.textContent = "No access cookie found."; return; }
-      statusEl.textContent = `Expires at ${expiry} (${timeLeft(expiry)} remaining)`;
+      if (hasAccessCookie()) {
+        statusEl.textContent = "Access cookie found (value=1). You can share access.";
+        document.getElementById("controls").style.display = "block";
+      } else {
+        statusEl.textContent = "No valid access cookie found.";
+      }
     }
 
     function generateShareLink() {
-      const expiry = getAccessCookie();
-      if (!expiry) return;
-      const expDate = new Date(expiry);
-      const date = expDate.toISOString().split("T")[0];
-      const time = expDate.toISOString().split("T")[1].replace("Z","");
-      const year = expDate.getUTCFullYear();
-      const raw = `${date}:${time}:${year}`;
+      const duration = document.getElementById("duration").value;
+      const now = new Date();
+      let expiry = new Date(now);
+      if (duration === "1h") expiry.setHours(expiry.getHours()+1);
+      if (duration === "6h") expiry.setHours(expiry.getHours()+6);
+      if (duration === "12h") expiry.setHours(expiry.getHours()+12);
+      if (duration === "1d") expiry.setDate(expiry.getDate()+1);
+
+      const iso = expiry.toISOString();
+      const raw = `${iso}:${duration}`;
       const code = `${raw}:${checksum(raw)}`;
       const encoded = encodeChain(code);
-      // 🔹 Use your real domain here:
+
       const url = `https://aurorastorage.giize.com/activation/receive.html?a=${encoded}`;
       document.getElementById("shareLink").textContent = url;
     }
