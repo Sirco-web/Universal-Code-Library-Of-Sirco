@@ -29,6 +29,15 @@
       margin-bottom: 20px;
       text-align: center;
     }
+    .error {
+      background: #fdecea;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
     .controls {
       margin: 20px 0;
       display: flex;
@@ -115,7 +124,8 @@
         statusEl.innerHTML = `<div class="success">✅ You can share access</div>`;
         document.getElementById("controls").style.display = "block";
       } else {
-        statusEl.innerHTML = `<div style="color:red;font-weight:600;">No valid access cookie found.</div>`;
+        statusEl.innerHTML = `<div class="error">No valid access cookie found.</div>`;
+        // Keep controls hidden if no cookie
       }
     }
 
