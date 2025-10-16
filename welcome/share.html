@@ -78,19 +78,17 @@
   <div class="card">
     <div id="status"></div>
 
-    <div id="controls" style="display:none;">
-      <div class="controls">
-        <label for="duration">Duration:</label>
-        <select id="duration">
-          <option value="1h">1 hour</option>
-          <option value="6h">6 hours</option>
-          <option value="12h">12 hours</option>
-          <option value="24h">1 day</option>
-        </select>
-        <label for="customHours">Custom (hours):</label>
-        <input type="number" id="customHours" min="1" max="24" placeholder="e.g. 3">
-        <button id="shareBtn">Generate Share Link</button>
-      </div>
+    <div class="controls">
+      <label for="duration">Duration:</label>
+      <select id="duration">
+        <option value="1h">1 hour</option>
+        <option value="6h">6 hours</option>
+        <option value="12h">12 hours</option>
+        <option value="24h">1 day</option>
+      </select>
+      <label for="customHours">Custom (hours):</label>
+      <input type="number" id="customHours" min="1" max="24" placeholder="e.g. 3">
+      <button id="shareBtn">Generate Share Link</button>
     </div>
 
     <div id="shareLink"></div>
@@ -122,14 +120,17 @@
       const statusEl = document.getElementById("status");
       if (hasAccessCookie()) {
         statusEl.innerHTML = `<div class="success">✅ You can share access</div>`;
-        document.getElementById("controls").style.display = "block";
       } else {
-        statusEl.innerHTML = `<div class="error">No valid access cookie found.</div>`;
-        // Keep controls hidden if no cookie
+        statusEl.innerHTML = `<div class="error">No valid access cookie found. Clicking Share will redirect to /404.html</div>`;
       }
     }
 
     function generateShareLink() {
+      if (!hasAccessCookie()) {
+        window.location.href = "/404.html";
+        return;
+      }
+
       let duration = document.getElementById("duration").value;
       const custom = parseInt(document.getElementById("customHours").value, 10);
       if (!isNaN(custom) && custom > 0 && custom <= 24) {
