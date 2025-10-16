@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Status & Share</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #status { margin-bottom: 20px; font-size: 1.2em; }
+    button { padding: 10px 16px; }
+    #shareLink { margin-top: 20px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h2>Access Cookie Status</h2>
+  <div id="status">Checking…</div>
+  <button id="shareBtn">Share</button>
+  <div id="shareLink"></div>
+
+  <script>
+    function getAccessCookie() {
+      const raw = document.cookie.split("; ").find(c => c.startsWith("access="));
+      if (!raw) return null;
+      const parts = raw.split("=");
+      if (parts.length < 2) return null;
+      const val = parts[1];
+      const match = val.match(/\|(.*)$/);
+      return match ? match[1] : null;
+    }
+
+    function timeLeft(expiry) {
+      const now = new Date();
+      const exp = new Date(expiry);
+      const diff = exp - now;
+      if (diff <= 0) return "Expired";
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      return `${mins} min ${secs} sec`;
+    }
+
+    function base64(str) { return btoa(unescape(encodeURIComponent(str))); }
+    function hex(str) { return Array.from(str).map(c => c.charCodeAt(0).toString(16).padStart(2,"0")).join(""); }
+    function encodeChain(str) {
+      let result = str;
+      const steps = [base64, hex, base64, hex, base64, hex];
+      for (const step of steps) result = step(result);
+      return hex(result); // final wrap
+    }
+    function checksum(str) {
+      let sum = 0;
+      for (let i=0;i<str.length;i++) sum = (sum + str.charCodeAt(i)*(i+1)) % 100000;
+      return sum.toString().padStart(5,"0");
+    }
+
+    function updateStatus() {
+      const expiry = getAccessCookie();
+      const statusEl = document.getElementById("status");
+      if (!expiry) { statusEl.textContent = "No access cookie found."; return; }
+      statusEl.textContent = `Expires at ${expiry} (${timeLeft(expiry)} remaining)`;
+    }
+
+    function generateShareLink() {
+      const expiry = getAccessCookie();
+      if (!expiry) return;
+      const expDate = new Date(expiry);
+      const date = expDate.toISOString().split("T")[0];
+      const time = expDate.toISOString().split("T")[1].replace("Z","");
+      const year = expDate.getUTCFullYear();
+      const raw = `${date}:${time}:${year}`;
+      const code = `${raw}:${checksum(raw)}`;
+      const encoded = encodeChain(code);
+      // 🔹 Use your real domain here:
+      const url = `https://aurorastorage.giize.com/activation/receive.html?a=${encoded}`;
+      document.getElementById("shareLink").textContent = url;
+    }
+
+    document.getElementById("shareBtn").addEventListener("click", generateShareLink);
+    updateStatus();
+  </script>
+</body>
+</html>
