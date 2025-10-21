@@ -7,6 +7,14 @@
       "favicon": "https://duck.deepresearch2markdown.com/imgs/duck.webp",
       "active": true,
       "createdAt": 1761086829519
+    },
+    {
+      "id": "gb_xaISDZ0",
+      "url": "https://lessonix.online/",
+      "title": "Lessonix games",
+      "favicon": "https://lessonix.online/favicon.ico",
+      "active": true,
+      "createdAt": 1761086859382
     }
   ]
 }
