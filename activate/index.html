@@ -46,6 +46,43 @@
     </style>
 
     <script>
+        // --- NEW: check /info.txt (no-cache) and block activation if CODE: 404S ---
+        let __BLOCK_404S = false;
+        (async function checkInfoTxtFor404S() {
+            try {
+                if (!navigator.onLine) return; // do nothing while offline
+                const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
+                if (!res.ok) return;
+                const text = await res.text();
+                if (!text) return;
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                if (lines.length === 0) return;
+                let codeLine = null;
+                if (/^CODE:/i.test(lines[0])) codeLine = lines[0];
+                else codeLine = lines.find(l => /^CODE:/i.test(l));
+                const code = codeLine ? (codeLine.split(':')[1] || '').trim() : '';
+                if (code === '404S') {
+                    __BLOCK_404S = true;
+                    // If this page isn't an allowed path, redirect to /index.html
+                    const allowed = ['/index.html', '/404.html', '/', ''];
+                    if (!allowed.includes(window.location.pathname)) {
+                        try { window.location.replace('/index.html'); } catch (e) {}
+                        return;
+                    }
+                    // Replace activation UI with restricted message and do not allow activation
+                    const c = document.getElementById('container');
+                    if (c) {
+                        c.innerHTML = `
+                            <h1>Site Temporarily Restricted</h1>
+                            <p style="color:red;">Activations are disabled while maintenance/security mode is active. Only the homepage is accessible.</p>
+                            <p style="font-size:0.9em; color:#555;">If you believe this is an error, check back later.</p>
+                        `;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        })();
+        // --- END NEW ---
+
         const credentialsUrl = "pass.txt"; // Update this to your credentials file URL
 
         // OS detection & redirect logic
@@ -86,6 +123,13 @@
             // First check OS
             if (detectOSAndRedirect()) return;
 
+            // If 404S restriction is active, prevent activation flow entirely
+            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+                // redirect to homepage (requirements specify only /index.html allowed)
+                try { window.location.replace('/index.html'); } catch (e) {}
+                return;
+            }
+
             // Your existing activation logic
             if (!window.location.search.includes('nocache=')) {
                 const url = new URL(window.location.href);
@@ -118,7 +162,12 @@
             }
         }
 
+        // MODIFY setAccessCookie to respect restriction
         function setAccessCookie(days) {
+            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+                try { window.location.replace('/index.html'); } catch (e) {}
+                return;
+            }
             let expirationDate = new Date();
             expirationDate.setDate(expirationDate.getDate() + days);
             document.cookie = `access=1; path=/; expires=${expirationDate.toUTCString()}`;
@@ -129,7 +178,12 @@
             `;
         }
 
+        // MODIFY grantPermanentAccess to respect restriction
         function grantPermanentAccess() {
+            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+                try { window.location.replace('/index.html'); } catch (e) {}
+                return;
+            }
             document.cookie = `access=1; path=/; expires=Fri, 31 Dec 9999 23:59:59 UTC;`;
             document.getElementById("container").innerHTML = `
                 <h1>Thank You!</h1>

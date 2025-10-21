@@ -16,24 +16,54 @@ window.addEventListener('DOMContentLoaded', function() {
         popup.style.justifyContent = 'center';
         popup.style.zIndex = '2000';
 
-        popup.innerHTML = `
-            <div style="background:white;color:#222;padding:30px 40px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);text-align:center;max-width:90vw;">
-                <h2 style="margin-top:0;">Access Granted</h2>
-                <p style="font-size:1.1em;">You already have access. Would you like to go to the second site?</p>
-                <div style="margin-top:20px;">
-                    <button id="goSecondSite" style="padding:8px 20px;margin-right:10px;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:1em;">OK</button>
-                    <button id="cancelPopup" style="padding:8px 20px;background:#ccc;color:#222;border:none;border-radius:5px;cursor:pointer;font-size:1em;">Cancel</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(popup);
+        // build popup depending on 404S restriction
+        (function(){
+            const restricted = !!(window.__SITE_404S_BLOCK);
+            if (!restricted) {
+                popup.innerHTML = `
+                    <div style="background:white;color:#222;padding:30px 40px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);text-align:center;max-width:90vw;">
+                        <h2 style="margin-top:0;">Access Granted</h2>
+                        <p style="font-size:1.1em;">You already have access. Would you like to go to the second site?</p>
+                        <div style="margin-top:20px;">
+                            <button id="goSecondSite" style="padding:8px 20px;margin-right:10px;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:1em;">OK</button>
+                            <button id="cancelPopup" style="padding:8px 20px;background:#ccc;color:#222;border:none;border-radius:5px;cursor:pointer;font-size:1em;">Cancel</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // restricted UI: no welcome navigation button
+                popup.innerHTML = `
+                    <div style="background:white;color:#222;padding:30px 40px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);text-align:center;max-width:90vw;">
+                        <h2 style="margin-top:0;">Access Restricted</h2>
+                        <p style="font-size:1.05em;color:#b00;">The site is currently in restricted mode. Navigation to the welcome page is disabled.</p>
+                        <div style="margin-top:20px;">
+                            <button id="cancelPopup" style="padding:8px 20px;background:#ccc;color:#222;border:none;border-radius:5px;cursor:pointer;font-size:1em;">Close</button>
+                        </div>
+                    </div>
+                `;
+            }
 
-        document.getElementById('goSecondSite').onclick = function() {
-            window.location.href = "/welcome/index.html";
-        };
-        document.getElementById('cancelPopup').onclick = function() {
-            popup.remove();
-        };
+            // attach handlers (guarded)
+            const goBtn = document.getElementById('goSecondSite');
+            const cancelBtn = document.getElementById('cancelPopup');
+
+            if (goBtn) {
+                goBtn.addEventListener('click', function() {
+                    // defensive check in case the restriction was applied after popup creation
+                    if (window.__SITE_404S_BLOCK) {
+                        // do nothing or close
+                        if (cancelBtn) cancelBtn.click();
+                        return;
+                    }
+                    window.location.href = "/welcome/index.html";
+                });
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function() {
+                    popup.remove();
+                });
+            }
+        })();
     }
 
     // Add activate button area if not already present

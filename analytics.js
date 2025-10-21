@@ -605,3 +605,172 @@
     }
 
 })();
+
+// --- Begin 404S site restriction logic (polling, dynamic) ---
+(function(){
+    // Do nothing while offline
+    if (typeof navigator === 'undefined' || !navigator.onLine) return;
+
+    const allowedPaths = ['/index.html', '/404.html', '/', ''];
+    let isBlocked = false;
+    window.__SITE_404S_BLOCK = false;
+
+    // Keep references so we can restore original behavior
+    const originals = {};
+    let handlersInstalled = false;
+
+    function parseTopCode(text) {
+        if (!text) return '';
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return '';
+        let codeLine = null;
+        if (/^CODE:/i.test(lines[0])) codeLine = lines[0];
+        else codeLine = lines.find(l => /^CODE:/i.test(l));
+        if (!codeLine) return '';
+        return (codeLine.split(':')[1] || '').trim();
+    }
+
+    // Named handlers so we can remove them later
+    function clickHandler(ev) {
+        try {
+            const a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
+            if (!a || !a.href) return;
+            const urlObj = new URL(a.href, location.href);
+            if (urlObj.origin !== location.origin) return; // external allowed
+            if (isBlocked && !allowedPaths.includes(urlObj.pathname)) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    function submitHandler(ev) {
+        try {
+            const form = ev.target;
+            const action = (form && form.getAttribute && form.getAttribute('action')) || location.pathname;
+            const urlObj = new URL(action, location.href);
+            if (urlObj.origin !== location.origin) return;
+            if (isBlocked && !allowedPaths.includes(urlObj.pathname)) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    function wrapNavigationOnce() {
+        // Wrap only if not already saved
+        try {
+            if (!originals.assign) originals.assign = window.location.assign;
+            window.location.assign = function(href) {
+                try {
+                    const urlObj = new URL(href + '', location.href);
+                    if (isBlocked && urlObj.origin === location.origin && !allowedPaths.includes(urlObj.pathname)) return;
+                } catch (e) {}
+                return originals.assign.apply(this, arguments);
+            };
+        } catch (e) { /* ignore */ }
+
+        try {
+            if (!originals.replace) originals.replace = window.location.replace;
+            window.location.replace = function(href) {
+                try {
+                    const urlObj = new URL(href + '', location.href);
+                    if (isBlocked && urlObj.origin === location.origin && !allowedPaths.includes(urlObj.pathname)) return;
+                } catch (e) {}
+                return originals.replace.apply(this, arguments);
+            };
+        } catch (e) { /* ignore */ }
+
+        try {
+            if (!originals.pushState) originals.pushState = history.pushState;
+            history.pushState = function(state, title, url) {
+                try {
+                    const u = new URL((url === undefined || url === null) ? location.href : url + '', location.href);
+                    if (isBlocked && u.origin === location.origin && !allowedPaths.includes(u.pathname)) return;
+                } catch (e) {}
+                return originals.pushState.apply(this, arguments);
+            };
+        } catch (e) { /* ignore */ }
+
+        try {
+            if (!originals.replaceState) originals.replaceState = history.replaceState;
+            history.replaceState = function(state, title, url) {
+                try {
+                    const u = new URL((url === undefined || url === null) ? location.href : url + '', location.href);
+                    if (isBlocked && u.origin === location.origin && !allowedPaths.includes(u.pathname)) return;
+                } catch (e) {}
+                return originals.replaceState.apply(this, arguments);
+            };
+        } catch (e) { /* ignore */ }
+    }
+
+    function installHandlers() {
+        if (handlersInstalled) return;
+        document.addEventListener('click', clickHandler, true);
+        document.addEventListener('submit', submitHandler, true);
+        wrapNavigationOnce();
+        handlersInstalled = true;
+    }
+
+    function removeHandlers() {
+        try {
+            document.removeEventListener('click', clickHandler, true);
+            document.removeEventListener('submit', submitHandler, true);
+        } catch (e) { /* ignore */ }
+
+        // Restore originals if we have them
+        try { if (originals.assign) window.location.assign = originals.assign; } catch (e) {}
+        try { if (originals.replace) window.location.replace = originals.replace; } catch (e) {}
+        try { if (originals.pushState) history.pushState = originals.pushState; } catch (e) {}
+        try { if (originals.replaceState) history.replaceState = originals.replaceState; } catch (e) {}
+
+        handlersInstalled = false;
+    }
+
+    function applyBlock() {
+        isBlocked = true;
+        window.__SITE_404S_BLOCK = true;
+        installHandlers();
+    }
+
+    function clearBlock() {
+        isBlocked = false;
+        window.__SITE_404S_BLOCK = false;
+        removeHandlers();
+    }
+
+    async function checkNow() {
+        if (!navigator.onLine) return;
+        try {
+            const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
+            if (!res || !res.ok) return;
+            const text = await res.text();
+            const code = parseTopCode(text);
+            if (code === '404S') {
+                if (!isBlocked) applyBlock();
+                // immediate redirect if current path not allowed
+                if (!allowedPaths.includes(window.location.pathname)) {
+                    try { window.location.replace('/index.html'); } catch (e) {}
+                }
+            } else {
+                if (isBlocked) clearBlock();
+            }
+        } catch (e) {
+            // network or parsing errors -> ignore, continue polling
+        }
+    }
+
+    // Immediate check and then poll every 5-10s (randomized)
+    (function pollLoop() {
+        checkNow().finally(() => {
+            const next = 5000 + Math.floor(Math.random() * 5001); // 5000-10000 ms
+            setTimeout(pollLoop, next);
+        });
+    })();
+
+    // Also check once before unload/navigation to ensure decisions are current
+    window.addEventListener('beforeunload', function() {
+        try { navigator.sendBeacon && checkNow(); } catch (e) {}
+    });
+
+})();
