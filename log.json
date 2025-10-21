@@ -46,5 +46,17 @@
     "timestamp": "2025-10-21T15:26:15.991Z",
     "actorIp": "::1",
     "adminId": "wHr09Ls4"
+  },
+  {
+    "action": "clear",
+    "reason": "test",
+    "timestamp": "2025-10-21T15:29:54.260Z",
+    "actorIp": "::1",
+    "adminId": "wHr09Ls4",
+    "previous": {
+      "code": "404S",
+      "description": "bbc i can",
+      "timestamp": "2025-10-21T15:26:15.991Z"
+    }
   }
 ]
