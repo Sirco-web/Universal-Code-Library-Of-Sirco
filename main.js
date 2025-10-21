@@ -43,9 +43,14 @@ window.addEventListener('DOMContentLoaded', function() {
                 `;
             }
 
-            // attach handlers (guarded)
-            const goBtn = document.getElementById('goSecondSite');
-            const cancelBtn = document.getElementById('cancelPopup');
+            // ensure popup is actually added to the document so elements are visible and queryable
+            if (!document.body.contains(popup)) {
+                document.body.appendChild(popup);
+            }
+
+            // attach handlers (guarded) — query inside the popup to be robust
+            const goBtn = popup.querySelector('#goSecondSite');
+            const cancelBtn = popup.querySelector('#cancelPopup');
 
             if (goBtn) {
                 goBtn.addEventListener('click', function() {
