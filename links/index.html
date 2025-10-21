@@ -2,40 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Weekly Link Portal</title>
+  <title>Link Portal</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root { --bg:#0b0f14; --card:#121823; --muted:#94a3b8; --text:#e2e8f0; --acc:#47b0ff; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; }
-    *{box-sizing:border-box} html,body{height:100%}
+    :root{--bg:#0b0f14;--panel:#111826;--muted:#94a3b8;--text:#e2e8f0;--acc:#47b0ff;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--line:rgba(255,255,255,.08)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;background:radial-gradient(1200px 700px at 20% -10%,#17202e,transparent),radial-gradient(1000px 600px at 120% 10%,#131b27,transparent),var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-    .wrap{max-width:1000px;margin:0 auto;padding:32px}
-    header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
     .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#60a5fa);box-shadow:0 8px 30px rgba(71,176,255,.35)}
     h1{font-size:24px;margin:0;font-weight:800;letter-spacing:.2px}
     .muted{color:var(--muted)}
-    .row{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap}
-    .card{flex:1 1 320px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;backdrop-filter: blur(6px);box-shadow:0 12px 30px rgba(0,0,0,.25)}
-    .grid{display:grid;grid-template-columns: 1fr 1fr 1fr;gap:14px}
-    .item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center}
-    .item img{width:20px;height:20px;border-radius:4px;flex:0 0 auto}
-    .item .t{font-weight:600}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    /* Panels */
+    .row{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 12px 30px rgba(0,0,0,.25);backdrop-filter:blur(6px)}
+
+    /* Header status */
+    .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+    .countdown{font-variant-numeric:tabular-nums}
+
+    /* Catalog grid (spreadsheet-like alignment) */
+    .catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:10px}
+    .card{display:grid;grid-template-rows:auto 1fr auto;gap:10px;min-height:140px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:14px}
+    .card-head{display:flex;align-items:center;gap:10px;min-height:24px}
+    .card-head img{width:20px;height:20px;border-radius:4px;flex:0 0 auto}
+    .title{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sub{color:var(--muted);font-size:12px;min-height:18px}
+    .actions{display:flex;justify-content:flex-end}
     button{background:var(--acc);border:0;color:#00111c;font-weight:800;border-radius:12px;padding:10px 14px;cursor:pointer}
     button:disabled{opacity:.55;cursor:not-allowed}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:8px 10px}
-    .countdown{font-variant-numeric:tabular-nums}
+
+    /* History */
+    .history{margin:0;padding-left:18px}
     .history li{margin:6px 0}
     .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
-    .dot-admin{position:fixed;right:6px;bottom:6px;width:8px;height:8px;border-radius:50%;background:#8096b1;opacity:.1;transition:opacity .2s, transform .2s;z-index:50}
+
+    /* Tiny hidden admin dot */
+    .dot-admin{position:fixed;right:6px;bottom:6px;width:8px;height:8px;border-radius:50%;background:#8096b1;opacity:.1;transition:opacity .2s,transform .2s;z-index:50}
     .dot-admin:hover{opacity:1;transform:scale(1.6)}
-    dialog{border:1px solid rgba(255,255,255,.15);border-radius:16px;background:var(--card);color:var(--text);max-width:560px;width:calc(100% - 32px);box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+    /* Dialogs */
+    dialog{border:1px solid rgba(255,255,255,.15);border-radius:16px;background:var(--panel);color:var(--text);max-width:560px;width:calc(100% - 32px);box-shadow:0 30px 90px rgba(0,0,0,.5)}
     dialog::backdrop{background:rgba(0,0,0,.5)}
-    input, .in{background:#0e141d;color:var(--text);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;width:100%}
-    .row-admin{display:grid;grid-template-columns:1fr auto;gap:10px}
+    input{background:#0e141d;color:var(--text);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;width:100%}
     .mini{font-size:12px}
     .hide{display:none}
+    .row2{display:grid;grid-template-columns:1fr auto;gap:10px}
   </style>
 </head>
 <body>
@@ -44,47 +60,45 @@
       <div class="logo"></div>
       <div>
         <h1>Weekly Link Portal</h1>
-        <div class="muted">One new link per student every 7 days. Keep your unlocked links forever.</div>
+        <div class="muted">For all of your gaming addictions.</div>
       </div>
     </header>
 
-    <section class="row">
-      <div class="card" style="flex:2">
+    <div class="row">
+      <section class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div class="pill">
-            <span id="statusDot" style="width:8px;height:8px;border-radius:50%;background:var(--ok)"></span>
-            <span id="statusText">Ready</span>
-          </div>
-          <div class="pill countdown">Next new link in: <b id="countdown">now</b></div>
+          <div class="pill"><span id="dot" style="width:8px;height:8px;border-radius:50%;background:var(--ok)"></span><span id="status">Ready</span></div>
+          <div class="pill countdown">Next new link in: <b id="cd">now</b></div>
         </div>
 
         <h3 style="margin:14px 0 8px 0">Available Links</h3>
-        <div id="catalog" class="grid"></div>
-        <div class="actions">
-          <button id="refreshBtn">Refresh</button>
-          <button id="clearLSBtn" class="mini" title="Forget local history (does not give you a new link)">Clear local history</button>
+        <div id="catalog" class="catalog"></div>
+        <div class="actions" style="gap:10px;margin-top:10px">
+          <button id="refresh">Refresh</button>
+          <button id="clear" class="mini" title="Forget local history (does not grant a new link)">Clear local history</button>
         </div>
-      </div>
+      </section>
 
-      <div class="card" style="flex:1">
+      <aside class="panel">
         <h3>Your Unlocked Links</h3>
         <ul id="history" class="history"></ul>
-        <div class="muted mini">Unlocked links stay here forever (local to this browser).</div>
-      </div>
-    </section>
+        <div class="muted mini">Unlocked links stay here forever.</div>
+      </aside>
+    </div>
   </div>
 
-  <!-- Admin tiny button (only fully visible on hover) -->
+  <!-- Admin tiny button -->
   <div class="dot-admin" id="adminDot" title="Owner"></div>
 
   <!-- Confirm dialog -->
   <dialog id="confirmDlg">
     <form method="dialog">
-      <h3 id="dlgTitle">Open this link?</h3>
+      <h3 id="dlgTitle">Claim this link?</h3>
       <div id="dlgBody" class="muted"></div>
-      <div class="actions" style="margin-top:14px">
+      <div class="mini muted" style="margin-top:8px">Claiming uses up your weekly allowance. You’ll be able to claim a new link 7 days from now.</div>
+      <div class="actions" style="margin-top:14px;gap:10px">
         <button value="cancel" type="submit">Cancel</button>
-        <button id="dlgYes" value="yes" type="submit">Yes, give me this week’s link</button>
+        <button id="dlgYes" value="yes" type="submit">Yes, claim it</button>
       </div>
     </form>
   </dialog>
@@ -95,7 +109,7 @@
       <h3>Owner Login</h3>
       <p class="muted mini">Enter the PIN.</p>
       <input id="pinInput" placeholder="PIN" inputmode="numeric" minlength="1" />
-      <div class="actions" style="margin-top:10px">
+      <div class="actions" style="margin-top:10px;gap:10px">
         <button id="pinGo">Unlock</button>
         <button id="pinCancel">Close</button>
       </div>
@@ -105,7 +119,7 @@
     <div id="adminPanel" class="hide">
       <h3>Owner Panel</h3>
       <div class="pill mini">Service: <b id="svcState">enabled</b></div>
-      <div class="actions" style="margin-top:10px">
+      <div class="actions" style="margin-top:10px;gap:10px">
         <button id="toggleSvcBtn">Toggle Access</button>
         <button id="closeAdmin">Close</button>
       </div>
@@ -114,11 +128,11 @@
       <div id="adminList"></div>
 
       <h4 style="margin-top:18px">Add URL</h4>
-      <div class="row-admin">
+      <div class="row2">
         <input id="newUrl" placeholder="https://..." />
         <button id="probeBtn" type="button">Probe</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <div class="row2" style="grid-template-columns:1fr 1fr;margin-top:8px">
         <input id="newTitle" placeholder="Title (auto)" />
         <input id="newIcon" placeholder="Favicon URL (auto)" />
       </div>
@@ -131,251 +145,197 @@
 
   <script>
     // ===== CONFIG =====
-    // IMPORTANT: set this to your Render API base (and match FRONTEND_ORIGIN on the server).
-    const API_BASE = "https://linkkkkkkkkkkkk.onrender.com";
+    const API_BASE = "https://linkkkkkkkkkkkk.onrender.com"; // your Render API
 
     // ===== Utilities =====
     const $ = (q) => document.querySelector(q);
     const $$ = (q) => Array.from(document.querySelectorAll(q));
 
-    // localStorage (persistent; MDN notes it has no expiration) :contentReference[oaicite:4]{index=4}
     const LS_KEY = "weeklyLinkState";
     const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    let clickLock = false; // prevent race double-claims
+    let pendingId = null;
 
-    function loadState() {
-      try {
-        return JSON.parse(localStorage.getItem(LS_KEY)) || { lastAt: 0, nextAt: 0, history: [] };
-      } catch { return { lastAt: 0, nextAt: 0, history: [] }; }
+    function loadState(){
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || { lastAt:0, nextAt:0, history:[] }; }
+      catch { return { lastAt:0, nextAt:0, history:[] }; }
     }
-    function saveState(s) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-
-    function canGetNew(s) { return Date.now() >= (s.nextAt || 0); }
-
-    function formatCountdown(msLeft) {
-      // Friendly countdown using Intl APIs. :contentReference[oaicite:5]{index=5}
-      const total = Math.max(0, msLeft|0);
-      const d = Math.floor(total / 86400000);
-      const h = Math.floor((total % 86400000) / 3600000);
-      const m = Math.floor((total % 3600000) / 60000);
-      const s = Math.floor((total % 60000) / 1000);
-      if (d) return `${d}d ${h}h ${m}m`;
-      if (h) return `${h}h ${m}m ${s}s`;
-      if (m) return `${m}m ${s}s`;
-      return `${s}s`;
+    function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function canGetNew(s){ return Date.now() >= (s.nextAt||0); }
+    function setStatus(ok,msg){ $("#dot").style.background = ok ? "var(--ok)" : "var(--err)"; $("#status").textContent = msg; }
+    function fmtCountdown(ms){
+      const t = Math.max(0, ms|0); const d=Math.floor(t/86400000), h=Math.floor((t%86400000)/3600000), m=Math.floor((t%3600000)/60000), s=Math.floor((t%60000)/1000);
+      if (d) return `${d}d ${h}h ${m}m`; if (h) return `${h}h ${m}m ${s}s`; if (m) return `${m}m ${s}s`; return `${s}s`;
     }
 
-    function setStatus(ok, msg) {
-      $("#statusDot").style.background = ok ? "var(--ok)" : "var(--err)";
-      $("#statusText").textContent = msg;
-    }
-
-    // ===== Catalog =====
-    async function fetchCatalog() {
+    // ===== Catalog (never expose URL before claim) =====
+    async function fetchCatalog(){
       const r = await fetch(API_BASE + "/api/urls");
       if (!r.ok) throw new Error("catalog fetch failed");
-      return r.json();
+      return r.json(); // server may include url, but we IGNORE it here
     }
 
-    function renderCatalog(list) {
-      const el = $("#catalog");
-      el.innerHTML = "";
-      list.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <img src="${item.favicon || ''}" onerror="this.style.opacity=.2" alt="">
-          <div style="flex:1 1 auto;min-width:0">
-            <div class="t">${item.title || new URL(item.url).hostname}</div>
-            <div class="muted mini">${new URL(item.url).hostname}</div>
+    function renderCatalog(list){
+      const grid = $("#catalog");
+      grid.innerHTML = "";
+      const s = loadState();
+      const disabled = !canGetNew(s);
+      list.forEach(item=>{
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="card-head">
+            <img src="${item.favicon||''}" onerror="this.style.opacity=.2" alt="">
+            <div class="title" title="${item.title||'Untitled'}">${item.title||'Untitled'}</div>
           </div>
-          <button data-id="${item.id}" class="getBtn">Get</button>
-        `;
-        el.appendChild(div);
+          <div class="sub">Hidden until claimed</div>
+          <div class="actions"><button class="getBtn" data-id="${item.id}" ${disabled ? "disabled":""}>Get</button></div>`;
+        grid.appendChild(card);
       });
-      $$(".getBtn").forEach(btn => btn.addEventListener("click", onGetClick));
+      $$(".getBtn").forEach(b=> b.addEventListener("click", onGetClick));
     }
 
-    // confirm flow: show title+favicon first, then popup confirm, THEN write localStorage, THEN fetch resolve+open
-    async function onGetClick(e) {
-      const id = e.target.getAttribute("data-id");
+    async function onGetClick(e){
+      if (clickLock) return;
       const state = loadState();
-      if (!canGetNew(state)) {
-        setStatus(false, "You must wait until next week");
-        return;
-      }
-      // fetch the target metadata to show in confirm dialog (resolve also rechecks enabled on server)
+      if (!canGetNew(state)) { setStatus(false,"Waiting period active"); return; }
+
+      const id = e.currentTarget.getAttribute("data-id");
+      pendingId = id;
+      // we fetch resolve metadata (title+icon) but we WON'T show the URL/hostname
       const r = await fetch(API_BASE + "/api/resolve/" + encodeURIComponent(id));
-      if (!r.ok) {
-        setStatus(false, "Access disabled or URL missing");
-        return;
-      }
+      if (!r.ok){ setStatus(false,"Access disabled or URL missing"); return; }
       const data = await r.json();
-      const dlg = $("#confirmDlg");
-      $("#dlgTitle").textContent = "Open this link?";
+
+      $("#dlgTitle").textContent = "Claim this link?";
       $("#dlgBody").innerHTML = `
-        <div class="item">
-          <img src="${data.favicon || ''}" onerror="this.style.opacity=.2" alt="">
-          <div>
-            <div class="t">${data.title}</div>
-            <div class="muted mini">${new URL(data.url).hostname}</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="${data.favicon||''}" onerror="this.style.opacity=.2" width="20" height="20"/>
+          <div style="font-weight:700">${data.title || "Untitled"}</div>
         </div>
-        <div class="muted mini" style="margin-top:8px">You’ll get another new link 7 days from now.</div>
       `;
-      const res = await dlg.showModal(); // resolved on close
+      $("#confirmDlg").showModal();
     }
 
-    // Handle dialog result (we use 'close' event to know which button)
-    $("#confirmDlg").addEventListener("close", async () => {
-      const val = $("#confirmDlg").returnValue;
-      if (val !== "yes") return;
-      // We already fetched resolve above to populate dialog; fetch again to get a fresh url in case admin toggled:
-      const lastResolveBtn = document.activeElement?.closest(".item") ? null : null; // no-op
-      // Reuse selected card? Simpler: ask catalog again and pick first enabled one with matching title in dlg; 
-      // but that’s overkill. Instead, stash last clicked ID globally:
-    });
+    $("#confirmDlg").addEventListener("close", async ()=>{
+      if ($("#confirmDlg").returnValue !== "yes" || !pendingId) return;
+      if (clickLock) return;
+      clickLock = true;
 
-    // stash last clicked ID globally (simple)
-    let lastClickedId = null;
-    document.addEventListener("click", (e) => {
-      const b = e.target.closest(".getBtn");
-      if (b) lastClickedId = b.getAttribute("data-id");
-    });
-
-    $("#confirmDlg").addEventListener("close", async () => {
-      if ($("#confirmDlg").returnValue !== "yes" || !lastClickedId) return;
-      const r = await fetch(API_BASE + "/api/resolve/" + encodeURIComponent(lastClickedId));
-      if (!r.ok) { setStatus(false, "Access disabled or URL missing"); return; }
+      // Resolve again (fresh check) and grant
+      const r = await fetch(API_BASE + "/api/resolve/" + encodeURIComponent(pendingId));
+      if (!r.ok){ setStatus(false,"Access disabled or URL missing"); clickLock=false; return; }
       const { url, title, favicon, id } = await r.json();
 
-      // Commit this week locally FIRST (write-once until next week).
+      // Commit to localStorage FIRST
       const s = loadState();
       const now = Date.now();
-      s.lastAt = now;
-      s.nextAt = now + WEEK_MS;
+      s.lastAt = now; s.nextAt = now + WEEK_MS;
       s.history.push({ id, url, title, favicon, at: now });
       saveState(s);
-      renderHistory(s.history);
-      tickCountdown();
 
-      setStatus(true, "Granted. Opening…");
-      // Open in a new tab (user gesture is recent, after dialog) – pop-up blockers should allow this.
-      window.open(url, "_blank", "noopener");
+      renderHistory(s.history);
+      bootCountdown(); // refresh countdown + status
+      // Open granted URL
+      window.open(url,"_blank","noopener");
+      clickLock = false;
     });
 
     // ===== History =====
-    function renderHistory(list) {
+    function renderHistory(list){
       const h = $("#history");
-      if (!list.length) { h.innerHTML = `<li class="muted mini">None yet.</li>`; return; }
-      h.innerHTML = list.slice().reverse().map(x => `
-          <li>
-            <a href="${x.url}" target="_blank" rel="noopener"
-               style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
-              <img src="${x.favicon || ''}" onerror="this.style.opacity=.2" width="16" height="16" />
-              <span>${x.title || new URL(x.url).hostname}</span>
-            </a>
-            <span class="muted mini"> – unlocked ${new Date(x.at).toLocaleString()}</span>
-          </li>
+      if (!list.length){ h.innerHTML = `<li class="muted mini">None yet.</li>`; return; }
+      h.innerHTML = list.slice().reverse().map(x=>`
+        <li>
+          <a href="${x.url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none">
+            <img src="${x.favicon||''}" onerror="this.style.opacity=.2" width="16" height="16" />
+            <span>${x.title || new URL(x.url).hostname}</span>
+          </a>
+          <span class="muted mini"> – unlocked ${new Date(x.at).toLocaleString()}</span>
+        </li>
       `).join("");
     }
 
-    // ===== countdown =====
-    function tickCountdown() {
+    // ===== Countdown & status =====
+    function bootCountdown(){
       const s = loadState();
-      const left = (s.nextAt || 0) - Date.now();
-      const cd = $("#countdown");
-      if (canGetNew(s)) {
-        cd.textContent = "now";
-        setStatus(true, "Ready");
-      } else {
-        cd.textContent = formatCountdown(left);
-        setStatus(false, "Waiting period active");
+      const left = (s.nextAt||0) - Date.now();
+      const cd = $("#cd");
+      if (canGetNew(s)){ cd.textContent = "now"; setStatus(true,"Ready"); $$(".getBtn").forEach(b=>b.disabled=false); }
+      else {
+        cd.textContent = fmtCountdown(left);
+        setStatus(false,"Waiting period active");
+        $$(".getBtn").forEach(b=>b.disabled=true);
       }
     }
-    setInterval(tickCountdown, 1000);
+    setInterval(bootCountdown, 1000);
 
-    // ===== Admin panel =====
+    // ===== Admin =====
     const adminDlg = $("#adminDlg");
-    $("#adminDot").addEventListener("click", () => adminDlg.showModal());
-    $("#pinCancel").addEventListener("click", () => adminDlg.close());
+    $("#adminDot").addEventListener("click", ()=> adminDlg.showModal());
+    $("#pinCancel").addEventListener("click", ()=> adminDlg.close());
     let adminToken = null;
 
-    $("#pinGo").addEventListener("click", async () => {
+    $("#pinGo").addEventListener("click", async ()=>{
       const pin = $("#pinInput").value.trim();
-      const r = await fetch(API_BASE + "/api/admin/login", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin })
-      });
-      if (!r.ok) { $("#pinMsg").classList.remove("hide"); return; }
-      const j = await r.json();
-      adminToken = j.token;
-      $("#adminLogin").classList.add("hide");
-      $("#adminPanel").classList.remove("hide");
-      $("#pinMsg").classList.add("hide");
+      const r = await fetch(API_BASE + "/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin})});
+      if (!r.ok){ $("#pinMsg").classList.remove("hide"); return; }
+      const j = await r.json(); adminToken = j.token;
+      $("#adminLogin").classList.add("hide"); $("#adminPanel").classList.remove("hide"); $("#pinMsg").classList.add("hide");
       loadAdmin();
     });
 
-    async function loadAdmin() {
+    async function loadAdmin(){
       const r = await fetch(API_BASE + "/api/urls?all=1");
       const { urls, enabled } = await r.json();
-      $("#svcState").textContent = enabled ? "enabled" : "disabled";
-      const wrap = $("#adminList");
-      wrap.innerHTML = "";
-      urls.forEach(u => {
+      $("#svcState").textContent = enabled ? "enabled":"disabled";
+      const wrap = $("#adminList"); wrap.innerHTML = "";
+      urls.forEach(u=>{
         const row = document.createElement("div");
-        row.className = "item";
+        row.className = "card";
         row.innerHTML = `
-          <img src="${u.favicon || ''}" onerror="this.style.opacity=.2">
-          <div style="flex:1">
-            <div class="t">${u.title}</div>
-            <div class="muted mini">${u.url}</div>
+          <div class="card-head">
+            <img src="${u.favicon||''}" onerror="this.style.opacity=.2">
+            <div class="title">${u.title||'Untitled'}</div>
           </div>
-          <button data-id="${u.id}" class="rmBtn" title="Remove">🗑️</button>
+          <div class="sub" title="${u.url}">${u.url}</div>
+          <div class="actions"><button class="rmBtn" data-id="${u.id}" title="Remove">🗑️</button></div>
         `;
         wrap.appendChild(row);
       });
-      $$(".rmBtn").forEach(b => b.addEventListener("click", async () => {
+      $$(".rmBtn").forEach(b=> b.addEventListener("click", async ()=>{
         const id = b.getAttribute("data-id");
-        await fetch(API_BASE + "/api/admin/remove/" + id, { method: "DELETE", headers: { Authorization: "Bearer " + adminToken } });
+        await fetch(API_BASE + "/api/admin/remove/" + id,{method:"DELETE",headers:{Authorization:"Bearer "+adminToken}});
         loadAdmin();
       }));
     }
-    $("#closeAdmin").addEventListener("click", () => adminDlg.close());
-    $("#toggleSvcBtn").addEventListener("click", async () => {
+
+    $("#closeAdmin").addEventListener("click", ()=> adminDlg.close());
+    $("#toggleSvcBtn").addEventListener("click", async ()=>{
       const cur = $("#svcState").textContent === "enabled";
       const r = await fetch(API_BASE + "/api/admin/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + adminToken },
-        body: JSON.stringify({ enabled: !cur })
+        method:"POST",
+        headers:{"Content-Type":"application/json", Authorization:"Bearer "+adminToken},
+        body:JSON.stringify({enabled:!cur})
       });
-      const j = await r.json();
-      $("#svcState").textContent = j.enabled ? "enabled" : "disabled";
+      const j = await r.json(); $("#svcState").textContent = j.enabled ? "enabled":"disabled";
     });
 
-    $("#probeBtn").addEventListener("click", async () => {
-      const u = $("#newUrl").value.trim();
-      if (!u) return;
-      const r = await fetch(API_BASE + "/api/probe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: u })
-      });
-      if (r.ok) {
-        const j = await r.json();
-        $("#newTitle").value = j.meta.title || "";
-        $("#newIcon").value  = j.meta.favicon || "";
-      }
+    $("#probeBtn").addEventListener("click", async ()=>{
+      const u = $("#newUrl").value.trim(); if (!u) return;
+      const r = await fetch(API_BASE + "/api/probe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:u})});
+      if (r.ok){ const j = await r.json(); $("#newTitle").value = j.meta.title || ""; $("#newIcon").value = j.meta.favicon || ""; }
     });
 
-    $("#addBtn").addEventListener("click", async () => {
+    $("#addBtn").addEventListener("click", async ()=>{
       const url = $("#newUrl").value.trim();
       const title = $("#newTitle").value.trim();
       const favicon = $("#newIcon").value.trim();
       if (!url) return;
-      const r = await fetch(API_BASE + "/api/admin/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + adminToken },
-        body: JSON.stringify({ url, title, favicon })
+      const r = await fetch(API_BASE + "/api/admin/add",{
+        method:"POST",
+        headers:{"Content-Type":"application/json", Authorization:"Bearer "+adminToken},
+        body:JSON.stringify({url,title,favicon})
       });
       $("#adminMsg").textContent = r.ok ? "Added." : "Failed.";
       $("#newUrl").value = $("#newTitle").value = $("#newIcon").value = "";
@@ -383,21 +343,17 @@
     });
 
     // ===== Controls =====
-    $("#refreshBtn").addEventListener("click", boot);
-    $("#clearLSBtn").addEventListener("click", () => { localStorage.removeItem(LS_KEY); renderHistory([]); tickCountdown(); });
+    $("#refresh").addEventListener("click", boot);
+    $("#clear").addEventListener("click", ()=>{ localStorage.removeItem(LS_KEY); renderHistory([]); bootCountdown(); });
 
-    // ===== Boot =====
-    async function boot() {
-      try {
+    async function boot(){
+      try{
         const data = await fetchCatalog();
-        renderCatalog(data.urls);
-        const state = loadState();
-        renderHistory(state.history || []);
-        tickCountdown();
+        // IMPORTANT: do NOT leak domains pre-claim. We ignore any 'url' fields the server returns.
+        renderCatalog(data.urls.map(({id,title,favicon})=>({id,title,favicon})));
+        const s = loadState(); renderHistory(s.history||[]); bootCountdown();
         setStatus(true, data.enabled ? "Ready" : "Disabled by owner");
-      } catch {
-        setStatus(false, "API not reachable");
-      }
+      }catch{ setStatus(false,"API not reachable"); }
     }
     boot();
   </script>
