@@ -66,5 +66,17 @@
     "timestamp": "2025-10-21T15:48:18.590Z",
     "actorIp": "::1",
     "adminId": "j_eT9UWn"
+  },
+  {
+    "action": "clear",
+    "reason": "idc anymore",
+    "timestamp": "2025-10-21T16:59:54.937Z",
+    "actorIp": "::1",
+    "adminId": "j_eT9UWn",
+    "previous": {
+      "code": "401",
+      "description": "saw it in joe fart history",
+      "timestamp": "2025-10-21T15:48:18.590Z"
+    }
   }
 ]
