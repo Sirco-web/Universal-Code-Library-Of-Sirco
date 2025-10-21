@@ -15,6 +15,14 @@
       "favicon": "https://lessonix.online/favicon.ico",
       "active": true,
       "createdAt": 1761086859382
+    },
+    {
+      "id": "tsIHlEjS2S",
+      "url": "https://math-lessons-pro.lol/",
+      "title": "Math lessons pro",
+      "favicon": "https://math-lessons-pro.lol/img/google-drive.webp",
+      "active": true,
+      "createdAt": 1761087007683
     }
   ]
 }
