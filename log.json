@@ -86,5 +86,17 @@
     "timestamp": "2025-10-21T19:41:58.520Z",
     "actorIp": "::1",
     "adminId": "j_eT9UWn"
+  },
+  {
+    "action": "clear",
+    "reason": "6rdw",
+    "timestamp": "2025-10-21T19:42:44.954Z",
+    "actorIp": "::1",
+    "adminId": "j_eT9UWn",
+    "previous": {
+      "code": "404S",
+      "description": "PHONDE RING",
+      "timestamp": "2025-10-21T19:41:58.520Z"
+    }
   }
 ]
