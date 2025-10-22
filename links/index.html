@@ -75,7 +75,6 @@
         <div id="catalog" class="catalog"></div>
         <div class="actions" style="gap:10px;margin-top:10px">
           <button id="refresh">Refresh</button>
-          <button id="clear" class="mini" title="Forget local history (does not grant a new link)">Clear local history</button>
         </div>
       </section>
 
@@ -344,7 +343,6 @@
 
     // ===== Controls =====
     $("#refresh").addEventListener("click", boot);
-    $("#clear").addEventListener("click", ()=>{ localStorage.removeItem(LS_KEY); renderHistory([]); bootCountdown(); });
 
     async function boot(){
       try{
