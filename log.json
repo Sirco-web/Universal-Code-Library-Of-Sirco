@@ -138,5 +138,13 @@
       "description": "weekend",
       "timestamp": "2025-10-21T23:01:08.539Z"
     }
+  },
+  {
+    "action": "set",
+    "code": "404S",
+    "description": "test for other links",
+    "timestamp": "2025-10-26T21:48:07.793Z",
+    "actorIp": "::1",
+    "adminId": "wHr09Ls4"
   }
 ]
