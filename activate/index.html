@@ -1,215 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activate Access</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activate Access</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/UBG_favcon.png">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .hidden { display: none; }
+    .container {
+      margin-top: 10%;
+      padding: 20px;
+      background: white;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1em;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    .message {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #28a745;
+    }
+    input.copy-box {
+      width: 90%;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.95em;
+    }
+  </style>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .hidden {
-            display: none;
-        }
-        .container {
-            margin-top: 10%;
-            padding: 20px;
-            background: white;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 1em;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .message {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #28a745;
-        }
-    </style>
-
-    <script>
-        // --- NEW: check /info.txt (no-cache) and block activation if CODE: 404S ---
-        let __BLOCK_404S = false;
-        (async function checkInfoTxtFor404S() {
-            try {
-                if (!navigator.onLine) return; // do nothing while offline
-                const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
-                if (!res.ok) return;
-                const text = await res.text();
-                if (!text) return;
-                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-                if (lines.length === 0) return;
-                let codeLine = null;
-                if (/^CODE:/i.test(lines[0])) codeLine = lines[0];
-                else codeLine = lines.find(l => /^CODE:/i.test(l));
-                const code = codeLine ? (codeLine.split(':')[1] || '').trim() : '';
-                if (code === '404S') {
-                    __BLOCK_404S = true;
-                    // If this page isn't an allowed path, redirect to /index.html
-                    const allowed = ['/index.html', '/404.html', '/', ''];
-                    if (!allowed.includes(window.location.pathname)) {
-                        try { window.location.replace('/index.html'); } catch (e) {}
-                        return;
-                    }
-                    // Replace activation UI with restricted message and do not allow activation
-                    const c = document.getElementById('container');
-                    if (c) {
-                        c.innerHTML = `
-                            <h1>Site Temporarily Restricted</h1>
-                            <p style="color:red;">Activations are disabled while maintenance/security mode is active. Only the homepage is accessible.</p>
-                            <p style="font-size:0.9em; color:#555;">If you believe this is an error, check back later.</p>
-                        `;
-                    }
-                }
-            } catch (e) { /* ignore */ }
-        })();
-        // --- END NEW ---
-
-        const credentialsUrl = "pass.txt"; // Update this to your credentials file URL
-
-        // OS detection & redirect logic
-        function detectOSAndRedirect() {
-            const userAgent = navigator.userAgent;
-            const isWindows = userAgent.includes("Windows");
-            const isMac = userAgent.includes("Macintosh");
-
-            if (isWindows || isMac) {
-                document.getElementById("container").innerHTML = `
-                    <h1>Sorry, there was an error</h1>
-                    <p class="message" style="color:red;">Please check back soon.</p>
-                    <p style="font-size:0.9em; color:#555;">Error Code: 0x80070005</p>
-                `;
-                setTimeout(() => {
-                    window.location.href = "/";
-                }, 5000);
-                return true; // Stop other logic
-            }
-            return false; // Continue normal flow
-        }
-
-        async function fetchKeys() {
-            try {
-                const response = await fetch(credentialsUrl);
-                if (!response.ok) throw new Error("Failed to fetch credentials.");
-                const text = await response.text();
-                const keys = text.split("\n").map(line => line.trim()).filter(line => line);
-                return { tempKey: keys[0], permKey: keys[1] || null };
-            } catch (error) {
-                console.error("Error fetching credentials:", error);
-                window.location.href = "/index.html";
-                return null;
-            }
-        }
-
-        async function activate() {
-            // First check OS
-            if (detectOSAndRedirect()) return;
-
-            // If 404S restriction is active, prevent activation flow entirely
-            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
-                // redirect to homepage (requirements specify only /index.html allowed)
-                try { window.location.replace('/index.html'); } catch (e) {}
-                return;
-            }
-
-            // Your existing activation logic
-            if (!window.location.search.includes('nocache=')) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('nocache', Date.now());
-                window.location.replace(url.toString());
-                return;
-            }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const providedKey = urlParams.get("key");
-
-            if (!providedKey) {
-                console.error("No key provided. Redirecting...");
-                window.location.href = "/index.html";
-                return;
-            }
-
-            const keys = await fetchKeys();
-            if (!keys) return;
-
-            if (providedKey.trim() === keys.tempKey.trim()) {
-                document.getElementById("rulesSection").classList.remove("hidden");
-                document.getElementById("agreeButton").setAttribute("onclick", "setAccessCookie(10)");
-            } else if (keys.permKey && providedKey.trim() === keys.permKey.trim()) {
-                document.getElementById("rulesSection").classList.remove("hidden");
-                document.getElementById("agreeButton").setAttribute("onclick", "grantPermanentAccess()");
-            } else {
-                console.log("Invalid key. Redirecting...");
-                window.location.href = "/index.html";
-            }
-        }
-
-        // MODIFY setAccessCookie to respect restriction
-        function setAccessCookie(days) {
-            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
-                try { window.location.replace('/index.html'); } catch (e) {}
-                return;
-            }
-            let expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + days);
-            document.cookie = `access=1; path=/; expires=${expirationDate.toUTCString()}`;
-            document.getElementById("container").innerHTML = `
-                <h1>Thank You!</h1>
-                <p class="message">Website activated for <strong>${days} days</strong>.</p>
-                <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
+  <script>
+    // --- NEW: check /info.txt (no-cache) and block activation if CODE: 404S ---
+    let __BLOCK_404S = false;
+    (async function checkInfoTxtFor404S() {
+      try {
+        if (!navigator.onLine) return;
+        const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
+        if (!res.ok) return;
+        const text = await res.text();
+        if (!text) return;
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) return;
+        let codeLine = null;
+        if (/^CODE:/i.test(lines[0])) codeLine = lines[0];
+        else codeLine = lines.find(l => /^CODE:/i.test(l));
+        const code = codeLine ? (codeLine.split(':')[1] || '').trim() : '';
+        if (code === '404S') {
+          __BLOCK_404S = true;
+          const allowed = ['/index.html', '/404.html', '/', ''];
+          if (!allowed.includes(window.location.pathname)) {
+            try { window.location.replace('/index.html'); } catch (e) {}
+            return;
+          }
+          const c = document.getElementById('container');
+          if (c) {
+            c.innerHTML = `
+              <h1>Site Temporarily Restricted</h1>
+              <p style="color:red;">Activations are disabled while maintenance/security mode is active. Only the homepage is accessible.</p>
+              <p style="font-size:0.9em; color:#555;">If you believe this is an error, check back later.</p>
             `;
+          }
         }
+      } catch (e) {}
+    })();
+    // --- END NEW ---
 
-        // MODIFY grantPermanentAccess to respect restriction
-        function grantPermanentAccess() {
-            if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
-                try { window.location.replace('/index.html'); } catch (e) {}
-                return;
-            }
-            document.cookie = `access=1; path=/; expires=Fri, 31 Dec 9999 23:59:59 UTC;`;
-            document.getElementById("container").innerHTML = `
-                <h1>Thank You!</h1>
-                <p class="message">Website activated <strong>forever</strong>.</p>
-                <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
-            `;
-        }
+    const credentialsUrl = "pass.txt";
 
-        window.onload = activate;
-    </script>
+    function detectOSAndRedirect() {
+      const userAgent = navigator.userAgent;
+      const isWindows = userAgent.includes("Windows");
+      const isMac = userAgent.includes("Macintosh");
+      if (isWindows || isMac) {
+        document.getElementById("container").innerHTML = `
+          <h1>Sorry, there was an error</h1>
+          <p class="message" style="color:red;">Please check back soon.</p>
+          <p style="font-size:0.9em; color:#555;">Error Code: 0x80070005</p>
+        `;
+        setTimeout(() => { window.location.href = "/"; }, 5000);
+        return true;
+      }
+      return false;
+    }
+
+    async function fetchKeys() {
+      try {
+        const response = await fetch(credentialsUrl);
+        if (!response.ok) throw new Error("Failed to fetch credentials.");
+        const text = await response.text();
+        const keys = text.split("\n").map(line => line.trim()).filter(line => line);
+        return { tempKey: keys[0], permKey: keys[1] || null };
+      } catch (error) {
+        console.error("Error fetching credentials:", error);
+        window.location.href = "/index.html";
+        return null;
+      }
+    }
+
+    async function activate() {
+      if (detectOSAndRedirect()) return;
+      if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+        try { window.location.replace('/index.html'); } catch (e) {}
+        return;
+      }
+
+      if (!window.location.search.includes('nocache=')) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('nocache', Date.now());
+        window.location.replace(url.toString());
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const providedKey = urlParams.get("key");
+      if (!providedKey) {
+        console.error("No key provided. Redirecting...");
+        window.location.href = "/index.html";
+        return;
+      }
+
+      const keys = await fetchKeys();
+      if (!keys) return;
+
+      if (providedKey.trim() === keys.tempKey.trim()) {
+        document.getElementById("rulesSection").classList.remove("hidden");
+        document.getElementById("agreeButton").setAttribute("onclick", "setAccessCookie(10)");
+      } else if (keys.permKey && providedKey.trim() === keys.permKey.trim()) {
+        document.getElementById("rulesSection").classList.remove("hidden");
+        document.getElementById("agreeButton").setAttribute("onclick", "grantPermanentAccess()");
+      } else {
+        console.log("Invalid key. Redirecting...");
+        window.location.href = "/index.html";
+      }
+    }
+
+    // --- Helper functions for code generation ---
+    function stringToHex(str) {
+      return Array.from(str)
+        .map(c => c.charCodeAt(0).toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function sha256(msg) {
+      const buf = new TextEncoder().encode(msg);
+      const hash = await crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function generateExternalCode() {
+      const SECRET_KEY = "sirco-is-best-also-any-person-looking-at-this-you-cant-you-are-going-against-the-code-of-conduct-123456767-abc"; // same as Worker
+      const created = Date.now();
+      const expires = created + 2 * 60 * 60 * 1000; // 2 hours
+      const sum = await sha256(`${created}:${expires}:${SECRET_KEY}`);
+      const payload = JSON.stringify({ created, expires, sum });
+      const hex1 = stringToHex(payload);
+      const hex2 = stringToHex(hex1);
+      return btoa(hex2).replace(/=+$/, ""); // remove '=' padding
+    }
+
+    async function setAccessCookie(days) {
+      if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+        try { window.location.replace('/index.html'); } catch (e) {}
+        return;
+      }
+      let expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + days);
+      document.cookie = `access=1; path=/; expires=${expirationDate.toUTCString()}`;
+
+      // generate Base64 code for the other website
+      const code = await generateExternalCode();
+
+      document.getElementById("container").innerHTML = `
+        <h1>Thank You!</h1>
+        <p class="message">Website activated for <strong>${days} days</strong>.</p>
+        <p>Copy this code to use on the other site:</p>
+        <input class="copy-box" id="activationCode" value="${code}" readonly>
+        <button onclick="navigator.clipboard.writeText('${code}')">Copy Code</button>
+        <br>
+        <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
+      `;
+    }
+
+    async function grantPermanentAccess() {
+      if (typeof __BLOCK_404S !== 'undefined' && __BLOCK_404S) {
+        try { window.location.replace('/index.html'); } catch (e) {}
+        return;
+      }
+      document.cookie = `access=1; path=/; expires=Fri, 31 Dec 9999 23:59:59 UTC;`;
+
+      // generate Base64 code for the other website
+      const code = await generateExternalCode();
+
+      document.getElementById("container").innerHTML = `
+        <h1>Thank You!</h1>
+        <p class="message">Website activated <strong>forever</strong>.</p>
+        <p>Copy this code to use on the other site:</p>
+        <input class="copy-box" id="activationCode" value="${code}" readonly>
+        <button onclick="navigator.clipboard.writeText('${code}')">Copy Code</button>
+        <br>
+        <button onclick="window.location.href='/welcome/index.html';">Go to Welcome Page</button>
+      `;
+    }
+
+    window.onload = activate;
+  </script>
 </head>
 <body>
-    <div class="container" id="container">
-        <h1>Activate Access</h1>
-
-        <!-- Disclaimer Agreement -->
-        <div id="rulesSection" class="hidden">
-            <h2>Disclaimer & Agreement</h2>
-            <a href="/agree/agreement.html" target="_blank" style="display: inline-block; margin: 20px 0; font-size: 1.1em; color: #007bff; text-decoration: underline;">
-                View Agreement
-            </a>
-            <p style="color: red; font-weight: bold;">
-                By clicking "I Agree," you acknowledge and accept these terms.
-            </p>
-            <button id="agreeButton">I Agree</button>
-        </div>
+  <div class="container" id="container">
+    <h1>Activate Access</h1>
+    <div id="rulesSection" class="hidden">
+      <h2>Disclaimer & Agreement</h2>
+      <a href="/agree/agreement.html" target="_blank"
+        style="display: inline-block; margin: 20px 0; font-size: 1.1em; color: #007bff; text-decoration: underline;">
+        View Agreement
+      </a>
+      <p style="color: red; font-weight: bold;">
+        By clicking "I Agree," you acknowledge and accept these terms.
+      </p>
+      <button id="agreeButton">I Agree</button>
     </div>
+  </div>
 </body>
 </html>
