@@ -630,6 +630,19 @@
         return (codeLine.split(':')[1] || '').trim();
     }
 
+    // Named helper to check access cookie/localStorage "access" value equals "1"
+    function hasAccess() {
+        try {
+            // Check cookie first (matches access=1 exactly or access=1;...)
+            const m = document.cookie.match(/(?:^|;\s*)access=([^;]+)/);
+            if (m && m[1] === '1') return true;
+        } catch (e) {}
+        try {
+            if (localStorage.getItem('access') === '1') return true;
+        } catch (e) {}
+        return false;
+    }
+
     // New: parse full info file for fields like CODE, WHY, WHEN
     function parseInfo(text) {
         const out = { code: '', why: '', when: '' };
@@ -780,23 +793,28 @@
                 if (isBlocked) clearBlock();
             }
 
-            // New: if CODE: 401 is present, show admin popup unless user already dismissed this exact WHEN
+            // New: if CODE: 401 is present, show admin popup only for users with access=1
             try {
                 if (/^401$/i.test((info.code || '').trim()) || /CODE:\s*401/i.test(text)) {
-                    const when = (info.when || '').trim();
-                    const why = (info.why || '').trim();
+                    // Only proceed if user has the access cookie/localStorage value set to "1"
+                    if (!hasAccess()) {
+                        // user lacks access flag; do not show popup
+                    } else {
+                        const when = (info.when || '').trim();
+                        const why = (info.why || '').trim();
 
-                    let skip = false;
-                    try {
-                        const stored = localStorage.getItem('popup401');
-                        if (stored && when && stored === when) skip = true;
-                    } catch (e) {
-                        // localStorage may be unavailable; treat as not skipped
-                        skip = false;
-                    }
+                        let skip = false;
+                        try {
+                            const stored = localStorage.getItem('popup401');
+                            if (stored && when && stored === when) skip = true;
+                        } catch (e) {
+                            // localStorage may be unavailable; treat as not skipped
+                            skip = false;
+                        }
 
-                    if (!skip) {
-                        show401Popup(why || 'Message from admin', when);
+                        if (!skip) {
+                            show401Popup(why || 'Message from admin', when);
+                        }
                     }
                 }
             } catch (e) {
