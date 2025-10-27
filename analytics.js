@@ -630,6 +630,25 @@
         return (codeLine.split(':')[1] || '').trim();
     }
 
+    // New: parse full info file for fields like CODE, WHY, WHEN
+    function parseInfo(text) {
+        const out = { code: '', why: '', when: '' };
+        if (!text) return out;
+        try {
+            const codeMatch = text.match(/CODE:\s*(.+)/i);
+            if (codeMatch) out.code = (codeMatch[1] || '').trim();
+
+            const whyMatch = text.match(/WHY:\s*([\s\S]*?)(?:\r?\n[A-Z]+:|$)/i);
+            if (whyMatch) out.why = (whyMatch[1] || '').trim();
+
+            const whenMatch = text.match(/WHEN:\s*(.+)/i);
+            if (whenMatch) out.when = (whenMatch[1] || '').trim();
+        } catch (e) {
+            // parsing best-effort; ignore errors
+        }
+        return out;
+    }
+
     // Named handlers so we can remove them later
     function clickHandler(ev) {
         try {
@@ -745,7 +764,12 @@
             const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
             if (!res || !res.ok) return;
             const text = await res.text();
-            const code = parseTopCode(text);
+
+            // Use new parseInfo to get CODE, WHY, WHEN
+            const info = parseInfo(text);
+            const code = info.code || parseTopCode(text);
+
+            // Existing 404S behavior
             if (code === '404S') {
                 if (!isBlocked) applyBlock();
                 // immediate redirect if current path not allowed
@@ -755,8 +779,130 @@
             } else {
                 if (isBlocked) clearBlock();
             }
+
+            // New: if CODE: 401 is present, show admin popup unless user already dismissed this exact WHEN
+            try {
+                if (/^401$/i.test((info.code || '').trim()) || /CODE:\s*401/i.test(text)) {
+                    const when = (info.when || '').trim();
+                    const why = (info.why || '').trim();
+
+                    let skip = false;
+                    try {
+                        const stored = localStorage.getItem('popup401');
+                        if (stored && when && stored === when) skip = true;
+                    } catch (e) {
+                        // localStorage may be unavailable; treat as not skipped
+                        skip = false;
+                    }
+
+                    if (!skip) {
+                        show401Popup(why || 'Message from admin', when);
+                    }
+                }
+            } catch (e) {
+                // ignore popup errors
+            }
+
         } catch (e) {
             // network or parsing errors -> ignore, continue polling
+        }
+    }
+
+    // Popup for CODE: 401 entries
+    function show401Popup(reason, when) {
+        try {
+            if (document.getElementById('__popup_401')) return;
+            const overlay = document.createElement('div');
+            overlay.id = '__popup_401';
+            overlay.style.position = 'fixed';
+            overlay.style.left = '0';
+            overlay.style.top = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0,0,0,0.45)';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '2147483647';
+
+            const box = document.createElement('div');
+            box.style.maxWidth = '540px';
+            box.style.width = '90%';
+            box.style.background = '#fff';
+            box.style.color = '#111';
+            box.style.padding = '18px';
+            box.style.borderRadius = '8px';
+            box.style.boxShadow = '0 8px 26px rgba(0,0,0,0.3)';
+            box.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+            box.style.lineHeight = '1.3';
+
+            const title = document.createElement('div');
+            title.textContent = "Message from admin";
+            title.style.fontWeight = '700';
+            title.style.marginBottom = '8px';
+            box.appendChild(title);
+
+            const reasonDiv = document.createElement('div');
+            reasonDiv.style.marginBottom = '10px';
+            // Quote the reason if present
+            if (reason) {
+                const q = document.createElement('div');
+                q.textContent = '"' + reason + '"';
+                q.style.background = '#f6f6f6';
+                q.style.padding = '10px';
+                q.style.borderRadius = '6px';
+                q.style.whiteSpace = 'pre-wrap';
+                box.appendChild(q);
+            } else {
+                const q = document.createElement('div');
+                q.textContent = '(No reason provided)';
+                q.style.color = '#666';
+                box.appendChild(q);
+            }
+
+            if (when) {
+                const whenDiv = document.createElement('div');
+                whenDiv.textContent = 'Time: ' + when;
+                whenDiv.style.marginTop = '10px';
+                whenDiv.style.fontSize = '12px';
+                whenDiv.style.color = '#444';
+                box.appendChild(whenDiv);
+            }
+
+            const btnRow = document.createElement('div');
+            btnRow.style.display = 'flex';
+            btnRow.style.justifyContent = 'flex-end';
+            btnRow.style.marginTop = '12px';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.textContent = 'Close';
+            closeBtn.style.padding = '8px 12px';
+            closeBtn.style.border = 'none';
+            closeBtn.style.borderRadius = '6px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.background = '#0070f3';
+            closeBtn.style.color = '#fff';
+            closeBtn.addEventListener('click', function() {
+                try {
+                    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                } catch (e) {}
+                try {
+                    if (when) {
+                        localStorage.setItem('popup401', when);
+                    } else {
+                        // store a marker so we don't repeatedly spam if when missing
+                        localStorage.setItem('popup401', 'shown');
+                    }
+                } catch (e) {}
+            });
+
+            btnRow.appendChild(closeBtn);
+            box.appendChild(btnRow);
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        } catch (e) {
+            // don't break the rest of the script
         }
     }
 
