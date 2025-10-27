@@ -206,5 +206,17 @@
     "timestamp": "2025-10-27T19:01:33.801Z",
     "actorIp": "::1",
     "adminId": "wHr09Ls4"
+  },
+  {
+    "action": "clear",
+    "reason": "test",
+    "timestamp": "2025-10-27T19:05:05.806Z",
+    "actorIp": "::1",
+    "adminId": "wHr09Ls4",
+    "previous": {
+      "code": "401",
+      "description": "Hello guys!!!",
+      "timestamp": "2025-10-27T19:01:33.801Z"
+    }
   }
 ]
