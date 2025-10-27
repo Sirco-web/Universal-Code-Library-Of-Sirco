@@ -186,5 +186,17 @@
     "timestamp": "2025-10-27T18:51:24.439Z",
     "actorIp": "::1",
     "adminId": "wHr09Ls4"
+  },
+  {
+    "action": "clear",
+    "reason": "test",
+    "timestamp": "2025-10-27T18:52:21.810Z",
+    "actorIp": "::1",
+    "adminId": "wHr09Ls4",
+    "previous": {
+      "code": "404S",
+      "description": "test",
+      "timestamp": "2025-10-27T18:51:24.439Z"
+    }
   }
 ]
