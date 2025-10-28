@@ -127,6 +127,14 @@
       "favicon": "https://us5421231-eta-evan.global.ssl.fastly.net/securly-assets/images/securly.webp",
       "active": true,
       "createdAt": 1761680577465
+    },
+    {
+      "id": "dwnnZaMGv8",
+      "url": "https://us5421231-eta-evan.global.ssl.fastly.net/",
+      "title": "US5-M",
+      "favicon": "https://us5421231-eta-evan.global.ssl.fastly.net/securly-assets/images/securly.webp",
+      "active": true,
+      "createdAt": 1761680637516
     }
   ]
 }
