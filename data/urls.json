@@ -55,6 +55,14 @@
       "favicon": "https://ga-learnnoweducation9.global.ssl.fastly.net/securly-assets/images/securly.webp",
       "active": true,
       "createdAt": 1761679911317
+    },
+    {
+      "id": "7AQx6W21Vv",
+      "url": "https://texasmath.duncli32.workers.dev/",
+      "title": "US5-E",
+      "favicon": "https://texasmath.duncli32.workers.dev/securly-assets/images/securly.webp",
+      "active": true,
+      "createdAt": 1761679925708
     }
   ]
 }
