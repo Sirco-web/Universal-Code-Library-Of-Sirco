@@ -47,6 +47,14 @@
       "favicon": "https://ga-learnnoweducation9.global.ssl.fastly.net/securly-assets/images/securly.webp",
       "active": true,
       "createdAt": 1761679889548
+    },
+    {
+      "id": "bEjKdkofEW",
+      "url": "https://ga-learnnoweducation9.global.ssl.fastly.net/",
+      "title": "US5-D",
+      "favicon": "https://ga-learnnoweducation9.global.ssl.fastly.net/securly-assets/images/securly.webp",
+      "active": true,
+      "createdAt": 1761679911317
     }
   ]
 }
