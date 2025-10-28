@@ -23,6 +23,14 @@
       "favicon": "https://quardle.net/favicon.ico",
       "active": true,
       "createdAt": 1761087025285
+    },
+    {
+      "id": "4PEOKR727u",
+      "url": "https://wtf-is-a-kilometer.global.ssl.fastly.net/",
+      "title": "US5-A",
+      "favicon": "https://wtf-is-a-kilometer.global.ssl.fastly.net/securly-assets/images/securly.webp",
+      "active": true,
+      "createdAt": 1761679856232
     }
   ]
 }
