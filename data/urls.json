@@ -39,6 +39,14 @@
       "favicon": "https://mathfunk-12activities.global.ssl.fastly.net/securly-assets/images/securly.webp",
       "active": true,
       "createdAt": 1761679873379
+    },
+    {
+      "id": "jWAJkMhugz",
+      "url": "https://ga-learnnoweducation9.global.ssl.fastly.net/",
+      "title": "US5-C",
+      "favicon": "https://ga-learnnoweducation9.global.ssl.fastly.net/securly-assets/images/securly.webp",
+      "active": true,
+      "createdAt": 1761679889548
     }
   ]
 }
