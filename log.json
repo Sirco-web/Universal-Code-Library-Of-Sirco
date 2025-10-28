@@ -278,5 +278,13 @@
     "timestamp": "2025-10-27T20:13:16.614Z",
     "actorIp": "::1",
     "adminId": "wHr09Ls4"
+  },
+  {
+    "action": "set",
+    "code": "401",
+    "description": "Hi guys we added a new v2 proxy and do not report it.",
+    "timestamp": "2025-10-28T13:40:44.892Z",
+    "actorIp": "::1",
+    "adminId": "wHr09Ls4"
   }
 ]
