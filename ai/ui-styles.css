@@ -156,7 +156,7 @@ html, body {
 
 .chat-header #chat-title {
 	/* make title white and visible */
-	color: #fff;               /* requested white text */
+	color: #fff;
 	font-weight: 600;
 	min-width: 120px;
 	max-width: calc(100% - 48px);
